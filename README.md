@@ -14,5 +14,7 @@ Android near ultra-high frequency listener
 Test application for researching methods of discovering use of audio beacons.
 Proper for Android Studio build/release
  
+ TODO:
+ - unravel the bufferscan/magnitude scan to enable proper write to file
 
 # 2018 Kaputnik Go
