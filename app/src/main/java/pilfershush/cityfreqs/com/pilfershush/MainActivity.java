@@ -55,7 +55,6 @@ public class MainActivity extends AppCompatActivity
     // USB
     private DeviceContainer deviceContainer;
     private UsbManager usbManager;
-    //private boolean useUSB;
 
     private boolean output;
     private boolean checkAble;
@@ -160,7 +159,6 @@ public class MainActivity extends AppCompatActivity
     protected void onResume() {
         super.onResume();
         audioManager = (AudioManager)getSystemService(Context.AUDIO_SERVICE);
-        //initPilferShush();
         // refocus app, ready for fresh scanner run
     }
 

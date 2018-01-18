@@ -13,7 +13,7 @@ public class PilferShushScanner {
     private WriteProcessor writeProcessor;
     private int scanBufferSize;
     private String bufferScanReport;
-    private boolean writeFile = false;
+    public static boolean WRITE_FILE = false;
 
     protected void onDestroy() {
         audioChecker.destroy();
@@ -89,32 +89,25 @@ public class PilferShushScanner {
     protected void runAudioScanner() {
         entryLogger("AudioScanning start...", false);
         scanBufferSize = 0;
+        writeProcessor.prepareWriteToFile();
         audioScanner.runAudioScanner();
     }
 
+    /*
     protected byte[] getRecordBuffer() {
-        return audioScanner.getFreqDetector().getRecordTask().getRecordBuffer();
+        ByteArrayOutputStream byteStream = audioScanner.getFreqDetector().getRecordTask().getRecordStream();
+        return byteStream.toByteArray();
     }
+    */
 
-    protected boolean getWriteFileSwitch() {
-        return writeFile;
-    }
     protected void setWriteFileSwitch(boolean userChoice) {
-        writeFile = userChoice;
+        WRITE_FILE = userChoice;
     }
 
 
     protected void stopAudioScanner() {
         if (audioScanner != null) {
             entryLogger("AudioScanning stop.", false);
-            // optional save to file
-            if (writeFile) {
-                // then check if it has candidate freqs in bufferStorage
-                if (audioScanner.hasBufferStorage()) {
-                    // save raw byte buffer to file
-                    writeProcessor.writeToFile(getRecordBuffer());
-                }
-            }
             // below nulls the recordTask...
             audioScanner.stopAudioScanner();
 
@@ -132,9 +125,11 @@ public class PilferShushScanner {
         return scanBufferSize > 0;
     }
 
+    /*
     protected int getBufferStorageSize() {
         return scanBufferSize;
     }
+    */
 
     protected boolean runBufferScanner() {
         if (audioScanner.runBufferScanner()) {

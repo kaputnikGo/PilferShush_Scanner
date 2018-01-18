@@ -9,7 +9,6 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.OutputStream;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
@@ -28,10 +27,11 @@ public class WriteProcessor {
 
     private String filename;
     private String sessionFilename; // base filename
-    private File outputFile;
+    public static File OUTPUT_FILE;
+    public static BufferedOutputStream OUTPUT_STREAM;
 
     private static final String LOCAL_DIRECTORY = "PilferShush";
-    private static final String FILE_EXTENSION = ".raw";
+    private static final String FILE_EXTENSION = ".pcm";
     private static final SimpleDateFormat TIMESTAMP_FORMAT = new SimpleDateFormat("yyyyMMdd-HH:mm:ss", Locale.ENGLISH);
 
     public WriteProcessor(Context context, String filename) {
@@ -62,7 +62,7 @@ public class WriteProcessor {
         }
     }
 
-    public void writeToFile(byte[] audioArray) {
+    public void prepareWriteToFile() {
         // need to build the filename AND path
         File location = getStorageFile();
         if (location == null) {
@@ -70,21 +70,17 @@ public class WriteProcessor {
             return;
         }
         // add the extension and timestamp
-        // eg: 20151218-10:14:32-capture.raw
+        // eg: 20151218-10:14:32-capture.pcm
         filename = getTimestamp() + "-" + sessionFilename + FILE_EXTENSION;
-
         // file save will overwrite unless new name is used...
         try {
-            outputFile = new File(location, filename);
-            if (!outputFile.exists()) {
-                outputFile.createNewFile();
+            OUTPUT_FILE = new File(location, filename);
+            if (!OUTPUT_FILE.exists()) {
+                OUTPUT_FILE.createNewFile();
             }
-            OutputStream out = null;
-            out = new BufferedOutputStream(new FileOutputStream(outputFile, false)); // append == false
-            out.write(audioArray);
-            if (out != null) {
-                out.close();
-            }
+            OUTPUT_STREAM = null;
+            OUTPUT_STREAM = new BufferedOutputStream(new FileOutputStream(OUTPUT_FILE, false)); // append == false
+
         }
         catch (FileNotFoundException ex) {
             ex.printStackTrace();
@@ -92,8 +88,8 @@ public class WriteProcessor {
         }
         catch (IOException e) {
             e.printStackTrace();
-            log("File save IO error.");
         }
+
     }
 
     /**************************************************************/

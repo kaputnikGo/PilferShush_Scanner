@@ -5,17 +5,19 @@ import android.media.AudioRecord;
 import android.os.AsyncTask;
 import android.util.Log;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 
 import pilfershush.cityfreqs.com.pilfershush.MainActivity;
 import pilfershush.cityfreqs.com.pilfershush.assist.AudioSettings;
+import pilfershush.cityfreqs.com.pilfershush.assist.WriteProcessor;
 import pilfershush.cityfreqs.com.pilfershush.scanners.FreqDetector.RecordTaskListener;
 
 public class RecordTask extends AsyncTask<Void, Integer, String> {
     private static final String TAG = "RecordTask";
 
-    private short[] bufferArray;
+    private byte[] bufferArray;
     //private double[] dArr;
     private RecordTaskListener recordTaskListener;
     private AudioRecord audioRecord;
@@ -27,10 +29,11 @@ public class RecordTask extends AsyncTask<Void, Integer, String> {
     private HashMap<Integer, Integer> freqMap;
     private byte[] byteBuffer;
 
+
     public RecordTask(AudioSettings audioSettings, int freqStepper) {
         this.audioSettings = audioSettings;
         this.freqStepper = freqStepper;
-        bufferArray = new short[audioSettings.getBufferSize()];
+        bufferArray = new byte[audioSettings.getBufferSize()];
 
         bufferStorage = new ArrayList<Integer[]>();
 
@@ -101,9 +104,11 @@ public class RecordTask extends AsyncTask<Void, Integer, String> {
         return freqMap;
     }
 
+    /*
     public byte[] getRecordBuffer() {
         return byteBuffer;
     }
+    */
 
     /********************************************************************/
 
@@ -155,6 +160,14 @@ public class RecordTask extends AsyncTask<Void, Integer, String> {
                 // check for a stop
                 do {
                     bufferRead = audioRecord.read(bufferArray, 0, audioSettings.getBufferSize());
+                    // TODO here
+                    try {
+                        WriteProcessor.OUTPUT_STREAM.write(bufferArray, 0, audioSettings.getBufferSize());
+                    }
+                    catch (IOException e) {
+                        e.printStackTrace();
+                        logger("AudioRecord write stream error.");
+                    }
                 } while (!isCancelled());
             }
             catch (IllegalStateException exState) {
@@ -174,11 +187,19 @@ public class RecordTask extends AsyncTask<Void, Integer, String> {
     protected void onCancelled() {
         logger("onCancelled called.");
         bufferRead = 0;
+        try {
+            if (WriteProcessor.OUTPUT_STREAM != null) {
+                WriteProcessor.OUTPUT_STREAM.close();
+            }
+        }
+        catch (IOException e) {
+            e.printStackTrace();
+            logger("onCancelled write stream close error.");
+        }
+
         if (audioRecord != null) {
             audioRecord.stop();
             audioRecord.release();
-            // save to file
-
             logger("audioRecord stop and release.");
         }
         else {
@@ -200,7 +221,6 @@ public class RecordTask extends AsyncTask<Void, Integer, String> {
                 tempBuffer[i] = (int)bufferArray[i];
                 byteBuffer[i] = (byte)bufferArray[i];
             }
-
             // default value set to 2
             dArr = windowArray(windowType, dArr);
             int candidateFreq = AudioSettings.DEFAULT_FREQUENCY_MIN;

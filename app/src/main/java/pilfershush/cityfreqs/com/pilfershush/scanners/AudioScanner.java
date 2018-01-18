@@ -69,16 +69,17 @@ public class AudioScanner {
         });
     }
 
+    /*
     public FreqDetector getFreqDetector() {
         return freqDetector;
     }
+    */
 
     public void stopAudioScanner() {
         try {
-            if (freqDetector.hasBufferStorage()) {
+            if (hasBufferStorage()) {
                 // this can return a null
                 bufferStorage = freqDetector.getBufferStorage();
-                // optional save to file here:
             }
             freqDetector.stopRecording();
         }
@@ -128,7 +129,7 @@ public class AudioScanner {
                 // sort into list with highest values order
                 mapEntries = new ArrayList<Map.Entry<Integer,Integer>>(freqMap.entrySet());
 
-                Collections.sort(mapEntries, new Comparator<Map.Entry<Integer, Integer>>() {
+                Collections.sort(mapEntries, new Comparator<Entry<Integer, Integer>>() {
                     public int compare(Map.Entry<Integer, Integer> a, Map.Entry<Integer, Integer> b) {
                         return b.getValue().compareTo(a.getValue());
                     }
