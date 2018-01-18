@@ -1,0 +1,69 @@
+/* Notes */
+
+-- todo version 2 2018
+- change focus of app to be detect and record. no analysis as of yet.
+
+- add a save record audio scan bufferRead as a file for later use/analysis?
+    -- have an option switch to turn on/off automatic saving to file if a capture has candidate beacon frequencies
+    -- save file also save to text file the result of scan
+
+- remove bufferScan functions
+
+- button for reset/empty bins etc, and/or on pause/resume
+
+
+/*****************/
+
+as of >= android 6.x +, M == Marshmallow, SDK 23 need to reevalutate how to check for beacon SDks.
+
+It seems that the current methods only are useful if an application asks for
+permissions as per its manifest at install, then we can check these.
+
+Signal360 app New & Now has the sdk inside it (SignalService.java etc)
+is New&Now ouputting audio beacons instead of listening for them - lots of AudioALSA logs...
+problem also is that SignalService has BT as well as Audio in its methods...
+
+audio as modulated 1s and modulated 0s, transmit code to server,
+receive content from server.
+20550~21000 for logic 0
+21000~22000 for logic 1
+
+pulse of 1ms, for 32 ms duration == 32 bits
+clock pulse (carrier-like) between logic 0 and logic 1 frequency serves as centre freq and start bit
+
+application may wake up OS to listen for modulated code...
+can also listen for specific SSIDs of WiFi, to wake up os and listen for mod codes.
+
+example freq range may be increment of 100hz
+check for peaks that occuring within 100 hz of each other, ie 20500 has 30 peaks and 20400 has 8 peaks,
+this means likely a proper pair of mod codes, as opposed to 20500 and say 20750.. (250hz diff)
+"may" set lower freq peaks to logic 0 and higher freq peaks to logic 1 (20400 == 0, 20500 == 1)
+preamble, payload and checksum
+(use a PIC 10 F200 8 bit micro controller for badges to receive)
+
+RecordTask.magnitudeScan() needs to be better at picking useful freqs...
+any freq captured below the candidate and within 100Hz gets included with it?
+20025, 20050, 20075 all == 20100?
+
+debug ie:
+11-22 16:06:00.267: D/PilferShush(11662): Freq: 20000 : 16
+11-22 16:06:00.267: D/PilferShush(11662): Freq: 19975 : 14
+11-22 16:06:00.268: D/PilferShush(11662): Freq: 20075 : 9
+11-22 16:06:00.269: D/PilferShush(11662): Freq: 20100 : 7
+11-22 16:06:00.269: D/PilferShush(11662): Freq: 20025 : 7
+11-22 16:06:00.270: D/PilferShush(11662): Freq: 20125 : 7
+11-22 16:06:00.270: D/PilferShush(11662): Freq: 20050 : 5
+
+RecordTask that steps through frequencies is wrong algorithm for this.
+we need a 32ms ability.
+find a short burst tone (32ms) and then analyse it.
+
+LISNR
+18.7-19.2 kHz
+detect time: 0.6 - 3 sec
+start bit, record 10 secs or so using hpf, then look for payload within:
+mic->(Lpf)filter->(10sec)buffer->decode/demod
+
+hexArray = "0123456789abcdef".toCharArray(); for hashedPayload
+lisnr as of API 5 now uses phone to broadcast as well...
+

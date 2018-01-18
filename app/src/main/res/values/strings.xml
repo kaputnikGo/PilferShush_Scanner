@@ -1,0 +1,54 @@
+<resources>
+    <string name="app_name">PilferShush</string>
+    <string name="hello_world">Hello world!</string>
+    <string name="action_settings">Polling Speed</string>
+    <string name="dialog_polling">Mic polling speed</string>
+    <string name="polling_1_text">1 second</string>
+    <string name="polling_2_text">2 seconds</string>
+    <string name="polling_3_text">3 seconds</string>
+    <string name="polling_default_text">6 secs (default)</string>
+
+    <string name="action_audio_scan_settings">Audio Scan settings</string>
+    <string name="dialog_freq_step">Frequency step (Hz)</string>
+    <string name="freq_step_10_text">10 Hz</string>
+    <string name="freq_step_25_text">25 Hz (default)</string>
+    <string name="freq_step_50_text">50 Hz</string>
+    <string name="freq_step_75_text">75 Hz</string>
+    <string name="freq_step_100_text">100 Hz</string>
+
+    <string name="action_audio_beacons">Check Beacon Apps</string>
+    <string name="dialog_audio_beacon_apps">Audio Beacon List</string>
+
+    <string name="action_override_scan">Scan User App</string>
+    <string name="dialog_override_scan_apps">Scan Apps List</string>
+
+    <string name="action_write_file">Write to file option</string>
+    <string name="dialog_write_file">Allow write to file?</string>
+    <string name="dialog_write_file_yes">Yes</string>
+    <string name="dialog_write_file_no">No</string>
+
+    <string name="dialog_cautioned">Cautioned List</string>
+    <string name="action_services">get Services</string>
+    <string name="dialog_services">User Apps with Services</string>
+
+    <string name="action_receivers">get Receivers</string>
+    <string name="dialog_receivers">User Apps with Receivers</string>
+
+    <string name="focus_text">Audio Focus Listener: </string>
+    <string name="debug_text">loading PilferShush.</string>
+    <string name="mic_check_button_text">MICROPHONE CHECK</string>
+    <string name="mic_polling_button_text">POLLING CHECK</string>
+
+    <string name="run_scans_button_text">Run Scanner</string>
+    <string name="debug_view_button_text">Detailed View</string>
+    <string name="main_view_button_text">Simple View</string>
+    <string name="main_scan_text">PilferShush scanner initialising.</string>
+
+    <string name="action_sensitivity_settings">Sensitivity</string>
+    <string name="dialog_sensitivity_text">Relative loudness level</string>
+    <string name="magnitude_50_text">50 dB (spoken voice)</string>
+    <string name="magnitude_70_text">70 dB (busy traffic, TV)</string>
+    <string name="magnitude_80_text">80 dB (heavy traffic)</string>
+    <string name="magnitude_90_text">90 dB (trucks, shouting)</string>
+    <string name="magnitude_100_text">100 dB (jack hammer, default)</string>
+</resources>
