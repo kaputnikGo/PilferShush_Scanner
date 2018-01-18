@@ -34,7 +34,7 @@
     <string name="action_receivers">get Receivers</string>
     <string name="dialog_receivers">User Apps with Receivers</string>
 
-    <string name="focus_text">Audio Focus Listener: </string>
+    <string name="focus_text">Detailed View (scrollable): </string>
     <string name="debug_text">loading PilferShush.</string>
     <string name="mic_check_button_text">MICROPHONE CHECK</string>
     <string name="mic_polling_button_text">POLLING CHECK</string>

@@ -149,6 +149,10 @@ public class MainActivity extends AppCompatActivity
                     // not a vital permission
                 }
             }
+            else {
+                // assume already runonce, has permissions
+                initPilferShush();
+            }
         }
         else {
             initPilferShush();
