@@ -17,10 +17,10 @@ public class AudioScanner {
     private AudioSettings audioSettings;
     public boolean audioDetected;
     private int freqStep;
+    //private double magnitude;
 
     private ArrayList<Integer> frequencySequence;
-    private ArrayList<String> freqCharSequence;
-    private ArrayList<Integer[]> bufferStorage;
+    private ArrayList<short[]> bufferStorage;
     private HashMap<Integer, Integer> freqMap;
     private ArrayList<Map.Entry<Integer,Integer>> mapEntries;
     private Entry<Integer, Integer> logicZero;
@@ -29,18 +29,17 @@ public class AudioScanner {
     public AudioScanner(AudioSettings audioSettings) {
         this.audioSettings = audioSettings;
         freqStep = AudioSettings.DEFAULT_FREQ_STEP;
+        //magnitude = AudioSettings.DEFAULT_MAGNITUDE;
         freqDetector = new FreqDetector(this.audioSettings);
-        freqDetector.init(freqStep);
+        freqDetector.init(freqStep, AudioSettings.DEFAULT_MAGNITUDE);
         processAudio = new ProcessAudio();
         resetAudioScanner();
     }
 
     public void resetAudioScanner() {
         frequencySequence = new ArrayList<Integer>();
-        freqCharSequence = new ArrayList<String>();
-        bufferStorage = new ArrayList<Integer[]>();
+        bufferStorage = new ArrayList<short[]>();
         audioDetected = false;
-        processAudio.resetSequences();
     }
 
     public void setFreqStep(int freqStep) {
@@ -52,6 +51,11 @@ public class AudioScanner {
             // is a default...
             this.freqStep = AudioSettings.DEFAULT_FREQ_STEP;
         }
+    }
+
+    public void setMinMagnitude(double magnitude) {
+        //this.magnitude = magnitude;
+        freqDetector.setMagnitude(magnitude);
     }
 
     public void runAudioScanner() {
@@ -68,12 +72,6 @@ public class AudioScanner {
             }
         });
     }
-
-    /*
-    public FreqDetector getFreqDetector() {
-        return freqDetector;
-    }
-    */
 
     public void stopAudioScanner() {
         try {
@@ -108,7 +106,7 @@ public class AudioScanner {
     // secondary scans using the bufferStorage, ideally looking for binMods.
     public boolean runBufferScanner() {
         //
-        return freqDetector.runBufferScanner(freqStep);
+        return freqDetector.runBufferScanner(frequencySequence);
     }
 
     public void storeBufferScanMap() {
@@ -172,8 +170,6 @@ public class AudioScanner {
         return report;
     }
 
-
-
     /********************************************************************/
 
     public boolean hasFrequencySequence() {
@@ -191,25 +187,6 @@ public class AudioScanner {
 
     public ArrayList<Integer> getFreqSequence() {
         return frequencySequence;
-    }
-
-    public boolean processFreqCharSequence() {
-        for (int freq : frequencySequence) {
-            String str = processAudio.processFreqChar(freq);
-            if ((str != null) && (!str.equals(""))) {
-                freqCharSequence.add(str);
-                str = null;
-            }
-        }
-        //
-        return !freqCharSequence.isEmpty();
-    }
-
-    public ArrayList<String> getFreqCharSequence() {
-        if (freqCharSequence != null)
-            return freqCharSequence;
-        else
-            return freqCharSequence = new ArrayList<>();
     }
 }
 

@@ -24,6 +24,7 @@
 
     <string name="action_write_file">Write to file option</string>
     <string name="dialog_write_file">Allow write to file?</string>
+    <string name="dialog_write_message">saved to Download(s)/PilferShush/</string>
     <string name="dialog_write_file_yes">Yes</string>
     <string name="dialog_write_file_no">No</string>
 
@@ -45,9 +46,7 @@
     <string name="main_scan_text">PilferShush scanner initialising.</string>
 
     <string name="action_sensitivity_settings">Sensitivity</string>
-    <string name="dialog_sensitivity_text">Relative loudness level</string>
-    <string name="magnitude_50_text">50 dB (spoken voice)</string>
-    <string name="magnitude_70_text">70 dB (busy traffic, TV)</string>
+    <string name="dialog_sensitivity_text">Beacon loudness level</string>
     <string name="magnitude_80_text">80 dB (heavy traffic)</string>
     <string name="magnitude_90_text">90 dB (trucks, shouting)</string>
     <string name="magnitude_100_text">100 dB (jack hammer, default)</string>

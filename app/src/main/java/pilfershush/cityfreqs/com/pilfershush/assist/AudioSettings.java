@@ -37,8 +37,10 @@ public class AudioSettings {
     public static final int DEFAULT_FREQUENCY_MAX = 21000; // 22000
 
     // db = 20 log10(goertzel_magnitude).
-    public static final double MAGNITUDE_50 = 500; // ~= 53.9794 dB
-    public static final double MAGNITUDE_70 = 3000; // ~= 69.5425 dB
+    // mag_50, mag_70 are way too sensitive = false positives
+    //public static final double MAGNITUDE_50 = 500; // ~= 53.9794 dB
+    //public static final double MAGNITUDE_70 = 3000; // ~= 69.5425 dB
+
     public static final double MAGNITUDE_80 = 10000; // ~= 80.0000 dB
     public static final double MAGNITUDE_90 = 30000; // ~= 89.5424 dB
     public static final double MAGNITUDE_100 = 80000; // ~= 98.0618 dB

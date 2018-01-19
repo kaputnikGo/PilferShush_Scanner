@@ -15,6 +15,12 @@
         android:title="@string/action_audio_scan_settings"/>
 
     <item
+        android:id="@+id/action_sensitivity_settings"
+        android:orderInCategory="30"
+        app:showAsAction="never"
+        android:title="@string/action_sensitivity_settings"/>
+
+    <item
         android:id="@+id/action_audio_beacons"
         android:orderInCategory="30"
         app:showAsAction="never"

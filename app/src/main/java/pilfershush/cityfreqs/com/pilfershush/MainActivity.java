@@ -214,6 +214,9 @@ public class MainActivity extends AppCompatActivity
             case R.id.action_audio_scan_settings:
                 changeAudioScanSettings();
                 return true;
+            case R.id.action_sensitivity_settings:
+                changeSensitivitySettings();
+                return true;
             case R.id.action_audio_beacons:
                 hasAudioBeaconAppsList();
                 return true;
@@ -338,6 +341,7 @@ public class MainActivity extends AppCompatActivity
                 "to look for other apps using the microphone.", false);
 
         mainScanLogger("\nPress 'Run Scanner' button to start and stop scanning for audio.", false);
+        mainScanLogger("\nOption to save log output and audio as raw pcm file is off by default.", false);
         mainScanLogger("\nDO NOT RUN SCANNER FOR A LONG TIME.\n", true);
     }
 
@@ -355,12 +359,10 @@ public class MainActivity extends AppCompatActivity
         freqSteps[3] = getResources().getString(R.string.freq_step_75_text);
         freqSteps[4] = getResources().getString(R.string.freq_step_100_text);
 
-        dbLevel = new String[5];
-        dbLevel[0] = getResources().getString(R.string.magnitude_50_text);
-        dbLevel[1] = getResources().getString(R.string.magnitude_70_text);
-        dbLevel[2] = getResources().getString(R.string.magnitude_80_text);
-        dbLevel[3] = getResources().getString(R.string.magnitude_90_text);
-        dbLevel[4] = getResources().getString(R.string.magnitude_100_text);
+        dbLevel = new String[3];
+        dbLevel[0] = getResources().getString(R.string.magnitude_80_text);
+        dbLevel[1] = getResources().getString(R.string.magnitude_90_text);
+        dbLevel[2] = getResources().getString(R.string.magnitude_100_text);
     }
 
     private void changeWriteFile() {
@@ -368,6 +370,7 @@ public class MainActivity extends AppCompatActivity
         dialogBuilder = new AlertDialog.Builder(this);
 
         dialogBuilder.setTitle(R.string.dialog_write_file);
+        dialogBuilder.setMessage(R.string.dialog_write_message);
         dialogBuilder.setPositiveButton(R.string.dialog_write_file_yes, new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int id) {
                 pilferShushScanner.setWriteFileSwitch(true);
@@ -447,6 +450,30 @@ public class MainActivity extends AppCompatActivity
         });
 
         dialogBuilder.setTitle(R.string.dialog_freq_step);
+        alertDialog = dialogBuilder.create();
+        alertDialog.show();
+    }
+
+    private void changeSensitivitySettings() {
+        dialogBuilder = new AlertDialog.Builder(this);
+        dialogBuilder.setItems(dbLevel, new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialogInterface, int which) {
+                switch(which) {
+                    case 0:
+                        pilferShushScanner.setMinMagnitude(AudioSettings.MAGNITUDE_80);
+                        break;
+                    case 1:
+                        pilferShushScanner.setMinMagnitude(AudioSettings.MAGNITUDE_90);
+                        break;
+                    case 2:
+                        pilferShushScanner.setMinMagnitude(AudioSettings.MAGNITUDE_100);
+                        break;
+                    default:
+                        pilferShushScanner.setMinMagnitude(AudioSettings.DEFAULT_MAGNITUDE);
+                }
+            }
+        });
+        dialogBuilder.setTitle(R.string.dialog_sensitivity_text);
         alertDialog = dialogBuilder.create();
         alertDialog.show();
     }
@@ -535,16 +562,9 @@ public class MainActivity extends AppCompatActivity
             }
         }
         else {
-            mainScanLogger("No detected audio beacon modulated signals.", false);
+            mainScanLogger("No detected audio beacon signals.", false);
         }
 
-        if (pilferShushScanner.hasAudioScanCharSequence()) {
-            mainScanLogger("Detected audio beacon alphabet signal: \n", true);
-            mainScanLogger(pilferShushScanner.getAudioScanCharSequence(), true);
-        }
-        else {
-            mainScanLogger("No detected audio beacon alphabet signals.", false);
-        }
         pilferShushScanner.stopBufferScanner();
         mainScanLogger("\n[>-:end of scan:-<]\n\n", false);
     }

@@ -30,7 +30,7 @@ public class PilferShushScanner {
         audioChecker = new AudioChecker();
         writeProcessor = new WriteProcessor(context, "capture");
         // writes txt file to same location as audio records.
-        //  write init checks then close the file.
+        // write init checks then close the file.
         // called again at runScanner.
         writeProcessor.prepareLogToFile();
 
@@ -99,19 +99,17 @@ public class PilferShushScanner {
         entryLogger("FreqStep changed to: " + step, false);
     }
 
+    protected void setMinMagnitude(double magnitude) {
+        audioScanner.setMinMagnitude(magnitude);
+        entryLogger("Magnitude level set: " + magnitude, false);
+    }
+
     protected void runAudioScanner() {
         entryLogger("AudioScanning start...", false);
         scanBufferSize = 0;
         writeProcessor.prepareWriteToFile();
         audioScanner.runAudioScanner();
     }
-
-    /*
-    protected byte[] getRecordBuffer() {
-        ByteArrayOutputStream byteStream = audioScanner.getFreqDetector().getRecordTask().getRecordStream();
-        return byteStream.toByteArray();
-    }
-    */
 
     protected void setWriteFileSwitch(boolean userChoice) {
         WRITE_FILE = userChoice;
@@ -137,12 +135,6 @@ public class PilferShushScanner {
     protected boolean hasBufferStorage() {
         return scanBufferSize > 0;
     }
-
-    /*
-    protected int getBufferStorageSize() {
-        return scanBufferSize;
-    }
-    */
 
     protected boolean runBufferScanner() {
         if (audioScanner.runBufferScanner()) {
@@ -223,6 +215,8 @@ public class PilferShushScanner {
         return audioScanner.getFrequencySequenceLogic();
     }
 
+    // MainActivity.stopScanner() debug type outputs
+    // currently rem'd out
     protected String getFrequencySequence() {
         // get original sequence as transmitted...
         String sequence = "";
@@ -236,20 +230,6 @@ public class PilferShushScanner {
 
     protected String getFreqSeqLogicEntries() {
         return audioScanner.getFreqSeqLogicEntries();
-    }
-
-    protected boolean hasAudioScanCharSequence() {
-        return audioScanner.processFreqCharSequence();
-    }
-
-    protected String getAudioScanCharSequence() {
-        String sequence = "";
-        for (String seqString : audioScanner.getFreqCharSequence()) {
-            sequence += seqString;
-            // add a space
-            sequence += " ";
-        }
-        return sequence;
     }
 
     /********************************************************************/
