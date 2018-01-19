@@ -32,7 +32,9 @@ public class PilferShushScanner {
         // writes txt file to same location as audio records.
         // write init checks then close the file.
         // called again at runScanner.
-        writeProcessor.prepareLogToFile();
+        if (WRITE_FILE) {
+            writeProcessor.prepareLogToFile();
+        }
 
         if (audioChecker.determineInternalAudioType()) {
             entryLogger(audioChecker.getAudioSettings().toString(), false);
@@ -64,7 +66,9 @@ public class PilferShushScanner {
     }
 
     protected void resumeLogWrites() {
-        writeProcessor.prepareLogToFile();
+        if (WRITE_FILE) {
+            writeProcessor.prepareLogToFile();
+        }
     }
 
     protected boolean checkScanner() {
@@ -113,7 +117,9 @@ public class PilferShushScanner {
     protected void runAudioScanner() {
         entryLogger("AudioScanning start...", false);
         scanBufferSize = 0;
-        writeProcessor.prepareWriteToFile();
+        if (WRITE_FILE) {
+            writeProcessor.prepareWriteToFile();
+        }
         audioScanner.runAudioScanner();
     }
 
@@ -147,8 +153,6 @@ public class PilferShushScanner {
             entryLogger("Buffer Scan found data.", true);
             bufferScanReport = "";
             audioScanner.storeBufferScanMap();
-            // do something with it
-            // process Audio has useful methods...
             if (audioScanner.processBufferScanMap()) {
                 bufferScanReport = "Buffer Scan data: \n" + audioScanner.getLogicEntries();
                 entryLogger(bufferScanReport, true);

@@ -639,8 +639,9 @@ public class MainActivity extends AppCompatActivity
             alertDialog = dialogBuilder.create();
             alertDialog.show();
         }
-        entryLogger("NO USER APPS FOUND FOR OVERRIDE SCAN.", true);
-
+        else {
+            entryLogger("NO USER APPS FOUND FOR OVERRIDE SCAN.", true);
+        }
     }
 
 
@@ -813,7 +814,6 @@ public class MainActivity extends AppCompatActivity
         else {
             spannableText.setSpan(new ForegroundColorSpan(Color.GREEN), start, end, 0);
         }
-        // TODO switch here
         if (PilferShushScanner.WRITE_FILE) {
             WriteProcessor.writeLogFile(entry);
         }
