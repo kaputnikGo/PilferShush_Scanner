@@ -29,6 +29,10 @@ public class PilferShushScanner {
         scanBufferSize = 0;
         audioChecker = new AudioChecker();
         writeProcessor = new WriteProcessor(context, "capture");
+        // writes txt file to same location as audio records.
+        //  write init checks then close the file.
+        // called again at runScanner.
+        writeProcessor.prepareLogToFile();
 
         if (audioChecker.determineInternalAudioType()) {
             entryLogger(audioChecker.getAudioSettings().toString(), false);
@@ -37,6 +41,7 @@ public class PilferShushScanner {
             initBackgroundChecks();
             return true;
         }
+        // TODO wont yet run usb audio, no return true, background checks...
         if(hasUSB) {
             if (audioChecker.determineUsbAudioType(hasUSB)) {
                 MainActivity.logger("has usb audio type.");
@@ -46,6 +51,14 @@ public class PilferShushScanner {
             }
         }
         return false;
+    }
+
+    protected void closeLogWrites() {
+        writeProcessor.closeLogFile();
+    }
+
+    protected void resumeLogWrites() {
+        writeProcessor.prepareLogToFile();
     }
 
     protected boolean checkScanner() {

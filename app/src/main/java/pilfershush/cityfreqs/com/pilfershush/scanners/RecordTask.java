@@ -160,9 +160,9 @@ public class RecordTask extends AsyncTask<Void, Integer, String> {
                 // check for a stop
                 do {
                     bufferRead = audioRecord.read(bufferArray, 0, audioSettings.getBufferSize());
-                    // TODO here
+                    // TODO save audio buffer to non-header pcm file, add boolean switch here
                     try {
-                        WriteProcessor.OUTPUT_STREAM.write(bufferArray, 0, audioSettings.getBufferSize());
+                        WriteProcessor.AUDIO_OUTPUT_STREAM.write(bufferArray, 0, audioSettings.getBufferSize());
                     }
                     catch (IOException e) {
                         e.printStackTrace();
@@ -188,8 +188,8 @@ public class RecordTask extends AsyncTask<Void, Integer, String> {
         logger("onCancelled called.");
         bufferRead = 0;
         try {
-            if (WriteProcessor.OUTPUT_STREAM != null) {
-                WriteProcessor.OUTPUT_STREAM.close();
+            if (WriteProcessor.AUDIO_OUTPUT_STREAM != null) {
+                WriteProcessor.AUDIO_OUTPUT_STREAM.close();
             }
         }
         catch (IOException e) {

@@ -31,6 +31,7 @@ import java.util.Iterator;
 
 import pilfershush.cityfreqs.com.pilfershush.assist.AudioSettings;
 import pilfershush.cityfreqs.com.pilfershush.assist.DeviceContainer;
+import pilfershush.cityfreqs.com.pilfershush.assist.WriteProcessor;
 
 public class MainActivity extends AppCompatActivity
         implements ActivityCompat.OnRequestPermissionsResultCallback {
@@ -143,11 +144,6 @@ public class MainActivity extends AppCompatActivity
             if (ActivityCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO)
                     == PackageManager.PERMISSION_DENIED) {
                 requestRecordAudioPermission();
-                if (ActivityCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE)
-                        == PackageManager.PERMISSION_DENIED) {
-                    requestExtStorageWritePermission();
-                    // not a vital permission
-                }
             }
             else {
                 // assume already runonce, has permissions
@@ -164,6 +160,8 @@ public class MainActivity extends AppCompatActivity
         super.onResume();
         audioManager = (AudioManager)getSystemService(Context.AUDIO_SERVICE);
         // refocus app, ready for fresh scanner run
+        //TODO
+        //pilferShushScanner.resumeLogWrites();
     }
 
     @Override
@@ -171,6 +169,7 @@ public class MainActivity extends AppCompatActivity
         super.onPause();
         //TODO
         // sort out things here, clean up and ready for a possible restart/refocus
+        pilferShushScanner.closeLogWrites();
     }
 
     @Override
@@ -750,7 +749,7 @@ public class MainActivity extends AppCompatActivity
     }
 
     protected static void entryLogger(String entry, boolean caution) {
-        // this prints to console.log and DetailedView.log
+        // this prints to console.log and DetailedView.log, and save to text file
         int start = debugText.getText().length();
         debugText.append("\n" + entry);
         int end = debugText.getText().length();
@@ -761,6 +760,7 @@ public class MainActivity extends AppCompatActivity
         else {
             spannableText.setSpan(new ForegroundColorSpan(Color.GREEN), start, end, 0);
         }
+        WriteProcessor.writeLogFile(entry);
     }
 
     public static void logger(String message) {

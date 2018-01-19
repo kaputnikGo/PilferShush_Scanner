@@ -9,6 +9,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStreamWriter;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
@@ -21,66 +22,57 @@ public class WriteProcessor {
     //private  static final int HEADER_LENGTH = 44; //byte
     // until we bother with wav headers, this is raw format bytebuffer saves
 
-    private File intDirectory;
-    private boolean ext_capable = false;
+
     private File extDirectory;
 
-    private String filename;
+    private String audioFilename;
+    private String logFilename;
     private String sessionFilename; // base filename
-    public static File OUTPUT_FILE;
-    public static BufferedOutputStream OUTPUT_STREAM;
+    public static File AUDIO_OUTPUT_FILE;
+    public static File LOG_OUTPUT_FILE;
+    public static BufferedOutputStream AUDIO_OUTPUT_STREAM;
+    public static FileOutputStream LOG_OUTPUT_STREAM;
+    public static OutputStreamWriter LOG_OUTPUT_WRITER;
 
-    private static final String LOCAL_DIRECTORY = "PilferShush";
-    private static final String FILE_EXTENSION = ".pcm";
+    private static final String APP_DIRECTORY_NAME = "PilferShush";
+    private static final String AUDIO_FILE_EXTENSION = ".pcm";
+    private static final String LOG_FILE_EXTENSION = ".txt";
     private static final SimpleDateFormat TIMESTAMP_FORMAT = new SimpleDateFormat("yyyyMMdd-HH:mm:ss", Locale.ENGLISH);
 
-    public WriteProcessor(Context context, String filename) {
-        if (filename == null || filename == "") {
+    public WriteProcessor(Context context, String sessionName) {
+        if (sessionName == null || sessionName == "") {
             sessionFilename = "capture";
         }
         else {
-            sessionFilename = filename;
+            sessionFilename = sessionName;
         }
 
-        // grab app local internal storage directory
-        intDirectory = context.getFilesDir();
-
-        // prepare the default file save location here
-        if (isExternalStorageWritable()) {
-            if (createDirectory()) {
-                log("Ext storage ready.");
-            }
-            else {
-                log("Ext storage directory not created.");
-                ext_capable = false;
-                // permissions fail?, fallback to internal
-            }
-        }
-        else {
-            // prepare the internal
-            log("Int storage only.");
+        log("Setting up storage: Download(s)/PilferShush/");
+        // checks for read/write state
+        if (Environment.MEDIA_MOUNTED.equals(Environment.getExternalStorageState())) {
+            createDirectory();
+            log("ext dir: " + extDirectory.toString());
         }
     }
 
     public void prepareWriteToFile() {
         // need to build the filename AND path
-        File location = getStorageFile();
+        File location = extDirectory;
         if (location == null) {
             log("Error getting storage directory");
             return;
         }
         // add the extension and timestamp
         // eg: 20151218-10:14:32-capture.pcm
-        filename = getTimestamp() + "-" + sessionFilename + FILE_EXTENSION;
+        audioFilename = getTimestamp() + "-" + sessionFilename + AUDIO_FILE_EXTENSION;
         // file save will overwrite unless new name is used...
         try {
-            OUTPUT_FILE = new File(location, filename);
-            if (!OUTPUT_FILE.exists()) {
-                OUTPUT_FILE.createNewFile();
+            AUDIO_OUTPUT_FILE = new File(location, audioFilename);
+            if (!AUDIO_OUTPUT_FILE.exists()) {
+                AUDIO_OUTPUT_FILE.createNewFile();
             }
-            OUTPUT_STREAM = null;
-            OUTPUT_STREAM = new BufferedOutputStream(new FileOutputStream(OUTPUT_FILE, false)); // append == false
-
+            AUDIO_OUTPUT_STREAM = null;
+            AUDIO_OUTPUT_STREAM = new BufferedOutputStream(new FileOutputStream(AUDIO_OUTPUT_FILE, false)); // append == false
         }
         catch (FileNotFoundException ex) {
             ex.printStackTrace();
@@ -88,65 +80,82 @@ public class WriteProcessor {
         }
         catch (IOException e) {
             e.printStackTrace();
+            log("Audio write file error.");
+        }
+    }
+
+    public void prepareLogToFile() {
+        // need to build the filename AND path
+        log("prepare log file...");
+        File location = extDirectory;
+        if (location == null) {
+            log("Error getting storage directory");
+            return;
+        }
+        // add the extension and timestamp
+        // eg: 20151218-10:14:32-capture.txt
+        logFilename = getTimestamp() + "-" + sessionFilename + LOG_FILE_EXTENSION;
+        //LOG_OUTPUT_FILE = null;
+        try {
+            LOG_OUTPUT_FILE = new File(location, logFilename);
+            //if (!LOG_OUTPUT_FILE.exists()) {
+                LOG_OUTPUT_FILE.createNewFile();
+            //}
+            //LOG_OUTPUT_STREAM = null;
+            //LOG_OUTPUT_WRITER = null;
+            LOG_OUTPUT_STREAM = new FileOutputStream(LOG_OUTPUT_FILE, true); // append...
+            LOG_OUTPUT_WRITER = new OutputStreamWriter(LOG_OUTPUT_STREAM);
+        }
+        catch (FileNotFoundException ex) {
+            ex.printStackTrace();
+            log("File not found error.");
+        }
+        catch (IOException e) {
+            e.printStackTrace();
+            log("Log file write error.");
+        }
+    }
+
+    public static void writeLogFile(String textline) {
+        if (LOG_OUTPUT_WRITER != null) {
+            try {
+                LOG_OUTPUT_WRITER.append((new StringBuilder()).append(textline).append("\n"));
+            }
+            catch (IOException e) {
+                //
+            }
+        }
+    }
+
+    public void closeLogFile() {
+        // final act, no more writes possible.
+        log("close log file.");
+        try {
+            if (LOG_OUTPUT_WRITER != null) {
+                LOG_OUTPUT_WRITER.flush();
+                LOG_OUTPUT_WRITER.close();
+            }
+            if (LOG_OUTPUT_STREAM != null) {
+                LOG_OUTPUT_STREAM.flush();
+                LOG_OUTPUT_STREAM.close();
+            }
+        }
+        catch (IOException e) {
+            log("Error closing log output stream.");
         }
 
     }
 
     /**************************************************************/
-    private boolean isExternalStorageWritable() {
-        // is available for read and write
-        if (Environment.MEDIA_MOUNTED.equals(Environment.getExternalStorageState())) {
-            log("Ext storage is readable.");
-            ext_capable = true;
-            return ext_capable;
-        }
-        else {
-            log("Ext storage not readable.");
-            return false;
-        }
-    }
 
-    private boolean createDirectory() {
+    private void createDirectory() {
         // may not be writable if no permissions granted
-        if (ext_capable) {
-            extDirectory = new File(Environment.getExternalStoragePublicDirectory(
-                    Environment.DIRECTORY_MUSIC), LOCAL_DIRECTORY);
-
-            if (extDirectory != null) {
-                if (extDirectory.mkdir()) {
-                    log("Make ext dir.");
-                    return true;
-                }
-                else {
-                    log("mkdir failed");
-                }
-            }
-            else {
-                log("Ext directory is null.");
-                return false;
-            }
-        }
-        else {
-            log("Ext storage not available.");
-        }
-        return false;
-    }
-
-    private File getStorageFile() {
-        // get ext if possible
-        if (extDirectory != null) {
-            return extDirectory;
-        }
-        else if (intDirectory != null) {
-            return intDirectory;
-        }
-        else {
-            log("no storage directories found.");
-            return null;
+        extDirectory = new File(Environment.getExternalStoragePublicDirectory(
+                Environment.DIRECTORY_DOWNLOADS), APP_DIRECTORY_NAME);
+        if (!extDirectory.exists()) {
+            extDirectory.mkdirs();
         }
     }
-
-    /**************************************************************/
 
     private String getTimestamp() {
         // for adding to default file save name

@@ -5,7 +5,8 @@
 
 - add a save record audio scan bufferRead as a file for later use/analysis?
     -- have an option switch to turn on/off automatic saving to file if a capture has candidate beacon frequencies
-    -- save file also save to text file the result of scan
+
+    -- save file also save to text file the result of scan - save entrylogger to text file
 
 - remove bufferScan functions
 
