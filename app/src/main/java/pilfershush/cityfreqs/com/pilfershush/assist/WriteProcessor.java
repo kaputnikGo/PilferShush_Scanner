@@ -1,7 +1,6 @@
 package pilfershush.cityfreqs.com.pilfershush.assist;
 
 
-import android.content.Context;
 import android.os.Environment;
 
 import java.io.BufferedOutputStream;
@@ -39,19 +38,23 @@ public class WriteProcessor {
     private static final String LOG_FILE_EXTENSION = ".txt";
     private static final SimpleDateFormat TIMESTAMP_FORMAT = new SimpleDateFormat("yyyyMMdd-HH:mm:ss", Locale.ENGLISH);
 
-    public WriteProcessor(Context context, String sessionName) {
+    public WriteProcessor(String sessionName) {
+        setSessionName(sessionName);
+
+        log("Check: Download(s)/PilferShush/");
+        // checks for read/write state
+        if (Environment.MEDIA_MOUNTED.equals(Environment.getExternalStorageState())) {
+            createDirectory();
+            log("ext dir: " + extDirectory.toString());
+        }
+    }
+
+    public void setSessionName(String sessionName) {
         if (sessionName == null || sessionName == "") {
             sessionFilename = "capture";
         }
         else {
             sessionFilename = sessionName;
-        }
-
-        log("Setting up storage: Download(s)/PilferShush/");
-        // checks for read/write state
-        if (Environment.MEDIA_MOUNTED.equals(Environment.getExternalStorageState())) {
-            createDirectory();
-            log("ext dir: " + extDirectory.toString());
         }
     }
 
@@ -72,7 +75,7 @@ public class WriteProcessor {
                 AUDIO_OUTPUT_FILE.createNewFile();
             }
             AUDIO_OUTPUT_STREAM = null;
-            AUDIO_OUTPUT_STREAM = new BufferedOutputStream(new FileOutputStream(AUDIO_OUTPUT_FILE, false)); // append == false
+            AUDIO_OUTPUT_STREAM = new BufferedOutputStream(new FileOutputStream(AUDIO_OUTPUT_FILE, false));
         }
         catch (FileNotFoundException ex) {
             ex.printStackTrace();
@@ -98,11 +101,7 @@ public class WriteProcessor {
         //LOG_OUTPUT_FILE = null;
         try {
             LOG_OUTPUT_FILE = new File(location, logFilename);
-            //if (!LOG_OUTPUT_FILE.exists()) {
-                LOG_OUTPUT_FILE.createNewFile();
-            //}
-            //LOG_OUTPUT_STREAM = null;
-            //LOG_OUTPUT_WRITER = null;
+            LOG_OUTPUT_FILE.createNewFile();
             LOG_OUTPUT_STREAM = new FileOutputStream(LOG_OUTPUT_FILE, true); // append...
             LOG_OUTPUT_WRITER = new OutputStreamWriter(LOG_OUTPUT_STREAM);
         }
@@ -125,6 +124,19 @@ public class WriteProcessor {
                 //
             }
         }
+    }
+
+    public void closeAllFiles() {
+        try {
+            if (AUDIO_OUTPUT_STREAM != null) {
+                AUDIO_OUTPUT_STREAM.flush();
+                AUDIO_OUTPUT_STREAM.close();
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+            log("onCancelled write stream close error.");
+        }
+        closeLogFile();
     }
 
     public void closeLogFile() {

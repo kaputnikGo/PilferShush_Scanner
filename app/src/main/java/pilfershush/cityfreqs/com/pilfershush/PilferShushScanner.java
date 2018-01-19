@@ -13,7 +13,7 @@ public class PilferShushScanner {
     private WriteProcessor writeProcessor;
     private int scanBufferSize;
     private String bufferScanReport;
-    public static boolean WRITE_FILE = false;
+    public static boolean WRITE_FILE = true;
 
     protected void onDestroy() {
         audioChecker.destroy();
@@ -24,11 +24,11 @@ public class PilferShushScanner {
 /*
 *
 */
-    protected boolean initScanner(Context context, boolean hasUSB) {
+    protected boolean initScanner(Context context, boolean hasUSB, String sessionName) {
         this.context = context;
         scanBufferSize = 0;
         audioChecker = new AudioChecker();
-        writeProcessor = new WriteProcessor(context, "capture");
+        writeProcessor = new WriteProcessor(sessionName);
         // writes txt file to same location as audio records.
         // write init checks then close the file.
         // called again at runScanner.
@@ -51,6 +51,12 @@ public class PilferShushScanner {
             }
         }
         return false;
+    }
+
+    protected void renameSessionWrites(String sessionName) {
+        writeProcessor.closeAllFiles();
+        writeProcessor.setSessionName(sessionName);
+        resumeLogWrites();
     }
 
     protected void closeLogWrites() {

@@ -3,19 +3,18 @@
 -- todo version 2 2018
 - change focus of app to be detect and record. no analysis as of yet.
 
-- add a save record audio scan bufferRead as a file for later use/analysis?
-    -- have an option switch to turn on/off automatic saving to file if a capture has candidate beacon frequencies
+- enable option switch for file saving
 
-    -- save file also save to text file the result of scan - save entrylogger to text file
-
-- remove bufferScan functions
+- bufferScan functions? remove or optimise if possible (max size to scan?)
 
 - button for reset/empty bins etc, and/or on pause/resume
+
+- background service for scanner.
 
 
 /*****************/
 
-as of >= android 6.x +, M == Marshmallow, SDK 23 need to reevalutate how to check for beacon SDks.
+as of >= android 6.x +, M == Marshmallow, SDK 23 need to reevaluate how to check for beacon SDks.
 
 It seems that the current methods only are useful if an application asks for
 permissions as per its manifest at install, then we can check these.

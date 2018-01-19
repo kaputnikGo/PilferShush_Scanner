@@ -54,7 +54,6 @@ public class AudioScanner {
     }
 
     public void setMinMagnitude(double magnitude) {
-        //this.magnitude = magnitude;
         freqDetector.setMagnitude(magnitude);
     }
 

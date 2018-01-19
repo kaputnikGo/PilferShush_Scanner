@@ -18,10 +18,12 @@ import android.text.method.ScrollingMovementMethod;
 import android.text.style.ForegroundColorSpan;
 import android.util.Log;
 import android.view.Gravity;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ViewSwitcher;
@@ -136,7 +138,6 @@ public class MainActivity extends AppCompatActivity
             }
         });
 
-
         // permissions ask:
         // check API version, above 23 permissions are asked at runtime
         // if API version < 23 (6.x) fallback is manifest.xml file permission declares
@@ -225,6 +226,9 @@ public class MainActivity extends AppCompatActivity
                 return true;
             case R.id.action_write_file:
                 changeWriteFile();
+                return true;
+            case R.id.action_session_name:
+                setSessionName();
                 return true;
             default:
                 // do not consume the action
@@ -315,7 +319,8 @@ public class MainActivity extends AppCompatActivity
 
     private void initPilferShush() {
         audioManager = (AudioManager)getSystemService(Context.AUDIO_SERVICE);
-        if (pilferShushScanner.initScanner(this, scanUsbDevices())) {
+        if (pilferShushScanner.initScanner(this, scanUsbDevices(),
+                getResources().getString(R.string.session_default_name))) {
             checkAble = pilferShushScanner.checkScanner();
             micChecking = false;
             toggleHeadset(output);
@@ -335,13 +340,13 @@ public class MainActivity extends AppCompatActivity
         mainScanLogger(AudioSettings.DEFAULT_FREQUENCY_MIN + "+ Hz at "
                 + AudioSettings.DEFAULT_FREQ_STEP + "Hz steps, above 100 dB.", false);
 
-        mainScanLogger("\nSettings can be changed via the Options menu.", false);
+        mainScanLogger("\nSettings can be changed via the Options menu.", true);
         mainScanLogger("\nThe Detailed View has logging and more information from scans. " +
                 "It also has a continuous Mic check and intermittent polling check " +
                 "to look for other apps using the microphone.", false);
 
         mainScanLogger("\nPress 'Run Scanner' button to start and stop scanning for audio.", false);
-        mainScanLogger("\nOption to save log output and audio as raw pcm file is off by default.", false);
+        mainScanLogger("\nWrite to file option to save log output and audio as raw pcm file is ON by default.", false);
         mainScanLogger("\nDO NOT RUN SCANNER FOR A LONG TIME.\n", true);
     }
 
@@ -363,6 +368,34 @@ public class MainActivity extends AppCompatActivity
         dbLevel[0] = getResources().getString(R.string.magnitude_80_text);
         dbLevel[1] = getResources().getString(R.string.magnitude_90_text);
         dbLevel[2] = getResources().getString(R.string.magnitude_100_text);
+    }
+
+    private void setSessionName() {
+        dialogBuilder = new AlertDialog.Builder(this);
+        LayoutInflater inflater = this.getLayoutInflater();
+        View inputView = inflater.inflate(R.layout.session_form, null);
+        dialogBuilder.setView(inputView);
+        final EditText userInput = (EditText) inputView.findViewById(R.id.session_input);
+
+        dialogBuilder
+                .setCancelable(false)
+                .setPositiveButton(R.string.dialog_button_save, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int id) {
+                        // reset WriteProcessor via scanner
+                        pilferShushScanner.renameSessionWrites(userInput.getText().toString());
+                    }
+                })
+                .setNegativeButton(R.string.dialog_button_cancel, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int id) {
+                        // dismissed
+                        alertDialog.cancel();
+                    }
+                });
+        alertDialog = dialogBuilder.create();
+        alertDialog.show();
+
     }
 
     private void changeWriteFile() {
@@ -780,7 +813,10 @@ public class MainActivity extends AppCompatActivity
         else {
             spannableText.setSpan(new ForegroundColorSpan(Color.GREEN), start, end, 0);
         }
-        WriteProcessor.writeLogFile(entry);
+        // TODO switch here
+        if (PilferShushScanner.WRITE_FILE) {
+            WriteProcessor.writeLogFile(entry);
+        }
     }
 
     public static void logger(String message) {

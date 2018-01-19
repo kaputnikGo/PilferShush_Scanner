@@ -10,6 +10,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 import pilfershush.cityfreqs.com.pilfershush.MainActivity;
+import pilfershush.cityfreqs.com.pilfershush.PilferShushScanner;
 import pilfershush.cityfreqs.com.pilfershush.assist.AudioSettings;
 import pilfershush.cityfreqs.com.pilfershush.assist.WriteProcessor;
 import pilfershush.cityfreqs.com.pilfershush.scanners.FreqDetector.RecordTaskListener;
@@ -158,13 +159,14 @@ public class RecordTask extends AsyncTask<Void, Integer, String> {
 
                 do {
                     bufferRead = audioRecord.read(bufferArray, 0, audioSettings.getBufferSize());
-                    // TODO save audio buffer to non-header pcm file, add boolean switch here
-                    try {
-                        WriteProcessor.AUDIO_OUTPUT_STREAM.write(bufferArray, 0, audioSettings.getBufferSize());
-                    }
-                    catch (IOException e) {
-                        e.printStackTrace();
-                        logger("AudioRecord write stream error.");
+                    // save audio buffer to non-header pcm file, boolean switch here
+                    if (PilferShushScanner.WRITE_FILE) {
+                        try {
+                            WriteProcessor.AUDIO_OUTPUT_STREAM.write(bufferArray, 0, audioSettings.getBufferSize());
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                            logger("AudioRecord write stream error.");
+                        }
                     }
                 } while (!isCancelled());
             }

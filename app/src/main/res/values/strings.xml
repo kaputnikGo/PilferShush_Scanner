@@ -1,6 +1,14 @@
 <resources>
     <string name="app_name">PilferShush</string>
+
+    <string name="action_session_name">Set session name</string>
+    <string name="dialog_session_name">Enter suffix for save files</string>
+    <string name="session_default_name">capture</string>
+
+    <string name="dialog_button_save">Save</string>
+    <string name="dialog_button_cancel">Cancel</string>
     <string name="hello_world">Hello world!</string>
+
     <string name="action_settings">Polling Speed</string>
     <string name="dialog_polling">Mic polling speed</string>
     <string name="polling_1_text">1 second</string>

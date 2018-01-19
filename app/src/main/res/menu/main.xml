@@ -38,4 +38,10 @@
         app:showAsAction="never"
         android:title="@string/action_write_file"/>
 
+    <item
+        android:id="@+id/action_session_name"
+        android:orderInCategory="60"
+        app:showAsAction="never"
+        android:title="@string/action_session_name"/>
+
 </menu>
