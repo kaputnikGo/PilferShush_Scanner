@@ -18,29 +18,27 @@ import pilfershush.cityfreqs.com.pilfershush.scanners.FreqDetector.RecordTaskLis
 public class RecordTask extends AsyncTask<Void, Integer, String> {
     private static final String TAG = "RecordTask";
 
-    private byte[] bufferArray;
+    private short[] bufferArray;
     private double[] recordScan;
+    private double[] scanArray;
     private RecordTaskListener recordTaskListener;
     private AudioRecord audioRecord;
     private AudioSettings audioSettings;
     private int bufferRead;
+    private double minMagnitude;
     private int freqStepper;
     private int candidateFreq;
-    private double minMagnitude;
-    private double[] scanArray;
-    private short[] shortBuffer;
-    private ArrayList<short[]> bufferStorage;
+    private Integer[] tempBuffer;
+    private ArrayList<Integer[]> bufferStorage;
     private HashMap<Integer, Integer> freqMap;
     private byte[] byteBuffer;
-
 
     public RecordTask(AudioSettings audioSettings, int freqStepper, double magnitude) {
         this.audioSettings = audioSettings;
         this.freqStepper = freqStepper;
         minMagnitude = magnitude;
-
-        bufferArray = new byte[audioSettings.getBufferSize()];
-        bufferStorage = new ArrayList<short[]>();
+        bufferArray = new short[audioSettings.getBufferSize()];
+        bufferStorage = new ArrayList<Integer[]>();
 
         if (audioRecord == null) {
             try {
@@ -87,7 +85,7 @@ public class RecordTask extends AsyncTask<Void, Integer, String> {
         return false;
     }
 
-    protected ArrayList<short[]> getBufferStorage() {
+    protected ArrayList<Integer[]> getBufferStorage() {
         return bufferStorage;
     }
 
@@ -109,6 +107,9 @@ public class RecordTask extends AsyncTask<Void, Integer, String> {
         return freqMap;
     }
 
+    public byte[] getRecordBuffer() {
+        return byteBuffer;
+    }
 
     /********************************************************************/
 
@@ -159,15 +160,6 @@ public class RecordTask extends AsyncTask<Void, Integer, String> {
 
                 do {
                     bufferRead = audioRecord.read(bufferArray, 0, audioSettings.getBufferSize());
-                    // save audio buffer to non-header pcm file, boolean switch here
-                    if (PilferShushScanner.WRITE_FILE) {
-                        try {
-                            WriteProcessor.AUDIO_OUTPUT_STREAM.write(bufferArray, 0, audioSettings.getBufferSize());
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                            logger("AudioRecord write stream error.");
-                        }
-                    }
                 } while (!isCancelled());
             }
             catch (IllegalStateException exState) {
@@ -212,29 +204,43 @@ public class RecordTask extends AsyncTask<Void, Integer, String> {
     private void magnitudeRecordScan(int windowType) {
         if (bufferRead > 0) {
             recordScan = new double[audioSettings.getBufferSize()];
-            shortBuffer = new short[audioSettings.getBufferSize()];
+            tempBuffer = new Integer[audioSettings.getBufferSize()];
             byteBuffer = new byte[audioSettings.getBufferSize()];
 
             for (int i = 0; i < recordScan.length; i++) {
                 recordScan[i] = (double)bufferArray[i];
-                shortBuffer[i] = (short)bufferArray[i];
+                tempBuffer[i] = (int)bufferArray[i];
                 byteBuffer[i] = (byte)bufferArray[i];
             }
 
+            // save audio buffer to non-header pcm file, boolean switch here
+            if (PilferShushScanner.WRITE_FILE) {
+                try {
+                    WriteProcessor.AUDIO_OUTPUT_STREAM.write(byteBuffer, 0, audioSettings.getBufferSize());
+                } catch (IOException e) {
+                    e.printStackTrace();
+                    logger("AudioRecord write stream error.");
+                }
+            }
+
+            // default value set to 2
             recordScan = windowArray(windowType, recordScan);
             candidateFreq = AudioSettings.DEFAULT_FREQUENCY_MIN;
             Goertzel goertzel;
             double candidateMag;
 
             while (candidateFreq <= AudioSettings.DEFAULT_FREQUENCY_MAX) {
+                // look for any of our freqs here, increment by freqStepper
+                // this will result in a found candidate for anything in our ranges...
                 goertzel = new Goertzel((float)audioSettings.getSampleRate(), (float)candidateFreq, recordScan);
                 goertzel.initGoertzel();
+                // get its magnitude
                 candidateMag = goertzel.getOptimisedMagnitude();
-
+                // check if above threshold
                 if (candidateMag >= minMagnitude) {
+                    // saved here for later analysis
+                    bufferStorage.add(tempBuffer);
                     publishProgress(new Integer[]{Integer.valueOf(candidateFreq)});
-                    // saved here for later magnitudeBufferScan
-                    bufferStorage.add(shortBuffer);
                 }
                 // next freq for loop
                 candidateFreq += freqStepper;
@@ -259,7 +265,6 @@ public class RecordTask extends AsyncTask<Void, Integer, String> {
 
             // bufferStorage is ArrayList of Integer arrays,
             // each Integer array *may* contain a binMod signal
-            //double[] dArr;
             freqMap = new HashMap<Integer, Integer>();
             int freq;
             double candidateMag;
@@ -268,13 +273,13 @@ public class RecordTask extends AsyncTask<Void, Integer, String> {
 
             //TODO
             // may want a maximum on this cos it could get big and ugly...
-            for (short[] arrayShort : bufferStorage) {
+            for (Integer[] tempArray : bufferStorage) {
                 // in each array, scan for magnitude
-                scanArray = new double[arrayShort.length];
-                int i;
-                for (i = 0; i < scanArray.length; i++) {
-                    scanArray[i] = (double)arrayShort[i];
+                scanArray = new double[tempArray.length];
+                for (int i = 0; i < scanArray.length; i++) {
+                    scanArray[i] = (double)tempArray[i];
                 }
+
                 //
                 // default value set to 2
                 scanArray = windowArray(windowType, scanArray);
@@ -376,5 +381,4 @@ public class RecordTask extends AsyncTask<Void, Integer, String> {
         Log.d(TAG, message);
     }
 }
-
 

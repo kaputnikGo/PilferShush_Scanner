@@ -53,6 +53,7 @@ public class FreqDetector {
 
     /********************************************************************/
 
+
     protected boolean runBufferScanner(ArrayList<Integer> freqList) {
         int countSize = 0;
         //recordTask = new RecordTask(audioSettings, frequencyStepper);
@@ -78,7 +79,8 @@ public class FreqDetector {
         return false;
     }
 
-    protected ArrayList<short[]> getBufferStorage() {
+
+    protected ArrayList<Integer[]> getBufferStorage() {
         if (recordTask != null) {
             return recordTask.getBufferStorage();
         }

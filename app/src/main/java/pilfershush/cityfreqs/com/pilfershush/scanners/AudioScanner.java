@@ -20,7 +20,7 @@ public class AudioScanner {
     //private double magnitude;
 
     private ArrayList<Integer> frequencySequence;
-    private ArrayList<short[]> bufferStorage;
+    private ArrayList<Integer[]> bufferStorage;
     private HashMap<Integer, Integer> freqMap;
     private ArrayList<Map.Entry<Integer,Integer>> mapEntries;
     private Entry<Integer, Integer> logicZero;
@@ -38,7 +38,7 @@ public class AudioScanner {
 
     public void resetAudioScanner() {
         frequencySequence = new ArrayList<Integer>();
-        bufferStorage = new ArrayList<short[]>();
+        bufferStorage = new ArrayList<Integer[]>();
         audioDetected = false;
     }
 

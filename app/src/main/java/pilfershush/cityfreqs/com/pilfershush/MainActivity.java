@@ -25,7 +25,6 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
-import android.widget.Toast;
 import android.widget.ViewSwitcher;
 
 import java.util.HashMap;
@@ -39,6 +38,9 @@ public class MainActivity extends AppCompatActivity
         implements ActivityCompat.OnRequestPermissionsResultCallback {
     private static final String TAG = "PilferShush";
     private static final boolean DEBUG = true;
+
+    // dev internal version numbering
+    public static final String VERSION = "2.0.9";
 
     private ViewSwitcher viewSwitcher;
     private boolean mainView;
@@ -336,7 +338,7 @@ public class MainActivity extends AppCompatActivity
     }
 
     private void reportInitialState() {
-        mainScanText.setText("PilferShush scanner ready to scan for:");
+        mainScanText.setText("PilferShush scanner version " + VERSION +" \nready to scan for:");
         mainScanLogger(AudioSettings.DEFAULT_FREQUENCY_MIN + "+ Hz at "
                 + AudioSettings.DEFAULT_FREQ_STEP + "Hz steps, above 100 dB.", false);
 
@@ -572,15 +574,18 @@ public class MainActivity extends AppCompatActivity
         mainScanLogger("Stop listening for audio.", false);
 
         if (pilferShushScanner.hasAudioScanSequence()) {
-            mainScanLogger("Detected audio beacon modulated signal: \n", true);
+            mainScanLogger("Detected audio beacon signal: \n", true);
             mainScanLogger(pilferShushScanner.getModFrequencyLogic(), true);
 
-            // a debug of all modfreq captures
-            //mainScanLogger(pilferShushScanner.getFreqSeqLogicEntries(), true);
+            // all modfreq captures
+            mainScanLogger("All freq logic entries: \n", true);
+            mainScanLogger(pilferShushScanner.getFreqSeqLogicEntries(), true);
+
             // a debug, output in order of capture:
+            //mainScanLogger("Original sequence as transmitted: \n", true);
             //mainScanLogger(pilferShushScanner.getFrequencySequence(), true);
 
-            // TODO - this buffer scan
+            /*
             if (pilferShushScanner.hasBufferStorage()) {
                 Toast scanToast = Toast.makeText(this, "Processing buffer scan data...", Toast.LENGTH_LONG);
                 scanToast.show();
@@ -593,6 +598,7 @@ public class MainActivity extends AppCompatActivity
                 }
                 scanToast.cancel();
             }
+            */
         }
         else {
             mainScanLogger("No detected audio beacon signals.", false);
