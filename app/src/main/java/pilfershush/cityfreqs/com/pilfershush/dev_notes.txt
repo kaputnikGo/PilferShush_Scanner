@@ -2,24 +2,23 @@
 
 -- todo version 2 2018
 
-- busted magnitudeScan fixed by reverting to Version 1 RecordTask.java (shorts do not make a byte)
+- make usb audio work
+
 - replace/augment current stepFreq scan model with one that grabs any candidate above threshold (ie. 32ms binmods )
-
-
-- change focus of app to be detect and record. no analysis as of yet.
 
 - add a high pass filter with gate for the recordTask (only trigger magnitudeRecordScan when over threshold)
 
--- todo changes?
-
 - bufferScan functions? remove or optimise if possible (max size to scan?)
 
-- button for reset/empty bins etc, and/or on pause/resume
+- button for reset/empty bins etc,
+
+- proper on pause/resume
 
 - background service for scanner.
 
 - add bt scanner for beacons
 
+- dialogs make pretty
 
 /*****************/
 

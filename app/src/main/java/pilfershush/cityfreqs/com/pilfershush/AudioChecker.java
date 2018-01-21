@@ -77,7 +77,6 @@ public class AudioChecker {
                                 bufferSize = buffSize;
                                 audioSettings.setBasicAudioSettings(sampleRate, bufferSize, encoding, channel);
                                 recorder.release();
-                                recorder = null;
                                 return true;
                             }
                         }
@@ -110,6 +109,7 @@ public class AudioChecker {
                             int buffSize = AudioRecord.getMinBufferSize(rate, channelConfig, audioFormat);
                             if (buffSize != AudioRecord.ERROR_BAD_VALUE) {
                                 // check if we can instantiate and have a success
+                                // trying to get usb audio dongle with mic/line-in and headphone out...
                                 AudioRecord recorder = new AudioRecord(
                                         AudioSource.DEFAULT,  //DEFAULT, MIC, CAMCORDER
                                         rate,
@@ -125,8 +125,10 @@ public class AudioChecker {
                                     channel = channelConfig;
                                     encoding = audioFormat;
                                     bufferSize = buffSize;
+                                    audioSettings.setBasicAudioSettings(sampleRate, bufferSize, encoding, channel);
+                                    // experimental: get usbaudio dongle mic to work
+                                    audioSettings.setAudioSource(AudioSource.MIC);
                                     recorder.release();
-                                    recorder = null;
                                     return true;
                                 }
                             }

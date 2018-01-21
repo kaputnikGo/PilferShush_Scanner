@@ -2,8 +2,10 @@ package pilfershush.cityfreqs.com.pilfershush;
 
 import android.Manifest;
 import android.app.AlertDialog;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.hardware.usb.UsbDevice;
@@ -40,7 +42,7 @@ public class MainActivity extends AppCompatActivity
     private static final boolean DEBUG = true;
 
     // dev internal version numbering
-    public static final String VERSION = "2.0.9";
+    public static final String VERSION = "2.0.11";
 
     private ViewSwitcher viewSwitcher;
     private boolean mainView;
@@ -60,6 +62,7 @@ public class MainActivity extends AppCompatActivity
     // USB
     private DeviceContainer deviceContainer;
     private UsbManager usbManager;
+    private boolean hasUSB;
 
     private boolean output;
     private boolean checkAble;
@@ -292,6 +295,23 @@ public class MainActivity extends AppCompatActivity
         }
     }
 
+    /*
+* USB device
+*/
+    // https://source.android.com/devices/audio/usb.html
+    // http://developer.android.com/guide/topics/connectivity/usb/host.html
+    // SDR device driver: http://sdr.osmocom.org/trac/
+
+	/*
+	private boolean getIntentUsbDevice(Intent intent) {
+		// the device_filter.xml has a hardcoded usb device declaration
+		// update it to the SDR when it gets here...
+		deviceContainer = new DeviceContainer();
+		deviceContainer.setUsbDevice((UsbDevice) intent.getParcelableExtra(UsbManager.EXTRA_DEVICE));
+		return (deviceContainer.hasDevice() != false);
+	}
+	*/
+
     private boolean scanUsbDevices() {
         // search for any attached usb devices that we can read properties,
         // create a DeviceContainer for them.
@@ -318,6 +338,31 @@ public class MainActivity extends AppCompatActivity
         // check if audio compliant device, then return
         return found;
     }
+
+    BroadcastReceiver usbReceiver = new BroadcastReceiver() {
+        public void onReceive(Context context, Intent intent) {
+            String action = intent.getAction();
+
+            if (UsbManager.ACTION_USB_DEVICE_DETACHED.equals(action)) {
+                UsbDevice device = (UsbDevice)intent.getParcelableExtra(UsbManager.EXTRA_DEVICE);
+                if (device != null) {
+                    // prepare for re-routing of audio to handset
+                    hasUSB = false;
+                    logger("USB device is unplugged, mute output");
+                    toggleHeadset(false);
+                }
+            }
+            else if (UsbManager.ACTION_USB_DEVICE_ATTACHED.equals(action)) {
+                UsbDevice device = (UsbDevice)intent.getParcelableExtra(UsbManager.EXTRA_DEVICE);
+                if (device != null) {
+                    // prepare for re-routing of audio to USB
+                    hasUSB = true;
+                    logger("USB device is plugged in, allow output");
+                    toggleHeadset(true);
+                }
+            }
+        }
+    };
 
     private void initPilferShush() {
         audioManager = (AudioManager)getSystemService(Context.AUDIO_SERVICE);

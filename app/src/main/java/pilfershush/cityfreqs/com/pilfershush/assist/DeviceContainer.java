@@ -83,6 +83,8 @@ public class DeviceContainer {
 
 	/*
 	 * NOTES REGARDING USB AUDIO DONGLE ATTACHED TO TEST DEVICE
+	 * GeneralPlus Technology Inc ("7.1channel surround")
+	 * C-Media Electronics ("3D SOUND")
 	 * Sammy 5 says:
 	 *
 	 * 	Advanced Linux Sound Architecture Driver Version 1.0.25.
