@@ -42,7 +42,7 @@ public class MainActivity extends AppCompatActivity
     private static final boolean DEBUG = true;
 
     // dev internal version numbering
-    public static final String VERSION = "2.0.11";
+    public static final String VERSION = "2.0.12";
 
     private ViewSwitcher viewSwitcher;
     private boolean mainView;
@@ -300,7 +300,6 @@ public class MainActivity extends AppCompatActivity
 */
     // https://source.android.com/devices/audio/usb.html
     // http://developer.android.com/guide/topics/connectivity/usb/host.html
-    // SDR device driver: http://sdr.osmocom.org/trac/
 
 	/*
 	private boolean getIntentUsbDevice(Intent intent) {

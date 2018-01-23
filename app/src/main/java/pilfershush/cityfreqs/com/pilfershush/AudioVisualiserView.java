@@ -80,8 +80,11 @@ public class AudioVisualiserView extends View {
         freqValue = 0;
     }
 
-    public void updateVisualiser(byte[] bytes) {
-        mBytes = bytes;
+    public void updateVisualiser(short[] shortBuffer) {
+        mBytes = new byte[shortBuffer.length];
+        for (int i = 0; i < shortBuffer.length; i++) {
+            mBytes[i] = (byte)shortBuffer[i];
+        }
         invalidate();
     }
 

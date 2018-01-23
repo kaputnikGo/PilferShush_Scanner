@@ -27,6 +27,8 @@ public class WriteProcessor {
     private String audioFilename;
     private String logFilename;
     private String sessionFilename; // base filename
+
+    public static byte[] byteBuffer;
     public static File AUDIO_OUTPUT_FILE;
     public static File LOG_OUTPUT_FILE;
     public static BufferedOutputStream AUDIO_OUTPUT_STREAM;
@@ -69,6 +71,7 @@ public class WriteProcessor {
         // eg: 20151218-10:14:32-capture.pcm
         audioFilename = getTimestamp() + "-" + sessionFilename + AUDIO_FILE_EXTENSION;
         // file save will overwrite unless new name is used...
+
         try {
             AUDIO_OUTPUT_FILE = new File(location, audioFilename);
             if (!AUDIO_OUTPUT_FILE.exists()) {
@@ -112,6 +115,21 @@ public class WriteProcessor {
         catch (IOException e) {
             e.printStackTrace();
             log("Log file write error.");
+        }
+    }
+
+    public static void writeBufferToLog(short[] shortBuffer, int size) {
+        if (shortBuffer != null) {
+            byteBuffer = new byte[size];
+            for (int i = 0; i < size; i++) {
+                byteBuffer[i] = (byte) shortBuffer[i];
+            }
+
+            try {
+                AUDIO_OUTPUT_STREAM.write(byteBuffer, 0, size);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
     }
 

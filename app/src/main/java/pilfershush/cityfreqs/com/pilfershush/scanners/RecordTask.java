@@ -18,6 +18,7 @@ import pilfershush.cityfreqs.com.pilfershush.scanners.FreqDetector.RecordTaskLis
 public class RecordTask extends AsyncTask<Void, Integer, String> {
     private static final String TAG = "RecordTask";
 
+    private SpectrumAudio spectrumAudio;
     private short[] bufferArray;
     private double[] recordScan;
     private double[] scanArray;
@@ -31,7 +32,6 @@ public class RecordTask extends AsyncTask<Void, Integer, String> {
     private Integer[] tempBuffer;
     private ArrayList<Integer[]> bufferStorage;
     private HashMap<Integer, Integer> freqMap;
-    private byte[] byteBuffer;
 
     public RecordTask(AudioSettings audioSettings, int freqStepper, double magnitude) {
         this.audioSettings = audioSettings;
@@ -39,6 +39,7 @@ public class RecordTask extends AsyncTask<Void, Integer, String> {
         minMagnitude = magnitude;
         bufferArray = new short[audioSettings.getBufferSize()];
         bufferStorage = new ArrayList<Integer[]>();
+        spectrumAudio = new SpectrumAudio();
 
         if (audioRecord == null) {
             try {
@@ -48,6 +49,7 @@ public class RecordTask extends AsyncTask<Void, Integer, String> {
                         audioSettings.getEncoding(),
                         audioSettings.getBufferSize());
 
+                spectrumAudio.initSpectrumAudio(audioSettings.getBufferSize(), audioSettings.getSampleRate());
                 logger("RecordTask ready.");
             }
             catch (Exception ex) {
@@ -107,10 +109,6 @@ public class RecordTask extends AsyncTask<Void, Integer, String> {
         return freqMap;
     }
 
-    public byte[] getRecordBuffer() {
-        return byteBuffer;
-    }
-
     /********************************************************************/
 
     @Override
@@ -154,12 +152,13 @@ public class RecordTask extends AsyncTask<Void, Integer, String> {
 
                     public void onPeriodicNotification(AudioRecord audioRecord) {
                         magnitudeRecordScan(AudioSettings.DEFAULT_WINDOW_TYPE);
-                        MainActivity.visualiserView.updateVisualiser(byteBuffer);
+                        MainActivity.visualiserView.updateVisualiser(bufferArray); //byteBuffer
                     }
                 });
 
                 do {
                     bufferRead = audioRecord.read(bufferArray, 0, audioSettings.getBufferSize());
+                    spectrumAudio.checkSpectrumAudio(bufferArray);
                 } while (!isCancelled());
             }
             catch (IllegalStateException exState) {
@@ -202,25 +201,22 @@ public class RecordTask extends AsyncTask<Void, Integer, String> {
     /********************************************************************/
 
     private void magnitudeRecordScan(int windowType) {
+        // TODO so many type conversions (x3)
+        int bufferSize;
         if (bufferRead > 0) {
-            recordScan = new double[audioSettings.getBufferSize()];
-            tempBuffer = new Integer[audioSettings.getBufferSize()];
-            byteBuffer = new byte[audioSettings.getBufferSize()];
+            bufferSize = audioSettings.getBufferSize();
+
+            recordScan = new double[bufferSize]; // working array
+            tempBuffer = new Integer[bufferSize]; // for bufferStorage scans
 
             for (int i = 0; i < recordScan.length; i++) {
                 recordScan[i] = (double)bufferArray[i];
                 tempBuffer[i] = (int)bufferArray[i];
-                byteBuffer[i] = (byte)bufferArray[i];
             }
 
             // save audio buffer to non-header pcm file, boolean switch here
-            if (PilferShushScanner.WRITE_FILE) {
-                try {
-                    WriteProcessor.AUDIO_OUTPUT_STREAM.write(byteBuffer, 0, audioSettings.getBufferSize());
-                } catch (IOException e) {
-                    e.printStackTrace();
-                    logger("AudioRecord write stream error.");
-                }
+            if (PilferShushScanner.WRITE_FILE && bufferArray != null) {
+                WriteProcessor.writeBufferToLog(bufferArray, bufferSize);
             }
 
             // default value set to 2
