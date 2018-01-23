@@ -2,6 +2,8 @@
 
 -- todo version 2 2018
 
+- RecordTask reads in short[] (16 bit number
+
 - make usb audio work
 
 - replace/augment current stepFreq scan model with one that grabs any candidate above threshold (ie. 32ms binmods )

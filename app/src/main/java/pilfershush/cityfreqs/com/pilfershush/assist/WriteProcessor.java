@@ -4,11 +4,16 @@ package pilfershush.cityfreqs.com.pilfershush.assist;
 import android.os.Environment;
 
 import java.io.BufferedOutputStream;
+import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.io.OutputStreamWriter;
+import java.io.RandomAccessFile;
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
@@ -21,17 +26,20 @@ public class WriteProcessor {
     //private  static final int HEADER_LENGTH = 44; //byte
     // until we bother with wav headers, this is raw format bytebuffer saves
 
+    // pcm savefile for raw import into Audacity is signed 16 bit, big-endian, mono
 
+    private AudioSettings audioSettings;
     private File extDirectory;
 
     private String audioFilename;
     private String logFilename;
     private String sessionFilename; // base filename
 
-    public static byte[] byteBuffer;
     public static File AUDIO_OUTPUT_FILE;
-    public static File LOG_OUTPUT_FILE;
+    public static DataOutputStream AUDIO_DATA_STREAM;
     public static BufferedOutputStream AUDIO_OUTPUT_STREAM;
+
+    public static File LOG_OUTPUT_FILE;
     public static FileOutputStream LOG_OUTPUT_STREAM;
     public static OutputStreamWriter LOG_OUTPUT_WRITER;
 
@@ -40,8 +48,9 @@ public class WriteProcessor {
     private static final String LOG_FILE_EXTENSION = ".txt";
     private static final SimpleDateFormat TIMESTAMP_FORMAT = new SimpleDateFormat("yyyyMMdd-HH:mm:ss", Locale.ENGLISH);
 
-    public WriteProcessor(String sessionName) {
+    public WriteProcessor(String sessionName, AudioSettings audioSettings) {
         setSessionName(sessionName);
+        this.audioSettings = audioSettings;
 
         log("Check: Download(s)/PilferShush/");
         // checks for read/write state
@@ -79,6 +88,7 @@ public class WriteProcessor {
             }
             AUDIO_OUTPUT_STREAM = null;
             AUDIO_OUTPUT_STREAM = new BufferedOutputStream(new FileOutputStream(AUDIO_OUTPUT_FILE, false));
+            AUDIO_DATA_STREAM = new DataOutputStream(AUDIO_OUTPUT_STREAM);
         }
         catch (FileNotFoundException ex) {
             ex.printStackTrace();
@@ -118,20 +128,18 @@ public class WriteProcessor {
         }
     }
 
-    public static void writeBufferToLog(short[] shortBuffer, int size) {
+    public static void writeBufferToLog(short[] shortBuffer, int bufferRead) {
         if (shortBuffer != null) {
-            byteBuffer = new byte[size];
-            for (int i = 0; i < size; i++) {
-                byteBuffer[i] = (byte) shortBuffer[i];
-            }
-
             try {
-                AUDIO_OUTPUT_STREAM.write(byteBuffer, 0, size);
+                for (int i = 0; i < bufferRead; i++) {
+                    AUDIO_DATA_STREAM.writeShort(shortBuffer[i]);
+                }
             } catch (IOException e) {
                 e.printStackTrace();
             }
         }
     }
+
 
     public static void writeLogFile(String textline) {
         if (LOG_OUTPUT_WRITER != null) {
@@ -149,6 +157,7 @@ public class WriteProcessor {
             if (AUDIO_OUTPUT_STREAM != null) {
                 AUDIO_OUTPUT_STREAM.flush();
                 AUDIO_OUTPUT_STREAM.close();
+                AUDIO_DATA_STREAM.close();
             }
         } catch (IOException e) {
             e.printStackTrace();
@@ -174,6 +183,105 @@ public class WriteProcessor {
             log("Error closing log output stream.");
         }
 
+    }
+
+    /**************************************************************/
+
+    public static void initAudioBuffer(short channels, int sampleRate, short bitDepth) {
+        try {
+            writeWavHeader(AUDIO_OUTPUT_STREAM, channels, sampleRate, bitDepth);
+        }
+        catch (IOException ex) {
+            //
+        }
+    }
+
+    public static void writeAudioBuffer(byte[] buffer, int length) {
+        try {
+            AUDIO_OUTPUT_STREAM.write(buffer, 0, length);
+        }
+        catch (IOException ex) {
+            //
+        }
+    }
+
+    public static void closeWriteBuffer() {
+        try {
+            updateWavHeader();
+        }
+        catch (IOException ex) {
+            //
+        }
+    }
+
+    private static void writeWavHeader(OutputStream out, short channels, int sampleRate, short bitDepth) throws IOException {
+        // Convert the multi-byte integers to raw bytes in little endian format as required by the spec
+        byte[] littleBytes = ByteBuffer
+                .allocate(14)
+                .order(ByteOrder.LITTLE_ENDIAN)
+                .putShort(channels)
+                .putInt(sampleRate)
+                .putInt(sampleRate * channels * (bitDepth / 8))
+                .putShort((short) (channels * (bitDepth / 8)))
+                .putShort(bitDepth)
+                .array();
+
+        out.write(new byte[]{
+                // RIFF header
+                'R', 'I', 'F', 'F', // ChunkID
+                0, 0, 0, 0, // ChunkSize (must be updated later)
+                'W', 'A', 'V', 'E', // Format
+                // fmt subchunk
+                'f', 'm', 't', ' ', // Subchunk1ID
+                16, 0, 0, 0, // Subchunk1Size
+                1, 0, // AudioFormat
+                littleBytes[0], littleBytes[1], // NumChannels
+                littleBytes[2], littleBytes[3], littleBytes[4], littleBytes[5], // SampleRate
+                littleBytes[6], littleBytes[7], littleBytes[8], littleBytes[9], // ByteRate
+                littleBytes[10], littleBytes[11], // BlockAlign
+                littleBytes[12], littleBytes[13], // BitsPerSample
+                // data subchunk
+                'd', 'a', 't', 'a', // Subchunk2ID
+                0, 0, 0, 0, // Subchunk2Size (must be updated later)
+        });
+    }
+
+    private static void updateWavHeader() throws IOException {
+        //AUDIO_OUTPUT_FILE
+
+        byte[] sizes = ByteBuffer
+                .allocate(8)
+                .order(ByteOrder.LITTLE_ENDIAN)
+                // There are probably a bunch of different/better ways to calculate
+                // these two given your circumstances. Cast should be safe since if the WAV is
+                // > 4 GB we've already made a terrible mistake.
+                .putInt((int) (AUDIO_OUTPUT_FILE.length() - 8)) // ChunkSize
+                .putInt((int) (AUDIO_OUTPUT_FILE.length() - 44)) // Subchunk2Size
+                .array();
+
+        RandomAccessFile accessWave = null;
+        //noinspection CaughtExceptionImmediatelyRethrown
+        try {
+            accessWave = new RandomAccessFile(AUDIO_OUTPUT_FILE, "rw");
+            // ChunkSize
+            accessWave.seek(4);
+            accessWave.write(sizes, 0, 4);
+
+            // Subchunk2Size
+            accessWave.seek(40);
+            accessWave.write(sizes, 4, 4);
+        } catch (IOException ex) {
+            // Rethrow but we still close accessWave in our finally
+            throw ex;
+        } finally {
+            if (accessWave != null) {
+                try {
+                    accessWave.close();
+                } catch (IOException ex) {
+                    //
+                }
+            }
+        }
     }
 
     /**************************************************************/

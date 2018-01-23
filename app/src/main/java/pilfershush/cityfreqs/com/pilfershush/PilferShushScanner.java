@@ -28,7 +28,7 @@ public class PilferShushScanner {
         this.context = context;
         scanBufferSize = 0;
         audioChecker = new AudioChecker();
-        writeProcessor = new WriteProcessor(sessionName);
+        writeProcessor = new WriteProcessor(sessionName, audioChecker.getAudioSettings());
         // writes txt file to same location as audio records.
         // write init checks then close the file.
         // called again at runScanner.

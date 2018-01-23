@@ -10,7 +10,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 import pilfershush.cityfreqs.com.pilfershush.MainActivity;
-import pilfershush.cityfreqs.com.pilfershush.PilferShushScanner;
 import pilfershush.cityfreqs.com.pilfershush.assist.AudioSettings;
 import pilfershush.cityfreqs.com.pilfershush.assist.WriteProcessor;
 import pilfershush.cityfreqs.com.pilfershush.scanners.FreqDetector.RecordTaskListener;
@@ -19,7 +18,7 @@ public class RecordTask extends AsyncTask<Void, Integer, String> {
     private static final String TAG = "RecordTask";
 
     private SpectrumAudio spectrumAudio;
-    private short[] bufferArray;
+    private short[] bufferArray; // (shorts do not make a byte)
     private double[] recordScan;
     private double[] scanArray;
     private RecordTaskListener recordTaskListener;
@@ -30,6 +29,8 @@ public class RecordTask extends AsyncTask<Void, Integer, String> {
     private int freqStepper;
     private int candidateFreq;
     private Integer[] tempBuffer;
+    private byte[] byteBuffer;
+
     private ArrayList<Integer[]> bufferStorage;
     private HashMap<Integer, Integer> freqMap;
 
@@ -161,6 +162,9 @@ public class RecordTask extends AsyncTask<Void, Integer, String> {
                 do {
                     bufferRead = audioRecord.read(bufferArray, 0, audioSettings.getBufferSize());
                     spectrumAudio.checkSpectrumAudio(bufferArray);
+                    // rem till proper wav
+                    WriteProcessor.writeBufferToLog(bufferArray, bufferRead);
+
                 } while (!isCancelled());
             }
             catch (IllegalStateException exState) {
@@ -212,16 +216,29 @@ public class RecordTask extends AsyncTask<Void, Integer, String> {
 
             recordScan = new double[bufferSize]; // working array
             tempBuffer = new Integer[bufferSize]; // for bufferStorage scans
+            byteBuffer = new byte[bufferSize]; // for log writes
 
             for (int i = 0; i < recordScan.length; i++) {
                 recordScan[i] = (double)bufferArray[i];
                 tempBuffer[i] = (int)bufferArray[i];
+                byteBuffer[i] = (byte)bufferArray[i];
             }
 
             // save audio buffer to non-header pcm file, boolean switch here
+            /*
             if (PilferShushScanner.WRITE_FILE && bufferArray != null) {
                 WriteProcessor.writeBufferToLog(bufferArray, bufferSize);
             }
+            */
+            /*
+            try {
+                WriteProcessor.AUDIO_OUTPUT_STREAM.write(byteBuffer, 0, bufferSize);
+            }
+            catch (IOException e) {
+                e.printStackTrace();
+                logger("AudioRecord write stream error.");
+            }
+            */
 
             // default value set to 2
             recordScan = windowArray(windowType, recordScan);
