@@ -30,7 +30,8 @@ public class SpectrumAudio {
     private static final double EXPECT = 2.0 * Math.PI * STEP / SAMPLES;
 
     private int bufferSize;
-    private long counter;
+    private int counter;
+
     private double buffer[];
     private double xr[];
     private double xi[];
@@ -49,28 +50,7 @@ public class SpectrumAudio {
         xf = new double[RANGE];
     }
 
-    /*
-    protected void stopSpectrumAudio() {
-        if (audioRecord != null &&
-                audioRecord.getState() == AudioRecord.STATE_INITIALIZED) {
-            try {
-                if (audioRecord.getRecordingState() == AudioRecord.RECORDSTATE_RECORDING) {
-                    audioRecord.stop();
-                }
-                audioRecord.release();
-            }
-            catch (Exception e) {
-                //
-            }
-        }
-    }
-    */
-
     protected void initSpectrumAudio(int bufferSize, int sampleRate) {
-        // Assume the output sample will work on the input as
-        // there isn't an AudioRecord.getNativeInputSampleRate()
-        //sample = AudioTrack.getNativeOutputSampleRate(AudioManager.STREAM_MUSIC);
-
         // don't use this?
         this.bufferSize = bufferSize;
         if (bufferSize != SAMPLES) {
@@ -79,16 +59,22 @@ public class SpectrumAudio {
 
         // Calculate fps
         fps = (double) sampleRate / SAMPLES;
+        counter = 0;
     }
 
     protected void checkSpectrumAudio(short[] data) {
         //
-        // empty placeholder function for testing SpectrumAudio
-        /*
+        // placeholder function for testing SpectrumAudio
+
         if (data != null) {
             processSpectrumAudio(data);
         }
-        */
+
+    }
+
+    protected void finishSpectrumAudio() {
+        MainActivity.logger("spectrumAudio freq count: " + counter);
+        //MainActivity.logger(String.format("spectrumAudio freq: %1.1f Hz", frequency));
     }
 
     private void processSpectrumAudio(short[] data) {
@@ -108,9 +94,7 @@ public class SpectrumAudio {
         double level;
         double dB;
 
-        while (data != null) {
-            //size = audioRecord.read(data, 0, STEP);
-
+        if (data != null) {
             System.arraycopy(buffer, STEP, buffer, 0, SAMPLES - STEP);
 
             for (int i = 0; i < STEP; i++) {
@@ -129,8 +113,9 @@ public class SpectrumAudio {
                     dmax = Math.abs(buffer[i]);
                 }
 
-                // Calculate the window
-                window = 0.5 - 0.5 * Math.cos(2.0 * Math.PI * i / SAMPLES);
+                // uses a Hann(ing) window
+                window = 0.5 - 0.5 * Math.cos(AudioSettings.PI2 * i / SAMPLES);
+
                 // Normalise and window the input data
                 xr[i] = buffer[i] / norm * window;
             }
@@ -170,15 +155,6 @@ public class SpectrumAudio {
                 xf[i] = i * fps + df * fps;
             }
 
-            // Do a full process run every N
-            if (++counter % N != 0) {
-                continue;
-            }
-
-            // Update frequency and dB every M
-            if (counter % M != 0) {
-                continue;
-            }
             // Maximum FFT output
             max = 0.0;
             // Find maximum value
@@ -208,17 +184,16 @@ public class SpectrumAudio {
             if (max > MIN) {
                 // check frequency (%1.1fHz)
                 // check its level over threshold
+                // produces variations, so may need to group within range then count
                 if (frequency >= AudioSettings.DEFAULT_FREQUENCY_MIN) {
-                    MainActivity.logger("spectrumAudio freq: " + frequency);
+                    //MainActivity.logger(String.format("spectrumAudio freq: %1.1f Hz", frequency));
+                    counter++;
                 }
             }
             else {
                 frequency = 0.0;
             }
         }
-        // catch audio recorder
-        //stopSpectrumAudio();
-
         // end of process
     }
 

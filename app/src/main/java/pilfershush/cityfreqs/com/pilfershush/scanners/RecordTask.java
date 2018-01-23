@@ -140,6 +140,8 @@ public class RecordTask extends AsyncTask<Void, Integer, String> {
             return "isCancelled()";
         }
         // check audioRecord object first
+        // TODO getting a couple of RecordThread: buffer overflow warnings in adb at start of record
+
         if ((audioRecord != null) || (audioRecord.getState() == AudioRecord.STATE_INITIALIZED)) {
             try {
                 audioRecord.startRecording();
@@ -196,6 +198,8 @@ public class RecordTask extends AsyncTask<Void, Integer, String> {
         else {
             logger("audioRecord is null.");
         }
+
+        spectrumAudio.finishSpectrumAudio();
     }
 
     /********************************************************************/
@@ -236,6 +240,7 @@ public class RecordTask extends AsyncTask<Void, Integer, String> {
                 if (candidateMag >= minMagnitude) {
                     // saved here for later analysis
                     bufferStorage.add(tempBuffer);
+                    // draw on view
                     publishProgress(new Integer[]{Integer.valueOf(candidateFreq)});
                 }
                 // next freq for loop
