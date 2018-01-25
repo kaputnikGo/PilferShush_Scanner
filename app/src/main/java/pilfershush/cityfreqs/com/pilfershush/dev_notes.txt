@@ -2,9 +2,9 @@
 
 -- todo version 2 2018
 
-- RecordTask reads in short[] (16 bit number
+- ultra/synth.js make mod transmitter have a carrier freq and logic 1, logic 0 (include in repo)
 
-- make usb audio work
+- proper file management, can get lots of files per session.
 
 - replace/augment current stepFreq scan model with one that grabs any candidate above threshold (ie. 32ms binmods )
 
@@ -12,17 +12,18 @@
 
 - bufferScan functions? remove or optimise if possible (max size to scan?)
 
-- button for reset/empty bins etc,
-
 - proper on pause/resume
-
-- background service for scanner.
-
-- add bt scanner for beacons
 
 - dialogs make pretty
 
+-- maybe::
+
+- background service for scanner.
+- make usb audio work
+
 /*****************/
+
+- RecordTask reads in short[] only
 
 as of >= android 6.x +, M == Marshmallow, SDK 23 need to reevaluate how to check for beacon SDks.
 

@@ -11,6 +11,9 @@ Bill Farmer	 william j farmer [at] yahoo [dot] co [dot] uk.
 
  */
 
+import java.util.ArrayList;
+import java.util.HashMap;
+
 import pilfershush.cityfreqs.com.pilfershush.MainActivity;
 import pilfershush.cityfreqs.com.pilfershush.assist.AudioSettings;
 
@@ -23,14 +26,13 @@ public class SpectrumAudio {
     private static final int SAMPLES = 4096; // this as a final?
     private static final int RANGE = SAMPLES / 2;
     private static final int STEP = SAMPLES / OVERSAMPLE;
-    private static final int N = 4;
-    private static final int M = 16;
-
     private static final double MIN = 0.5;
     private static final double EXPECT = 2.0 * Math.PI * STEP / SAMPLES;
 
     private int bufferSize;
     private int counter;
+    private ArrayList<Integer> freqList;
+    private HashMap<Integer, Integer> freqMap;
 
     private double buffer[];
     private double xr[];
@@ -57,6 +59,8 @@ public class SpectrumAudio {
             MainActivity.logger("initSpectrumAudio bufferSize diff error.");
         }
 
+        freqList = new ArrayList<Integer>();
+        freqMap = new HashMap<Integer, Integer>();
         // Calculate fps
         fps = (double) sampleRate / SAMPLES;
         counter = 0;
@@ -65,7 +69,6 @@ public class SpectrumAudio {
     protected void checkSpectrumAudio(short[] data) {
         //
         // placeholder function for testing SpectrumAudio
-
         if (data != null) {
             processSpectrumAudio(data);
         }
@@ -75,13 +78,15 @@ public class SpectrumAudio {
     protected void finishSpectrumAudio() {
         MainActivity.logger("spectrumAudio freq count: " + counter);
         //MainActivity.logger(String.format("spectrumAudio freq: %1.1f Hz", frequency));
+        if (counter > 0) {
+           //assume
+            sortFreqMap();
+        }
     }
 
     private void processSpectrumAudio(short[] data) {
-
         // pass the data short buffer in to this, check for freqs above
         // AudioSettings.DEFAULT_FREQUENCY_MIN;
-
         double dmax = 0.0;
         double norm;
         double window;
@@ -92,7 +97,7 @@ public class SpectrumAudio {
         double df;
         double max;
         double level;
-        double dB;
+        double dB; // using dBFS(full scale) where 0dB is peak amplitude
 
         if (data != null) {
             System.arraycopy(buffer, STEP, buffer, 0, SAMPLES - STEP);
@@ -148,7 +153,7 @@ public class SpectrumAudio {
                 dp -=  Math.PI * qpd;
 
                 // Calculate frequency difference
-                df = OVERSAMPLE * dp / (2.0 * Math.PI);
+                df = OVERSAMPLE * dp / AudioSettings.PI2;
 
                 // Calculate actual frequency from slot frequency plus
                 // frequency difference and correction value
@@ -168,10 +173,13 @@ public class SpectrumAudio {
             level = 0.0;
 
             for (int i = 0; i < STEP; i++) {
+                // 0x7FFF == 32767.0 or 32768.0
                 level += ((double) data[i] / 32768.0) * ((double) data[i] / 32768.0);
             }
-            level = Math.sqrt(level / STEP) * 2.0;
 
+            // add a magnitude check here before proceeding
+            // level is a negative number rising to zero
+            level = Math.sqrt(level / STEP) * 2.0;
 
             dB = Math.log10(level) * 20.0;
 
@@ -179,14 +187,18 @@ public class SpectrumAudio {
                 dB = -80.0;
             }
 
-
             // check frequency and dB
+            // need a dB sensitivity switch here
+            // tests get ~ -40dB to -30dB (internal) as a range
+
             if (max > MIN) {
                 // check frequency (%1.1fHz)
                 // check its level over threshold
                 // produces variations, so may need to group within range then count
                 if (frequency >= AudioSettings.DEFAULT_FREQUENCY_MIN) {
-                    //MainActivity.logger(String.format("spectrumAudio freq: %1.1f Hz", frequency));
+                    MainActivity.logger(String.format("spectrumAudio freq: %1.1f Hz", frequency));
+                    //MainActivity.logger("dB: " + dB + ", level: " + level);
+                    freqList.add(Integer.valueOf((int) Math.round(frequency)));
                     counter++;
                 }
             }
@@ -237,6 +249,21 @@ public class SpectrumAudio {
                     ar[i] += tr;
                     ai[i] += ti;
                 }
+            }
+        }
+    }
+
+    // this is duping AudioScanner functions from first scanner type.
+    private void sortFreqMap() {
+        // SparseIntArray is suggested...
+        // this only counts, order of occurrence is not preserved.
+
+        for (int freq : freqList) {
+            if (freqMap.containsKey(freq)) {
+                freqMap.put(freq, freqMap.get(freq) + 1);
+            }
+            else {
+                freqMap.put(freq, 1);
             }
         }
     }

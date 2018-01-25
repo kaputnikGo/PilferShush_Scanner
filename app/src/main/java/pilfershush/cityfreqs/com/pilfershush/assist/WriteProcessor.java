@@ -21,19 +21,15 @@ import java.util.Locale;
 import pilfershush.cityfreqs.com.pilfershush.MainActivity;
 
 public class WriteProcessor {
-    //
-    //private int audioLen = 0;
-    //private  static final int HEADER_LENGTH = 44; //byte
-    // until we bother with wav headers, this is raw format bytebuffer saves
-
-    // pcm savefile for raw import into Audacity is signed 16 bit, big-endian, mono
+    // until we bother with wav headers, this is raw format buffer writes
+    // pcm savefile for raw import into Audacity as 48 kHz, signed 16 bit, big-endian, mono
 
     private AudioSettings audioSettings;
     private File extDirectory;
 
     private String audioFilename;
     private String logFilename;
-    private String sessionFilename; // base filename
+    private String sessionFilename;
 
     public static File AUDIO_OUTPUT_FILE;
     public static DataOutputStream AUDIO_DATA_STREAM;
@@ -69,6 +65,71 @@ public class WriteProcessor {
         }
     }
 
+    /**************************************************************/
+    /*
+        text logging
+     */
+    public void prepareLogToFile() {
+        // need to build the filename AND path
+        log("prepare log file...");
+        File location = extDirectory;
+        if (location == null) {
+            log("Error getting storage directory");
+            return;
+        }
+        // add the extension and timestamp
+        // eg: 20151218-10:14:32-capture.txt
+        logFilename = getTimestamp() + "-" + sessionFilename + LOG_FILE_EXTENSION;
+        try {
+            LOG_OUTPUT_FILE = new File(location, logFilename);
+            LOG_OUTPUT_FILE.createNewFile();
+            LOG_OUTPUT_STREAM = new FileOutputStream(LOG_OUTPUT_FILE, true);
+            LOG_OUTPUT_WRITER = new OutputStreamWriter(LOG_OUTPUT_STREAM);
+        }
+        catch (FileNotFoundException ex) {
+            ex.printStackTrace();
+            log("File not found error.");
+        }
+        catch (IOException e) {
+            e.printStackTrace();
+            log("Log file write error.");
+        }
+    }
+
+    public static void writeLogFile(String textline) {
+        if (LOG_OUTPUT_WRITER != null) {
+            try {
+                LOG_OUTPUT_WRITER.append((new StringBuilder()).append(textline).append("\n"));
+            }
+            catch (IOException e) {
+                //
+            }
+        }
+    }
+
+    public void closeLogFile() {
+        // final act, no more writes possible.
+        log("close log file.");
+        try {
+            if (LOG_OUTPUT_WRITER != null) {
+                LOG_OUTPUT_WRITER.flush();
+                LOG_OUTPUT_WRITER.close();
+            }
+            if (LOG_OUTPUT_STREAM != null) {
+                LOG_OUTPUT_STREAM.flush();
+                LOG_OUTPUT_STREAM.close();
+            }
+        }
+        catch (IOException e) {
+            log("Error closing log output stream.");
+        }
+    }
+
+    /**************************************************************/
+    /*
+        audio logging
+     */
+
     public void prepareWriteToFile() {
         // need to build the filename AND path
         File location = extDirectory;
@@ -100,54 +161,20 @@ public class WriteProcessor {
         }
     }
 
-    public void prepareLogToFile() {
-        // need to build the filename AND path
-        log("prepare log file...");
-        File location = extDirectory;
-        if (location == null) {
-            log("Error getting storage directory");
-            return;
-        }
-        // add the extension and timestamp
-        // eg: 20151218-10:14:32-capture.txt
-        logFilename = getTimestamp() + "-" + sessionFilename + LOG_FILE_EXTENSION;
-        //LOG_OUTPUT_FILE = null;
-        try {
-            LOG_OUTPUT_FILE = new File(location, logFilename);
-            LOG_OUTPUT_FILE.createNewFile();
-            LOG_OUTPUT_STREAM = new FileOutputStream(LOG_OUTPUT_FILE, true); // append...
-            LOG_OUTPUT_WRITER = new OutputStreamWriter(LOG_OUTPUT_STREAM);
-        }
-        catch (FileNotFoundException ex) {
-            ex.printStackTrace();
-            log("File not found error.");
-        }
-        catch (IOException e) {
-            e.printStackTrace();
-            log("Log file write error.");
-        }
-    }
-
     public static void writeBufferToLog(short[] shortBuffer, int bufferRead) {
         if (shortBuffer != null) {
             try {
                 for (int i = 0; i < bufferRead; i++) {
                     AUDIO_DATA_STREAM.writeShort(shortBuffer[i]);
+                    /*
+                    ByteBuffer bb = ByteBuffer.allocate(Short.SIZE / Byte.SIZE);
+                    bb.order(ByteOrder.BIG_ENDIAN);
+                    bb.putShort(shortBuffer[i]);
+                    AUDIO_OUTPUT_STREAM.write(bb.array(), 0, bb.limit());
+                    */
                 }
             } catch (IOException e) {
                 e.printStackTrace();
-            }
-        }
-    }
-
-
-    public static void writeLogFile(String textline) {
-        if (LOG_OUTPUT_WRITER != null) {
-            try {
-                LOG_OUTPUT_WRITER.append((new StringBuilder()).append(textline).append("\n"));
-            }
-            catch (IOException e) {
-                //
             }
         }
     }
@@ -159,33 +186,19 @@ public class WriteProcessor {
                 AUDIO_OUTPUT_STREAM.close();
                 AUDIO_DATA_STREAM.close();
             }
-        } catch (IOException e) {
+        }
+        catch (IOException e) {
             e.printStackTrace();
             log("onCancelled write stream close error.");
         }
+        // then close text logging
         closeLogFile();
     }
 
-    public void closeLogFile() {
-        // final act, no more writes possible.
-        log("close log file.");
-        try {
-            if (LOG_OUTPUT_WRITER != null) {
-                LOG_OUTPUT_WRITER.flush();
-                LOG_OUTPUT_WRITER.close();
-            }
-            if (LOG_OUTPUT_STREAM != null) {
-                LOG_OUTPUT_STREAM.flush();
-                LOG_OUTPUT_STREAM.close();
-            }
-        }
-        catch (IOException e) {
-            log("Error closing log output stream.");
-        }
-
-    }
-
     /**************************************************************/
+    /*
+        wav + header logging
+     */
 
     public static void initAudioBuffer(short channels, int sampleRate, short bitDepth) {
         try {
@@ -196,7 +209,19 @@ public class WriteProcessor {
         }
     }
 
-    public static void writeAudioBuffer(byte[] buffer, int length) {
+    public static void writeAudioBuffer(short[] bufferIn, int length) {
+        // too much overhead?
+        int short_index, byte_index;
+        int iterations = length;
+        byte [] buffer = new byte[length * 2];
+        short_index = byte_index = 0;
+
+        for( ; short_index != iterations ; ) {
+            buffer[byte_index]     = (byte) (bufferIn[short_index] & 0x00FF);
+            buffer[byte_index + 1] = (byte) ((bufferIn[short_index] & 0xFF00) >> 8);
+            ++short_index; byte_index += 2;
+        }
+
         try {
             AUDIO_OUTPUT_STREAM.write(buffer, 0, length);
         }
@@ -270,14 +295,17 @@ public class WriteProcessor {
             // Subchunk2Size
             accessWave.seek(40);
             accessWave.write(sizes, 4, 4);
-        } catch (IOException ex) {
+        }
+        catch (IOException ex) {
             // Rethrow but we still close accessWave in our finally
             throw ex;
-        } finally {
+        }
+        finally {
             if (accessWave != null) {
                 try {
                     accessWave.close();
-                } catch (IOException ex) {
+                }
+                catch (IOException ex) {
                     //
                 }
             }

@@ -36,6 +36,7 @@ public class AudioSettings {
     public static final int DEFAULT_FREQUENCY_MIN = 18000;
     public static final int DEFAULT_FREQUENCY_MAX = 21000; // 22000
 
+    // using dB SPL (sound pressure level) without distance
     // db = 20 log10(goertzel_magnitude).
     // mag_50, mag_70 are way too sensitive = false positives
     //public static final double MAGNITUDE_50 = 500; // ~= 53.9794 dB
@@ -64,7 +65,7 @@ public class AudioSettings {
     // possible number of audio signals to sequence (32 bits)
     public static final int MAX_SEQUENCE_LENGTH = 32;
 
-    // 1=Hann(ing), 2=Blackman, 3=Hamming, 4=Nuttall
+    // 1=Hann(ing), 2=Blackman, 3=Hamming, 4=Nuttall, 5=Blacknman-Nuttall
     public static final int DEFAULT_WINDOW_TYPE = 2;
 
     // scanning delay for runner

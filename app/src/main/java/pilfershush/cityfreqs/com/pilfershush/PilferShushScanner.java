@@ -55,6 +55,10 @@ public class PilferShushScanner {
         return false;
     }
 
+    protected String getAudioCheckerReport() {
+        return audioChecker.getAudioSettingsReport();
+    }
+
     protected void renameSessionWrites(String sessionName) {
         writeProcessor.closeAllFiles();
         writeProcessor.setSessionName(sessionName);

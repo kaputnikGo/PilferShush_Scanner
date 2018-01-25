@@ -161,10 +161,10 @@ public class RecordTask extends AsyncTask<Void, Integer, String> {
 
                 do {
                     bufferRead = audioRecord.read(bufferArray, 0, audioSettings.getBufferSize());
-                    spectrumAudio.checkSpectrumAudio(bufferArray);
-                    // rem till proper wav
+                    // not proper wav yet
                     WriteProcessor.writeBufferToLog(bufferArray, bufferRead);
-
+                    // test spectrumAudio processing - not as quick
+                    spectrumAudio.checkSpectrumAudio(bufferArray);
                 } while (!isCancelled());
             }
             catch (IllegalStateException exState) {
@@ -223,22 +223,6 @@ public class RecordTask extends AsyncTask<Void, Integer, String> {
                 tempBuffer[i] = (int)bufferArray[i];
                 byteBuffer[i] = (byte)bufferArray[i];
             }
-
-            // save audio buffer to non-header pcm file, boolean switch here
-            /*
-            if (PilferShushScanner.WRITE_FILE && bufferArray != null) {
-                WriteProcessor.writeBufferToLog(bufferArray, bufferSize);
-            }
-            */
-            /*
-            try {
-                WriteProcessor.AUDIO_OUTPUT_STREAM.write(byteBuffer, 0, bufferSize);
-            }
-            catch (IOException e) {
-                e.printStackTrace();
-                logger("AudioRecord write stream error.");
-            }
-            */
 
             // default value set to 2
             recordScan = windowArray(windowType, recordScan);
@@ -364,10 +348,19 @@ public class RecordTask extends AsyncTask<Void, Integer, String> {
                 break;
             case 4:
                 // Nuttall Window
+                // NOTE:: a0 = 0.3635819, a1 = 0.4891775, a2 = 0.1365995, a3 = 0.0106411
                 for (i = 0; i < dArr.length; i++) {
                     dArr[i] = dArr[i] * (((0.355768d - (0.487396d * Math.cos((AudioSettings.PI2 * ((double) i)) / dArr.length))) +
                             (0.144232d * Math.cos((AudioSettings.PI4 * ((double) i)) / dArr.length))) -
                             (0.012604d * Math.cos((AudioSettings.PI6 * ((double) i)) / dArr.length)));
+                }
+                break;
+            case 5:
+                // Blackman-Nuttall window
+                for (i = 0; i < dArr.length; i++) {
+                    dArr[i] = dArr[i] * (((0.3635819d - (0.4891775d * Math.cos((AudioSettings.PI2 * ((double) i)) / dArr.length))) +
+                            (0.1365995d * Math.cos((AudioSettings.PI4 * ((double) i)) / dArr.length))) -
+                            (0.0106411d * Math.cos((AudioSettings.PI6 * ((double) i)) / dArr.length)));
                 }
                 break;
         }
@@ -378,7 +371,6 @@ public class RecordTask extends AsyncTask<Void, Integer, String> {
     private void mapFrequencyCounts(ArrayList<Integer> freqList) {
         // SparseIntArray is suggested...
         // this only counts, order of occurrence is not preserved.
-
         for (int freq : freqList) {
             if (freqMap.containsKey(freq)) {
                 freqMap.put(freq, freqMap.get(freq) + 1);

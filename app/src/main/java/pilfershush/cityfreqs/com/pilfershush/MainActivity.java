@@ -42,7 +42,7 @@ public class MainActivity extends AppCompatActivity
     private static final boolean DEBUG = true;
 
     // dev internal version numbering
-    public static final String VERSION = "2.0.14";
+    public static final String VERSION = "2.0.15";
 
     private ViewSwitcher viewSwitcher;
     private boolean mainView;
@@ -382,9 +382,12 @@ public class MainActivity extends AppCompatActivity
     }
 
     private void reportInitialState() {
-        mainScanText.setText("PilferShush scanner version " + VERSION +" \nready to scan for:");
-        mainScanLogger(AudioSettings.DEFAULT_FREQUENCY_MIN + "+ Hz at "
-                + AudioSettings.DEFAULT_FREQ_STEP + "Hz steps, above 100 dB.", false);
+        mainScanText.setText("PilferShush scanner version " + VERSION);
+        /*
+        mainScanLogger(AudioSettings.DEFAULT_FREQUENCY_MIN + " Hz + in "
+                + AudioSettings.DEFAULT_FREQ_STEP + "Hz steps.", false);
+        */
+        mainScanLogger("\nFound: " + pilferShushScanner.getAudioCheckerReport(), false);
 
         mainScanLogger("\nSettings can be changed via the Options menu.", true);
         mainScanLogger("\nThe Detailed View has logging and more information from scans. " +

@@ -39,6 +39,10 @@ public class AudioChecker {
         }
     }
 
+    protected String getAudioSettingsReport() {
+        return audioSettings.toString();
+    }
+
     /********************************************************************/
 /*
  *
