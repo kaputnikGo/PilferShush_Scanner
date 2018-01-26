@@ -43,7 +43,7 @@ public class MainActivity extends AppCompatActivity
     private static final boolean INIT_WRITE_FILES = false;
 
     // dev internal version numbering
-    public static final String VERSION = "2.0.17";
+    public static final String VERSION = "2.0.16";
 
     private ViewSwitcher viewSwitcher;
     private boolean mainView;
