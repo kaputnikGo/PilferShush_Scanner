@@ -89,9 +89,12 @@ public class AudioSettings {
     private int minFreq;
     private int maxFreq;
 
-    public AudioSettings() {
+    private boolean writeFiles;
+
+    public AudioSettings(boolean writeFiles) {
         // convenience class to hold values for audio recording
         // and useful vars for audio processing
+        this.writeFiles = writeFiles;
         minFreq = DEFAULT_FREQUENCY_MIN;
         maxFreq = DEFAULT_FREQUENCY_MAX;
     }
@@ -155,6 +158,13 @@ public class AudioSettings {
         return maxFreq;
     }
 
+    public void setWriteFiles(boolean writeFiles) {
+        this.writeFiles = writeFiles;
+    }
+    public boolean getWriteFiles() {
+        return writeFiles;
+    }
+
     public String toString() {
         return "AudioSetting: " + sampleRate + ", " + bufferSize + ", "
                 + bufferOverlap + ", " + encoding + ", " + channel + ", " + audioSource;
@@ -166,7 +176,6 @@ public class AudioSettings {
  * Utilities, that may be useful...
  *
  */
-
     public static int getClosestPowersHigh(int reported) {
         // return the next highest power from the minimum reported
         // 512, 1024, 2048, 4096, 8192, 16384

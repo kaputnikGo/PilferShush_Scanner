@@ -2,8 +2,6 @@
 
 -- todo version 2 2018
 
-- scanner max range of 3000 Hz beofre massive cpu hit ( make switch 18k-21k and 19k-22k)
-
 - ultra/synth.js make mod transmitter have a carrier freq and logic 1, logic 0 (include in repo)
 
 - proper file management, can get lots of files per session.
@@ -19,11 +17,13 @@
 - dialogs make pretty
 
 -- maybe::
-
+- bt beacon scanner
 - background service for scanner.
 - make usb audio work
 
 /*****************/
+
+- scanner max range of 3000 Hz before cpu hit
 
 - RecordTask reads in short[] only
 

@@ -40,9 +40,10 @@ public class MainActivity extends AppCompatActivity
         implements ActivityCompat.OnRequestPermissionsResultCallback {
     private static final String TAG = "PilferShush";
     private static final boolean DEBUG = true;
+    private static final boolean INIT_WRITE_FILES = false;
 
     // dev internal version numbering
-    public static final String VERSION = "2.0.16";
+    public static final String VERSION = "2.0.17";
 
     private ViewSwitcher viewSwitcher;
     private boolean mainView;
@@ -168,7 +169,7 @@ public class MainActivity extends AppCompatActivity
         audioManager = (AudioManager)getSystemService(Context.AUDIO_SERVICE);
         // refocus app, ready for fresh scanner run
         //TODO
-        //pilferShushScanner.resumeLogWrites();
+        pilferShushScanner.resumeLogWrite();
     }
 
     @Override
@@ -176,7 +177,7 @@ public class MainActivity extends AppCompatActivity
         super.onPause();
         //TODO
         // sort out things here, clean up and ready for a possible restart/refocus
-        pilferShushScanner.closeLogWrites();
+        pilferShushScanner.closeLogWrite();
     }
 
     @Override
@@ -370,7 +371,7 @@ public class MainActivity extends AppCompatActivity
     private void initPilferShush() {
         audioManager = (AudioManager)getSystemService(Context.AUDIO_SERVICE);
         if (pilferShushScanner.initScanner(this, scanUsbDevices(),
-                getResources().getString(R.string.session_default_name))) {
+                getResources().getString(R.string.session_default_name), INIT_WRITE_FILES)) {
             checkAble = pilferShushScanner.checkScanner();
             micChecking = false;
             toggleHeadset(output);
@@ -399,7 +400,7 @@ public class MainActivity extends AppCompatActivity
                 "to look for other apps using the microphone.", false);
 
         mainScanLogger("\nPress 'Run Scanner' button to start and stop scanning for audio.", false);
-        mainScanLogger("\nWrite to file option to save log output and audio as raw pcm file is ON by default.", false);
+        mainScanLogger("\nWrite to file option to save log output and audio as raw pcm file is OFF by default.", false);
         mainScanLogger("\nDO NOT RUN SCANNER FOR A LONG TIME.\n", true);
     }
 
@@ -463,13 +464,13 @@ public class MainActivity extends AppCompatActivity
         dialogBuilder.setMessage(R.string.dialog_write_message);
         dialogBuilder.setPositiveButton(R.string.dialog_write_file_yes, new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int id) {
-                pilferShushScanner.setWriteFileSwitch(true);
+                pilferShushScanner.setWriteFiles(true);
                 mainScanLogger("Write to file enabled.", false);
             }
         });
         dialogBuilder.setNegativeButton(R.string.dialog_write_file_no, new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int id) {
-                pilferShushScanner.setWriteFileSwitch(false);
+                pilferShushScanner.setWriteFiles(false);
                 mainScanLogger("Write to file disabled.", false);
             }
         });
@@ -658,8 +659,8 @@ public class MainActivity extends AppCompatActivity
             mainScanLogger(pilferShushScanner.getFreqSeqLogicEntries(), true);
 
             // a debug, output in order of capture:
-            //mainScanLogger("Original sequence as transmitted: \n", true);
-            //mainScanLogger(pilferShushScanner.getFrequencySequence(), true);
+            writeLogger("Original sequence as transmitted:");
+            writeLogger(pilferShushScanner.getFrequencySequence());
 
             /*
             if (pilferShushScanner.hasBufferStorage()) {
@@ -870,6 +871,13 @@ public class MainActivity extends AppCompatActivity
 /*
  * 	LOGGER
  */
+
+    private void writeLogger(String text) {
+        if (pilferShushScanner.getWriteFiles()) {
+            WriteProcessor.writeLogFile(text);
+        }
+    }
+
     private void mainScanLogger(String entry, boolean caution) {
         // this prints to MainView.log
         int start = mainScanText.getText().length();
@@ -895,9 +903,6 @@ public class MainActivity extends AppCompatActivity
         }
         else {
             spannableText.setSpan(new ForegroundColorSpan(Color.GREEN), start, end, 0);
-        }
-        if (PilferShushScanner.WRITE_FILE) {
-            WriteProcessor.writeLogFile(entry);
         }
     }
 

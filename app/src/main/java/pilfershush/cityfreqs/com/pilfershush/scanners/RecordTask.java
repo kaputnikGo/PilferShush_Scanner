@@ -40,7 +40,7 @@ public class RecordTask extends AsyncTask<Void, Integer, String> {
         minMagnitude = magnitude;
         bufferArray = new short[audioSettings.getBufferSize()];
         bufferStorage = new ArrayList<Integer[]>();
-        spectrumAudio = new SpectrumAudio();
+        spectrumAudio = new SpectrumAudio(audioSettings.getBufferSize());
 
         if (audioRecord == null) {
             try {
@@ -50,7 +50,7 @@ public class RecordTask extends AsyncTask<Void, Integer, String> {
                         audioSettings.getEncoding(),
                         audioSettings.getBufferSize());
 
-                spectrumAudio.initSpectrumAudio(audioSettings.getBufferSize(), audioSettings.getSampleRate());
+                spectrumAudio.initSpectrumAudio(audioSettings.getSampleRate());
                 logger("RecordTask ready.");
             }
             catch (Exception ex) {
@@ -162,9 +162,11 @@ public class RecordTask extends AsyncTask<Void, Integer, String> {
                 do {
                     bufferRead = audioRecord.read(bufferArray, 0, audioSettings.getBufferSize());
                     // not proper wav yet
-                    WriteProcessor.writeBufferToLog(bufferArray, bufferRead);
+                    if (audioSettings.getWriteFiles()) {
+                        WriteProcessor.writeAudioFile(bufferArray, bufferRead);
+                    }
                     // test spectrumAudio processing - not as quick
-                    spectrumAudio.checkSpectrumAudio(bufferArray);
+                    spectrumAudio.processSpectrumAudio(bufferArray, bufferRead);
                 } while (!isCancelled());
             }
             catch (IllegalStateException exState) {

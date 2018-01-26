@@ -129,7 +129,7 @@ public class WriteProcessor {
         audio logging
      */
 
-    public void prepareWriteToFile() {
+    public void prepareWriteAudioFile() {
         // need to build the filename AND path
         File location = extDirectory;
         if (location == null) {
@@ -140,7 +140,6 @@ public class WriteProcessor {
         // eg: 20151218-10:14:32-capture.pcm
         audioFilename = getTimestamp() + "-" + sessionFilename + AUDIO_FILE_EXTENSION;
         // file save will overwrite unless new name is used...
-
         try {
             AUDIO_OUTPUT_FILE = new File(location, audioFilename);
             if (!AUDIO_OUTPUT_FILE.exists()) {
@@ -160,7 +159,7 @@ public class WriteProcessor {
         }
     }
 
-    public static void writeBufferToLog(short[] shortBuffer, int bufferRead) {
+    public static void writeAudioFile(short[] shortBuffer, int bufferRead) {
         if (shortBuffer != null) {
             try {
                 for (int i = 0; i < bufferRead; i++) {
@@ -178,7 +177,7 @@ public class WriteProcessor {
         }
     }
 
-    public void closeAllFiles() {
+    public void closeWriteFile() {
         try {
             if (AUDIO_OUTPUT_STREAM != null) {
                 AUDIO_OUTPUT_STREAM.flush();
@@ -195,6 +194,7 @@ public class WriteProcessor {
     }
 
     /**************************************************************/
+    //TODO
     /*
         wav + header logging
      */

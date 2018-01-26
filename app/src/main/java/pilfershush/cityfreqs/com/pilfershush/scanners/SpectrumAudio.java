@@ -18,18 +18,19 @@ import pilfershush.cityfreqs.com.pilfershush.MainActivity;
 import pilfershush.cityfreqs.com.pilfershush.assist.AudioSettings;
 
 public class SpectrumAudio {
+    private static final String TAG = "SpecAudio";
+    private static final int OVERSAMPLE = 4;
+    private static final double MIN = 0.5;
+    private static final int FIXED_BUFFER_SIZE = 4096;
     // Data
     protected double frequency;
     protected double fps;
 
-    private static final int OVERSAMPLE = 4;
-    private static final int SAMPLES = 4096; // this as a final?
-    private static final int RANGE = SAMPLES / 2;
-    private static final int STEP = SAMPLES / OVERSAMPLE;
-    private static final double MIN = 0.5;
-    private static final double EXPECT = 2.0 * Math.PI * STEP / SAMPLES;
+    private int samples;// = 4096;
+    private int range;// = SAMPLES / 2;
+    private int step;// = SAMPLES / OVERSAMPLE;
+    private double expect;// = 2.0 * Math.PI * step / SAMPLES;
 
-    private int bufferSize;
     private int counter;
     private ArrayList<Integer> freqList;
     private HashMap<Integer, Integer> freqMap;
@@ -41,42 +42,42 @@ public class SpectrumAudio {
     private double xp[];
     private double xf[];
 
-    protected SpectrumAudio() {
-        buffer = new double[SAMPLES];
+    protected SpectrumAudio(int minBuffer) {
+        if (minBuffer != FIXED_BUFFER_SIZE) {
+            // sam5 minbuffer is 3840, not a powers of two...
+            // not all phones, roms etc will have 4096 as minBufferSize, or powers of two,
+            // but 'should' have divisible by 8
+            MainActivity.logger(TAG + " minBuffer error, found: " + minBuffer);
+            samples = AudioSettings.getClosestPowersHigh(minBuffer);
+            MainActivity.logger(TAG + "try closest PowersOfTwo: " + samples);
+        }
+        else {
+            samples = minBuffer;
+        }
+        range = samples / 2;
+        step = samples / OVERSAMPLE;
+        expect = 2.0 * Math.PI * step / samples;
 
-        xr = new double[SAMPLES];
-        xi = new double[SAMPLES];
+        buffer = new double[samples];
 
-        xa = new double[RANGE];
-        xp = new double[RANGE];
-        xf = new double[RANGE];
+        xr = new double[samples];
+        xi = new double[samples];
+
+        xa = new double[range];
+        xp = new double[range];
+        xf = new double[range];
     }
 
-    protected void initSpectrumAudio(int bufferSize, int sampleRate) {
-        // don't use this?
-        this.bufferSize = bufferSize;
-        if (bufferSize != SAMPLES) {
-            MainActivity.logger("initSpectrumAudio bufferSize diff error.");
-        }
-
+    protected void initSpectrumAudio(int sampleRate) {
         freqList = new ArrayList<Integer>();
         freqMap = new HashMap<Integer, Integer>();
         // Calculate fps
-        fps = (double) sampleRate / SAMPLES;
+        fps = (double) sampleRate / samples;
         counter = 0;
     }
 
-    protected void checkSpectrumAudio(short[] data) {
-        //
-        // placeholder function for testing SpectrumAudio
-        if (data != null) {
-            processSpectrumAudio(data);
-        }
-
-    }
-
     protected void finishSpectrumAudio() {
-        MainActivity.logger("spectrumAudio freq count: " + counter);
+        MainActivity.logger(TAG + " freq count: " + counter);
         //MainActivity.logger(String.format("spectrumAudio freq: %1.1f Hz", frequency));
         if (counter > 0) {
            //assume
@@ -84,7 +85,7 @@ public class SpectrumAudio {
         }
     }
 
-    private void processSpectrumAudio(short[] data) {
+    protected void processSpectrumAudio(short[] data, int bufferRead) {
         // pass the data short buffer in to this, check for freqs above
         // AudioSettings.DEFAULT_FREQUENCY_MIN;
         double dmax = 0.0;
@@ -100,26 +101,26 @@ public class SpectrumAudio {
         double dB; // using dBFS(full scale) where 0dB is peak amplitude
 
         if (data != null) {
-            System.arraycopy(buffer, STEP, buffer, 0, SAMPLES - STEP);
+            System.arraycopy(buffer, step, buffer, 0, bufferRead - step);
 
-            for (int i = 0; i < STEP; i++) {
-                buffer[(SAMPLES - STEP) + i] = data[i];
+            for (int i = 0; i < step; i++) {
+                buffer[(bufferRead - step) + i] = data[i];
             }
 
-            if (dmax < 4096.0)
-                dmax = 4096.0;
+            //if (dmax < bufferRead) //4096.0
+            //    dmax = bufferRead; //4096.0
 
             norm = dmax;
             dmax = 0.0;
 
-            for (int i = 0; i < SAMPLES; i++) {
+            for (int i = 0; i < bufferRead; i++) {
                 // Find the magnitude
                 if (dmax < Math.abs(buffer[i])) {
                     dmax = Math.abs(buffer[i]);
                 }
 
                 // uses a Hann(ing) window
-                window = 0.5 - 0.5 * Math.cos(AudioSettings.PI2 * i / SAMPLES);
+                window = 0.5 - 0.5 * Math.cos(AudioSettings.PI2 * i / bufferRead);
 
                 // Normalise and window the input data
                 xr[i] = buffer[i] / norm * window;
@@ -127,7 +128,7 @@ public class SpectrumAudio {
 
             fftr(xr, xi);
             // Process FFT output
-            for (int i = 1; i < RANGE; i++) {
+            for (int i = 1; i < range; i++) {
                 real = xr[i];
                 imag = xi[i];
 
@@ -140,7 +141,7 @@ public class SpectrumAudio {
                 xp[i] = p;
 
                 // Calculate phase difference
-                dp -= i * EXPECT;
+                dp -= i * expect;
 
                 int qpd = (int)(dp / Math.PI);
 
@@ -163,7 +164,7 @@ public class SpectrumAudio {
             // Maximum FFT output
             max = 0.0;
             // Find maximum value
-            for (int i = 1; i < RANGE; i++) {
+            for (int i = 1; i < range; i++) {
                 if (xa[i] > max) {
                     max = xa[i];
                     frequency = xf[i];
@@ -172,14 +173,14 @@ public class SpectrumAudio {
 
             level = 0.0;
 
-            for (int i = 0; i < STEP; i++) {
+            for (int i = 0; i < step; i++) {
                 // 0x7FFF == 32767.0 or 32768.0
                 level += ((double) data[i] / 32768.0) * ((double) data[i] / 32768.0);
             }
 
             // add a magnitude check here before proceeding
             // level is a negative number rising to zero
-            level = Math.sqrt(level / STEP) * 2.0;
+            level = Math.sqrt(level / step) * 2.0;
 
             dB = Math.log10(level) * 20.0;
 
@@ -196,7 +197,7 @@ public class SpectrumAudio {
                 // check its level over threshold
                 // produces variations, so may need to group within range then count
                 if (frequency >= AudioSettings.DEFAULT_FREQUENCY_MIN) {
-                    MainActivity.logger(String.format("spectrumAudio freq: %1.1f Hz", frequency));
+                    MainActivity.logger(String.format(TAG, " freq: %1.1f Hz", frequency));
                     //MainActivity.logger("dB: " + dB + ", level: " + level);
                     freqList.add(Integer.valueOf((int) Math.round(frequency)));
                     counter++;

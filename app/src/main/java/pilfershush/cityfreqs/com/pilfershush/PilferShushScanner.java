@@ -15,7 +15,6 @@ public class PilferShushScanner {
     private WriteProcessor writeProcessor;
     private int scanBufferSize;
     private String bufferScanReport;
-    public static boolean WRITE_FILE = true;
 
     protected void onDestroy() {
         audioChecker.destroy();
@@ -26,16 +25,16 @@ public class PilferShushScanner {
 /*
 *
 */
-    protected boolean initScanner(Context context, boolean hasUSB, String sessionName) {
+    protected boolean initScanner(Context context, boolean hasUSB, String sessionName, boolean writeFiles) {
         this.context = context;
         scanBufferSize = 0;
-        audioSettings = new AudioSettings();
+        audioSettings = new AudioSettings(writeFiles);
         audioChecker = new AudioChecker(audioSettings);
         writeProcessor = new WriteProcessor(sessionName);
         // writes txt file to same location as audio records.
         // write init checks then close the file.
         // called again at runScanner.
-        if (WRITE_FILE) {
+        if (writeFiles) {
             writeProcessor.prepareLogToFile();
         }
 
@@ -71,25 +70,37 @@ public class PilferShushScanner {
         }
     }
 
+    protected void setWriteFiles(boolean writeFiles) {
+        audioSettings.setWriteFiles(writeFiles);
+    }
+    protected boolean getWriteFiles() {
+        return audioSettings.getWriteFiles();
+    }
+
     protected String getAudioCheckerReport() {
         return audioChecker.getAudioSettingsReport();
     }
 
     protected void renameSessionWrites(String sessionName) {
-        writeProcessor.closeAllFiles();
-        writeProcessor.setSessionName(sessionName);
-        resumeLogWrites();
-    }
-
-    protected void closeLogWrites() {
         writeProcessor.closeLogFile();
-    }
-
-    protected void resumeLogWrites() {
-        if (WRITE_FILE) {
+        writeProcessor.closeWriteFile();
+        writeProcessor.setSessionName(sessionName);
+        // attempt to reopen
+        if (audioSettings.getWriteFiles()) {
             writeProcessor.prepareLogToFile();
         }
     }
+
+    protected void resumeLogWrite() {
+        if (audioSettings.getWriteFiles()) {
+            writeProcessor.prepareLogToFile();
+        }
+    }
+
+    protected void closeLogWrite() {
+        writeProcessor.closeLogFile();
+    }
+
 
     protected boolean checkScanner() {
         return audioChecker.checkAudioRecord();
@@ -137,16 +148,11 @@ public class PilferShushScanner {
     protected void runAudioScanner() {
         entryLogger("AudioScanning start...", false);
         scanBufferSize = 0;
-        if (WRITE_FILE) {
-            writeProcessor.prepareWriteToFile();
+        if (audioSettings.getWriteFiles()) {
+            writeProcessor.prepareWriteAudioFile();
         }
         audioScanner.runAudioScanner();
     }
-
-    protected void setWriteFileSwitch(boolean userChoice) {
-        WRITE_FILE = userChoice;
-    }
-
 
     protected void stopAudioScanner() {
         if (audioScanner != null) {
