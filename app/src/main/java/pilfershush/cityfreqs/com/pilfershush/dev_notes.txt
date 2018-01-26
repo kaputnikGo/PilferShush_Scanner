@@ -2,6 +2,8 @@
 
 -- todo version 2 2018
 
+- scanner max range of 3000 Hz beofre massive cpu hit ( make switch 18k-21k and 19k-22k)
+
 - ultra/synth.js make mod transmitter have a carrier freq and logic 1, logic 0 (include in repo)
 
 - proper file management, can get lots of files per session.
@@ -50,7 +52,12 @@ check for peaks that occuring within 100 hz of each other, ie 20500 has 30 peaks
 this means likely a proper pair of mod codes, as opposed to 20500 and say 20750.. (250hz diff)
 "may" set lower freq peaks to logic 0 and higher freq peaks to logic 1 (20400 == 0, 20500 == 1)
 preamble, payload and checksum
-(use a PIC 10 F200 8 bit micro controller for badges to receive)
+(use a PIC 10 F200 OT 8 bit micro controller for badges to receive)
+    "Microprocessor may be configured to send to speaker a periodic Wave
+    such as a square Wave in a first range of frequencies corresponding to a
+    logic 0. Microprocessor may be configured to send to speaker a
+    square Wave in a second range of frequencies corresponding to a logic 1.
+    In this Way, micro processor may thereby frequency modulate code..."
 
 RecordTask.magnitudeScan() needs to be better at picking useful freqs...
 any freq captured below the candidate and within 100Hz gets included with it?

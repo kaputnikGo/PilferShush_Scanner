@@ -33,8 +33,11 @@ public class AudioSettings {
     public static final int DEFAULT_SAMPLE_RATE = RATE_44;
 
     public static final int DEFAULT_THRESHOLD_JUMP = 3000;
+    // max frequency range is 3000hz (between min and max)
     public static final int DEFAULT_FREQUENCY_MIN = 18000;
-    public static final int DEFAULT_FREQUENCY_MAX = 21000; // 22000
+    public static final int DEFAULT_FREQUENCY_MAX = 21000;
+    public static final int SECOND_FREQUENCY_MIN = 19000;
+    public static final int SECOND_FREQUENCY_MAX = 22000;
 
     // using dB SPL (sound pressure level) without distance
     // db = 20 log10(goertzel_magnitude).
@@ -83,9 +86,14 @@ public class AudioSettings {
     private int channel;
     private int audioSource;
 
+    private int minFreq;
+    private int maxFreq;
+
     public AudioSettings() {
         // convenience class to hold values for audio recording
         // and useful vars for audio processing
+        minFreq = DEFAULT_FREQUENCY_MIN;
+        maxFreq = DEFAULT_FREQUENCY_MAX;
     }
 
     public void setBasicAudioSettings(int sampleRate, int bufferSize, int encoding, int channel) {
@@ -131,6 +139,20 @@ public class AudioSettings {
     }
     public int getAudioSource() {
         return audioSource;
+    }
+
+    public void setMinFreq(int minFreq) {
+        this.minFreq = minFreq;
+    }
+    public void setMaxFreq(int maxFreq) {
+        this.maxFreq = maxFreq;
+    }
+
+    public int getMinFreq() {
+        return minFreq;
+    }
+    public int getMaxFreq() {
+        return maxFreq;
     }
 
     public String toString() {

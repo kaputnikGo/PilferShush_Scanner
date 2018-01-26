@@ -13,6 +13,11 @@
         android:orderInCategory="20"
         app:showAsAction="never"
         android:title="@string/action_audio_scan_settings"/>
+    <item
+        android:id="@+id/action_audio_scan_range"
+        android:orderInCategory="25"
+        app:showAsAction="never"
+        android:title="@string/action_audio_scan_ranges"/>
 
     <item
         android:id="@+id/action_sensitivity_settings"

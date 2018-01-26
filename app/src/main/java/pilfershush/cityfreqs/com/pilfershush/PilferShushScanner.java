@@ -2,11 +2,13 @@ package pilfershush.cityfreqs.com.pilfershush;
 
 import android.content.Context;
 
+import pilfershush.cityfreqs.com.pilfershush.assist.AudioSettings;
 import pilfershush.cityfreqs.com.pilfershush.assist.WriteProcessor;
 import pilfershush.cityfreqs.com.pilfershush.scanners.AudioScanner;
 
 public class PilferShushScanner {
     private Context context;
+    private AudioSettings audioSettings;
     private BackgroundChecker backgroundChecker;
     private AudioChecker audioChecker;
     private AudioScanner audioScanner;
@@ -27,8 +29,9 @@ public class PilferShushScanner {
     protected boolean initScanner(Context context, boolean hasUSB, String sessionName) {
         this.context = context;
         scanBufferSize = 0;
-        audioChecker = new AudioChecker();
-        writeProcessor = new WriteProcessor(sessionName, audioChecker.getAudioSettings());
+        audioSettings = new AudioSettings();
+        audioChecker = new AudioChecker(audioSettings);
+        writeProcessor = new WriteProcessor(sessionName);
         // writes txt file to same location as audio records.
         // write init checks then close the file.
         // called again at runScanner.
@@ -53,6 +56,19 @@ public class PilferShushScanner {
             }
         }
         return false;
+    }
+
+    protected void setFreqMinMax(int pair) {
+        // at the moment stick to ranges of 3kHz as DEFAULT or SECOND pair
+        // use int as may get more ranges than the 2 presently used
+        if (pair == 1) {
+            audioSettings.setMinFreq(AudioSettings.DEFAULT_FREQUENCY_MIN);
+            audioSettings.setMaxFreq(AudioSettings.DEFAULT_FREQUENCY_MAX);
+        }
+        else if (pair == 2) {
+            audioSettings.setMinFreq(AudioSettings.SECOND_FREQUENCY_MIN);
+            audioSettings.setMaxFreq(AudioSettings.SECOND_FREQUENCY_MAX);
+        }
     }
 
     protected String getAudioCheckerReport() {

@@ -29,6 +29,7 @@ public class AudioScanner {
     public AudioScanner(AudioSettings audioSettings) {
         this.audioSettings = audioSettings;
         freqStep = AudioSettings.DEFAULT_FREQ_STEP;
+
         freqDetector = new FreqDetector(this.audioSettings);
         freqDetector.init(freqStep, AudioSettings.DEFAULT_MAGNITUDE);
         processAudio = new ProcessAudio();

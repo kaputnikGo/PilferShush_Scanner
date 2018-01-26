@@ -226,11 +226,11 @@ public class RecordTask extends AsyncTask<Void, Integer, String> {
 
             // default value set to 2
             recordScan = windowArray(windowType, recordScan);
-            candidateFreq = AudioSettings.DEFAULT_FREQUENCY_MIN;
+            candidateFreq = audioSettings.getMinFreq();
             Goertzel goertzel;
             double candidateMag;
 
-            while (candidateFreq <= AudioSettings.DEFAULT_FREQUENCY_MAX) {
+            while (candidateFreq <= audioSettings.getMaxFreq()) {
                 // look for any of our freqs here, increment by freqStepper
                 // this will result in a found candidate for anything in our ranges...
                 goertzel = new Goertzel((float)audioSettings.getSampleRate(), (float)candidateFreq, recordScan);

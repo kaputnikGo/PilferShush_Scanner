@@ -23,8 +23,8 @@ import pilfershush.cityfreqs.com.pilfershush.MainActivity;
 public class WriteProcessor {
     // until we bother with wav headers, this is raw format buffer writes
     // pcm savefile for raw import into Audacity as 48 kHz, signed 16 bit, big-endian, mono
+    // wav has a little-endian
 
-    private AudioSettings audioSettings;
     private File extDirectory;
 
     private String audioFilename;
@@ -44,9 +44,8 @@ public class WriteProcessor {
     private static final String LOG_FILE_EXTENSION = ".txt";
     private static final SimpleDateFormat TIMESTAMP_FORMAT = new SimpleDateFormat("yyyyMMdd-HH:mm:ss", Locale.ENGLISH);
 
-    public WriteProcessor(String sessionName, AudioSettings audioSettings) {
+    public WriteProcessor(String sessionName) {
         setSessionName(sessionName);
-        this.audioSettings = audioSettings;
 
         log("Check: Download(s)/PilferShush/");
         // checks for read/write state

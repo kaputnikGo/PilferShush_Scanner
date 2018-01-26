@@ -42,7 +42,7 @@ public class MainActivity extends AppCompatActivity
     private static final boolean DEBUG = true;
 
     // dev internal version numbering
-    public static final String VERSION = "2.0.15";
+    public static final String VERSION = "2.0.16";
 
     private ViewSwitcher viewSwitcher;
     private boolean mainView;
@@ -57,6 +57,7 @@ public class MainActivity extends AppCompatActivity
 
     private String[] pollSpeedList;
     private String[] freqSteps;
+    private String[] freqRanges;
     private String[] dbLevel;
 
     // USB
@@ -219,6 +220,9 @@ public class MainActivity extends AppCompatActivity
                 return true;
             case R.id.action_audio_scan_settings:
                 changeAudioScanSettings();
+                return true;
+            case R.id.action_audio_scan_range:
+                changeAudioScanRange();
                 return true;
             case R.id.action_sensitivity_settings:
                 changeSensitivitySettings();
@@ -413,6 +417,10 @@ public class MainActivity extends AppCompatActivity
         freqSteps[3] = getResources().getString(R.string.freq_step_75_text);
         freqSteps[4] = getResources().getString(R.string.freq_step_100_text);
 
+        freqRanges = new String[2];
+        freqRanges[0] = getResources().getString(R.string.freq_range_one);
+        freqRanges[1] = getResources().getString(R.string.freq_range_two);
+
         dbLevel = new String[3];
         dbLevel[0] = getResources().getString(R.string.magnitude_80_text);
         dbLevel[1] = getResources().getString(R.string.magnitude_90_text);
@@ -535,6 +543,27 @@ public class MainActivity extends AppCompatActivity
         alertDialog = dialogBuilder.create();
         alertDialog.show();
     }
+
+    private void changeAudioScanRange() {
+        dialogBuilder = new AlertDialog.Builder(this);
+        dialogBuilder.setItems(freqRanges, new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialogInterface, int which) {
+                switch(which) {
+                    case 0:
+                        pilferShushScanner.setFreqMinMax(1);
+                        mainScanLogger("Frequency range set 18kHz - 21kHz.", false);
+                        break;
+                    case 1:
+                        pilferShushScanner.setFreqMinMax(2);
+                        mainScanLogger("Frequency range set 19kHz - 22kHz.", false);
+                }
+            }
+        });
+        dialogBuilder.setTitle(R.string.dialog_freq_range);
+        alertDialog = dialogBuilder.create();
+        alertDialog.show();
+    }
+
 
     private void changeSensitivitySettings() {
         dialogBuilder = new AlertDialog.Builder(this);

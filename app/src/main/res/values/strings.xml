@@ -16,13 +16,18 @@
     <string name="polling_3_text">3 seconds</string>
     <string name="polling_default_text">6 secs (default)</string>
 
-    <string name="action_audio_scan_settings">Audio Scan settings</string>
-    <string name="dialog_freq_step">Frequency step (Hz)</string>
+    <string name="action_audio_scan_settings">Audio Scan steps</string>
+    <string name="dialog_freq_step">Frequency steps</string>
     <string name="freq_step_10_text">10 Hz</string>
     <string name="freq_step_25_text">25 Hz (default)</string>
     <string name="freq_step_50_text">50 Hz</string>
     <string name="freq_step_75_text">75 Hz</string>
     <string name="freq_step_100_text">100 Hz</string>
+
+    <string name="action_audio_scan_ranges">Audio Scan range</string>
+    <string name="dialog_freq_range">Frequency range</string>
+    <string name="freq_range_one">18kHz - 21kHz (default)</string>
+    <string name="freq_range_two">19kHz - 22kHz</string>
 
     <string name="action_audio_beacons">Check Beacon Apps</string>
     <string name="dialog_audio_beacon_apps">Audio Beacon List</string>

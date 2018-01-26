@@ -23,10 +23,10 @@ public class AudioChecker {
     private AudioSettings audioSettings;
 
 
-    public AudioChecker() {
+    public AudioChecker(AudioSettings audioSettings) {
         //
         userPollSpeed = PollAudioChecker.LONG_DELAY;
-        audioSettings = new AudioSettings();
+        this.audioSettings = audioSettings;
     }
 
     protected void destroy() {
