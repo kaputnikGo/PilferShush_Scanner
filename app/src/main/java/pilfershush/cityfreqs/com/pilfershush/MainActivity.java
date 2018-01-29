@@ -40,10 +40,10 @@ public class MainActivity extends AppCompatActivity
         implements ActivityCompat.OnRequestPermissionsResultCallback {
     private static final String TAG = "PilferShush";
     private static final boolean DEBUG = true;
-    private static final boolean INIT_WRITE_FILES = false;
+    private static final boolean INIT_WRITE_FILES = true;
 
     // dev internal version numbering
-    public static final String VERSION = "2.0.16";
+    public static final String VERSION = "2.0.18";
 
     private ViewSwitcher viewSwitcher;
     private boolean mainView;
@@ -60,6 +60,7 @@ public class MainActivity extends AppCompatActivity
     private String[] freqSteps;
     private String[] freqRanges;
     private String[] dbLevel;
+    private String[] storageAdmins;
 
     // USB
     private DeviceContainer deviceContainer;
@@ -240,6 +241,9 @@ public class MainActivity extends AppCompatActivity
             case R.id.action_session_name:
                 setSessionName();
                 return true;
+            case R.id.action_storage_admin:
+                performStorageAdmin();
+                return true;
             default:
                 // do not consume the action
                 return super.onOptionsItemSelected(item);
@@ -395,12 +399,15 @@ public class MainActivity extends AppCompatActivity
         mainScanLogger("\nFound: " + pilferShushScanner.getAudioCheckerReport(), false);
 
         mainScanLogger("\nSettings can be changed via the Options menu.", true);
+
         mainScanLogger("\nThe Detailed View has logging and more information from scans. " +
                 "It also has a continuous Mic check and intermittent polling check " +
                 "to look for other apps using the microphone.", false);
 
+        mainScanLogger("\nInit save log output and audio as raw pcm file: " + Boolean.toString(INIT_WRITE_FILES), true);
+
         mainScanLogger("\nPress 'Run Scanner' button to start and stop scanning for audio.", false);
-        mainScanLogger("\nWrite to file option to save log output and audio as raw pcm file is OFF by default.", false);
+
         mainScanLogger("\nDO NOT RUN SCANNER FOR A LONG TIME.\n", true);
     }
 
@@ -426,6 +433,11 @@ public class MainActivity extends AppCompatActivity
         dbLevel[0] = getResources().getString(R.string.magnitude_80_text);
         dbLevel[1] = getResources().getString(R.string.magnitude_90_text);
         dbLevel[2] = getResources().getString(R.string.magnitude_100_text);
+
+        storageAdmins = new String[3];
+        storageAdmins[0] = getResources().getString(R.string.dialog_storage_size);
+        storageAdmins[1] = getResources().getString(R.string.dialog_delete_empty_logs);
+        storageAdmins[2] = getResources().getString(R.string.dialog_delete_all_files);
     }
 
     private void setSessionName() {
@@ -454,6 +466,33 @@ public class MainActivity extends AppCompatActivity
         alertDialog = dialogBuilder.create();
         alertDialog.show();
 
+    }
+
+    private void performStorageAdmin() {
+        dialogBuilder = new AlertDialog.Builder(this);
+        dialogBuilder.setItems(storageAdmins, new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialogInterface, int which) {
+                switch(which) {
+                    case 0:
+                        mainScanLogger("Log storage size: " + printableBytesize(), false);
+                        break;
+                    case 1:
+                        mainScanLogger("Delete empty log files.", false);
+                        pilferShushScanner.clearEmptyLogFiles();
+                        break;
+                    case 2:
+                        mainScanLogger("Delete ALL log files.", true);
+                        pilferShushScanner.clearLogStorageFolder();
+                        break;
+                    default:
+                        // do nothing, catch dismisses
+                        break;
+                }
+            }
+        });
+        dialogBuilder.setTitle(R.string.action_storage_admin);
+        alertDialog = dialogBuilder.create();
+        alertDialog.show();
     }
 
     private void changeWriteFile() {
@@ -588,6 +627,11 @@ public class MainActivity extends AppCompatActivity
         dialogBuilder.setTitle(R.string.dialog_sensitivity_text);
         alertDialog = dialogBuilder.create();
         alertDialog.show();
+    }
+
+
+    private String printableBytesize() {
+        return android.text.format.Formatter.formatShortFileSize(this, pilferShushScanner.getLogStorageSize());
     }
 
 
@@ -873,6 +917,7 @@ public class MainActivity extends AppCompatActivity
  */
 
     private void writeLogger(String text) {
+        // can create empty text files as no n-uhf data to save.
         if (pilferShushScanner.getWriteFiles()) {
             WriteProcessor.writeLogFile(text);
         }

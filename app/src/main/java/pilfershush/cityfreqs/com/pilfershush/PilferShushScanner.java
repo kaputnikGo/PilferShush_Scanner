@@ -77,6 +77,18 @@ public class PilferShushScanner {
         return audioSettings.getWriteFiles();
     }
 
+    protected int getLogStorageSize() {
+        return writeProcessor.getStorageSize();
+    }
+
+    protected void clearEmptyLogFiles() {
+        writeProcessor.deleteEmptyLogFiles();
+    }
+
+    protected void clearLogStorageFolder() {
+        writeProcessor.deleteStorageFiles();
+    }
+
     protected String getAudioCheckerReport() {
         return audioChecker.getAudioSettingsReport();
     }

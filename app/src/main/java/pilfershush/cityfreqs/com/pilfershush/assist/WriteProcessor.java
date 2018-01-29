@@ -64,6 +64,21 @@ public class WriteProcessor {
         }
     }
 
+    public int getStorageSize() {
+        return (int)calculateStorageSize();
+    }
+
+    public void deleteEmptyLogFiles() {
+        // storage could have only 0kb log files
+        deleteZeroSizeLogFiles();
+    }
+
+    public void deleteStorageFiles() {
+        if (calculateStorageSize() > 0) {
+            deleteAllStorageFiles();
+        }
+    }
+
     /**************************************************************/
     /*
         text logging
@@ -165,10 +180,10 @@ public class WriteProcessor {
                 for (int i = 0; i < bufferRead; i++) {
                     AUDIO_DATA_STREAM.writeShort(shortBuffer[i]);
                     /*
-                    ByteBuffer bb = ByteBuffer.allocate(Short.SIZE / Byte.SIZE);
-                    bb.order(ByteOrder.BIG_ENDIAN);
-                    bb.putShort(shortBuffer[i]);
-                    AUDIO_OUTPUT_STREAM.write(bb.array(), 0, bb.limit());
+                    ByteBuffer byteBuffer = ByteBuffer.allocate(Short.SIZE / Byte.SIZE);
+                    byteBuffer.order(ByteOrder.BIG_ENDIAN);
+                    byteBuffer.putShort(shortBuffer[i]);
+                    AUDIO_OUTPUT_STREAM.write(byteBuffer.array(), 0, byteBuffer.limit());
                     */
                 }
             } catch (IOException e) {
@@ -320,6 +335,56 @@ public class WriteProcessor {
         if (!extDirectory.exists()) {
             extDirectory.mkdirs();
         }
+    }
+
+    private void deleteZeroSizeLogFiles() {
+        // assume MainActivity has cautioned first.
+        if (!extDirectory.exists()) {
+            log("No storage folder found.");
+            return;
+        }
+
+        log("Deleting empty files...");
+        int counter = 0;
+        for (File file : extDirectory.listFiles()) {
+            if (file.isFile()) {
+                if (file.length() == 0) {
+                    file.delete();
+                    counter++;
+                }
+            }
+        }
+        log("Deleted " + counter + " empty file(s).");
+
+    }
+
+    private void deleteAllStorageFiles() {
+        // assume MainActivity has cautioned first.
+        if (!extDirectory.exists()) {
+            log("No storage folder found.");
+            return;
+        }
+        String[] filesDelete = extDirectory.list();
+        log("Deleting " + filesDelete.length + " files from storage...");
+        for (int i = 0; i < filesDelete.length; i++) {
+            new File(extDirectory, filesDelete[i]).delete();
+        }
+        log("Storage folder now empty.");
+    }
+
+    private long calculateStorageSize() {
+        if (!extDirectory.exists()) {
+            log("No storage folder found.");
+            return 0;
+        }
+        long length = 0;
+        for (File file : extDirectory.listFiles()) {
+            if (file.isFile()) {
+                length += file.length();
+            }
+        }
+        log("Storage size: " + (int)length);
+        return length;
     }
 
     private String getTimestamp() {

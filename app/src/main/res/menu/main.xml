@@ -49,4 +49,10 @@
         app:showAsAction="never"
         android:title="@string/action_session_name"/>
 
+    <item
+        android:id="@+id/action_storage_admin"
+        android:orderInCategory="70"
+        app:showAsAction="never"
+        android:title="@string/action_storage_admin"/>
+
 </menu>

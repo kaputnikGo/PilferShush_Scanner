@@ -49,7 +49,7 @@ public class SpectrumAudio {
             // but 'should' have divisible by 8
             MainActivity.logger(TAG + " minBuffer error, found: " + minBuffer);
             samples = AudioSettings.getClosestPowersHigh(minBuffer);
-            MainActivity.logger(TAG + "try closest PowersOfTwo: " + samples);
+            MainActivity.logger(TAG + " try closest PowersOfTwo: " + samples);
         }
         else {
             samples = minBuffer;
@@ -258,7 +258,6 @@ public class SpectrumAudio {
     private void sortFreqMap() {
         // SparseIntArray is suggested...
         // this only counts, order of occurrence is not preserved.
-
         for (int freq : freqList) {
             if (freqMap.containsKey(freq)) {
                 freqMap.put(freq, freqMap.get(freq) + 1);

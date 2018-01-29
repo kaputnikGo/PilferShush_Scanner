@@ -4,8 +4,6 @@
 
 - ultra/synth.js make mod transmitter have a carrier freq and logic 1, logic 0 (include in repo)
 
-- proper file management, can get lots of files per session.
-
 - replace/augment current stepFreq scan model with one that grabs any candidate above threshold (ie. 32ms binmods )
 
 - add a high pass filter with gate for the recordTask (only trigger magnitudeRecordScan when over threshold)
