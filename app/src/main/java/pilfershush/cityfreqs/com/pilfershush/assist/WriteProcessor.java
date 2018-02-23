@@ -185,7 +185,7 @@ public class WriteProcessor {
             if (writeWav) {
                 AUDIO_WAV_STREAM = new FileOutputStream(AUDIO_OUTPUT_FILE);
                 writeWavHeader(AUDIO_WAV_STREAM,
-                        (short) audioSettings.getChannel(),
+                        (short) audioSettings.getChannelCount(),
                         audioSettings.getSampleRate(),
                         (short) audioSettings.getBitDepth());
             }
@@ -261,7 +261,7 @@ public class WriteProcessor {
         glitchy...
 
         from: https://gist.github.com/kmark/d8b1b01fb0d2febf5770
-     */
+    */
     private static void writeWavHeader(OutputStream out, short channels, int sampleRate, short bitDepth) {
         // Convert the multi-byte integers to raw bytes in little endian format as required by the spec
         byte[] littleBytes = ByteBuffer

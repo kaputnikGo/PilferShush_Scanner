@@ -45,7 +45,7 @@ public class MainActivity extends AppCompatActivity
     private static final boolean WRITE_WAV = false;
 
     // dev internal version numbering
-    public static final String VERSION = "2.0.19";
+    public static final String VERSION = "2.0.20";
 
     private ViewSwitcher viewSwitcher;
     private boolean mainView;
@@ -392,7 +392,7 @@ public class MainActivity extends AppCompatActivity
     private void reportInitialState() {
         mainScanText.setText("PilferShush scanner version " + VERSION);
 
-        mainScanLogger("\nFound: " + pilferShushScanner.getAudioCheckerReport(), false);
+        mainScanLogger("\nUsing " + pilferShushScanner.getAudioCheckerReport(), false);
 
         mainScanLogger("\nSettings can be changed via the Options menu.", true);
 
@@ -401,11 +401,12 @@ public class MainActivity extends AppCompatActivity
                 "to look for other apps using the microphone.", false);
 
         mainScanLogger("\nInit: save log output and audio to files: " + Boolean.toString(INIT_WRITE_FILES), true);
+
         if (WRITE_WAV) {
-            mainScanLogger("\nWav audio: pcm, 48 kHz, signed 16 bit, little-endian, mono", false);
+            mainScanLogger("\nWav audio: " + pilferShushScanner.getSaveFileType() + ", little-endian.", false);
         }
         else {
-            mainScanLogger("\nRaw audio: import as 48 kHz, signed 16 bit, big-endian, mono", false);
+            mainScanLogger("\nRaw audio: " + pilferShushScanner.getSaveFileType() + ", big-endian.", false);
         }
 
         mainScanLogger("\nPress 'Run Scanner' button to start and stop scanning for audio.", false);

@@ -6,14 +6,11 @@ import android.media.MediaRecorder.AudioSource;
 
 import pilfershush.cityfreqs.com.pilfershush.assist.AudioSettings;
 
-//import android.media.AudioManager;
-//import android.media.AudioTrack;
-
 public class AudioChecker {
     private int sampleRate;
     private int bufferSize;
     private int encoding;
-    private int channel;
+    private int channelConfig;
     private int audioSource = AudioSource.DEFAULT;
 
     private AudioRecord audioRecord;
@@ -45,6 +42,20 @@ public class AudioChecker {
 
     /********************************************************************/
 /*
+ *      Find audio record format for device.
+ *
+ *      NOTE
+ *      channelConfig != number of channels of audio
+ *      CHANNEL_IN_MONO (channel count = 1, mono ) = CHANNEL_IN_FRONT (channel count = 2, stereo)
+ *
+ *      other possible values to consider:
+ *      AudioFormat.ENCODING_PCM_FLOAT = 4
+ *      AudioFormat.ENCODING_AC3 = 5
+ *      AudioFormat.ENCODING_E_AC3 = 6
+ *
+ *      below has channel count = 2 (stereo)
+ *      AudioFormat.CHANNEL_IN_FRONT = 16 // n.b. CHANNEL_IN_MONO = CHANNEL_IN_FRONT
+ *      AudioFormat.CHANNEL_IN_BACK = 32
  *
  */
     protected boolean determineInternalAudioType() {
@@ -55,11 +66,11 @@ public class AudioChecker {
                     AudioFormat.ENCODING_PCM_8BIT}) {
 
                 for (short channelConfig : new short[] {
-                        AudioFormat.CHANNEL_IN_DEFAULT,
-                        AudioFormat.CHANNEL_IN_MONO,
-                        AudioFormat.CHANNEL_IN_STEREO }) {
+                        AudioFormat.CHANNEL_IN_DEFAULT, // 1 - switched by OS, not native?
+                        AudioFormat.CHANNEL_IN_MONO,    // 16, also CHANNEL_IN_FRONT == 16
+                        AudioFormat.CHANNEL_IN_STEREO }) {  // 12
                     try {
-                        MainActivity.logger("Try rate " + rate + "Hz, bits: " + audioFormat + ", channel: "+ channelConfig);
+                        MainActivity.logger("Try rate " + rate + "Hz, bits: " + audioFormat + ", channelConfig: "+ channelConfig);
 
                         int buffSize = AudioRecord.getMinBufferSize(rate, channelConfig, audioFormat);
                         if (buffSize != AudioRecord.ERROR_BAD_VALUE) {
@@ -73,13 +84,13 @@ public class AudioChecker {
                                     buffSize);
 
                             if (recorder.getState() == AudioRecord.STATE_INITIALIZED) {
-                                MainActivity.logger("found, rate: " + rate + ", min-buff: " + buffSize);
-                                // set our values
+                                MainActivity.logger("found, rate: " + rate + ", buffer: " + buffSize + ", channel count: " + recorder.getChannelCount());
+                                // set our values, AudioRecord.getChannelCount() is number of input audio channels (1 is mono, 2 is stereo)
                                 sampleRate = rate;
-                                channel = channelConfig;
+                                this.channelConfig = channelConfig;
                                 encoding = audioFormat;
                                 bufferSize = buffSize;
-                                audioSettings.setBasicAudioSettings(sampleRate, bufferSize, encoding, channel);
+                                audioSettings.setBasicAudioSettings(sampleRate, bufferSize, encoding, this.channelConfig, recorder.getChannelCount());
                                 recorder.release();
                                 return true;
                             }
@@ -108,7 +119,7 @@ public class AudioChecker {
                             AudioFormat.CHANNEL_IN_MONO,  // 16
                             AudioFormat.CHANNEL_IN_STEREO }) { // 12
                         try {
-                            MainActivity.logger("USB - try rate " + rate + "Hz, bits: " + audioFormat + ", channel: "+ channelConfig);
+                            MainActivity.logger("USB - try rate " + rate + "Hz, bits: " + audioFormat + ", channelConfig: "+ channelConfig);
 
                             int buffSize = AudioRecord.getMinBufferSize(rate, channelConfig, audioFormat);
                             if (buffSize != AudioRecord.ERROR_BAD_VALUE) {
@@ -122,14 +133,14 @@ public class AudioChecker {
                                         buffSize);
 
                                 if (recorder.getState() == AudioRecord.STATE_INITIALIZED) {
-                                    MainActivity.logger("USB - found:: rate: " + rate + ", min-buff: " + buffSize + ", channel: " + channelConfig);
+                                    MainActivity.logger("USB - found:: rate: " + rate + ", buffer: " + buffSize + ", channel count: " + recorder.getChannelCount());
                                     MainActivity.logger("USB - Audio source: " + recorder.getAudioSource());
                                     // set our values
                                     sampleRate = rate;
-                                    channel = channelConfig;
+                                    this.channelConfig = channelConfig;
                                     encoding = audioFormat;
                                     bufferSize = buffSize;
-                                    audioSettings.setBasicAudioSettings(sampleRate, bufferSize, encoding, channel);
+                                    audioSettings.setBasicAudioSettings(sampleRate, bufferSize, encoding, this.channelConfig, recorder.getChannelCount() );
                                     // experimental: get usbaudio dongle mic to work
                                     audioSettings.setAudioSource(AudioSource.MIC);
                                     recorder.release();
@@ -161,7 +172,7 @@ public class AudioChecker {
         boolean recordable = false;
         if (audioRecord == null) {
             try {
-                audioRecord = new AudioRecord(audioSource, sampleRate, channel, encoding, bufferSize);
+                audioRecord = new AudioRecord(audioSource, sampleRate, channelConfig, encoding, bufferSize);
                 //audioSessionId = audioRecord.getAudioSessionId();
                 MainActivity.logger("Can start Microphone Check.");
             }
@@ -195,7 +206,7 @@ public class AudioChecker {
  */
     protected void checkAudioBufferState() {
         try {
-            audioRecord = new AudioRecord(AudioSource.DEFAULT, sampleRate, channel, encoding, bufferSize );
+            audioRecord = new AudioRecord(AudioSource.DEFAULT, sampleRate, channelConfig, encoding, bufferSize );
             // need to start reading buffer to trigger an exception
             audioRecord.startRecording();
             short buffer[] = new short[bufferSize];
@@ -223,7 +234,7 @@ public class AudioChecker {
     // currently this will start and then destroy after single use...
     protected boolean pollAudioCheckerInit() {
         //set for default
-        pollAudioChecker = new PollAudioChecker(audioSource, sampleRate, channel, encoding, bufferSize);
+        pollAudioChecker = new PollAudioChecker(audioSource, sampleRate, channelConfig, encoding, bufferSize);
         return pollAudioChecker.setupPollAudio();
     }
 

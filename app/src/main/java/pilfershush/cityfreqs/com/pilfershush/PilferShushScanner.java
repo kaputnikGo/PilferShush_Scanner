@@ -70,6 +70,10 @@ public class PilferShushScanner {
         }
     }
 
+    protected String getSaveFileType() {
+        return audioSettings.saveFormatToString();
+    }
+
     protected void setWriteFiles(boolean writeFiles) {
         audioSettings.setWriteFiles(writeFiles);
     }

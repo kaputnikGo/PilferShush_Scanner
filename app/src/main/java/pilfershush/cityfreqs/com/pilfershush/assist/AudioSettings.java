@@ -75,7 +75,8 @@ public class AudioSettings {
     private int sampleRate;
     private int bufferSize; // in bytes
     private int encoding;
-    private int channel;
+    private int channelConfig;
+    private int channelCount;
     private int audioSource;
 
     private int minFreq;
@@ -91,11 +92,12 @@ public class AudioSettings {
         maxFreq = DEFAULT_FREQUENCY_MAX;
     }
 
-    public void setBasicAudioSettings(int sampleRate, int bufferSize, int encoding, int channel) {
+    public void setBasicAudioSettings(int sampleRate, int bufferSize, int encoding, int channelConfig, int channelCount) {
         this.sampleRate = sampleRate;
         this.bufferSize = bufferSize;
         this.encoding = encoding;
-        this.channel = channel;
+        this.channelConfig = channelConfig;
+        this.channelCount = channelCount;
     }
     public void setEncoding(int encoding) {
         this.encoding = encoding;
@@ -113,8 +115,13 @@ public class AudioSettings {
     public int getEncoding() {
         return encoding;
     }
-    public int getChannel() {
-        return channel;
+
+    public int getChannelConfig() {
+        return channelConfig;
+    }
+
+    public int getChannelCount() {
+        return channelCount;
     }
     public int getAudioSource() {
         return audioSource;
@@ -142,8 +149,15 @@ public class AudioSettings {
     }
 
     public String toString() {
-        return "AudioSetting: " + sampleRate + ", " + bufferSize + ", "
-                + encoding + ", " + channel + ", " + audioSource;
+        return new String("audio record format: "
+                + sampleRate + ", " + bufferSize + ", "
+                + encoding + ", " + channelConfig + ", " + audioSource);
+    }
+
+    public String saveFormatToString() {
+        return new String(sampleRate + " Hz, "
+                + getBitDepth() + " bits, "
+                + channelCount + " channel");
     }
 
     public int getBitDepth() {

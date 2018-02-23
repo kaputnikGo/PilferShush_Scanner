@@ -17,7 +17,7 @@ import pilfershush.cityfreqs.com.pilfershush.scanners.FreqDetector.RecordTaskLis
 public class RecordTask extends AsyncTask<Void, Integer, String> {
     private static final String TAG = "RecordTask";
 
-    private SpectrumAudio spectrumAudio;
+    //private SpectrumAudio spectrumAudio;
     private short[] bufferArray; // (shorts do not make a byte)
     private double[] recordScan;
     private double[] scanArray;
@@ -40,17 +40,17 @@ public class RecordTask extends AsyncTask<Void, Integer, String> {
         minMagnitude = magnitude;
         bufferArray = new short[audioSettings.getBufferSize()];
         bufferStorage = new ArrayList<Integer[]>();
-        spectrumAudio = new SpectrumAudio(audioSettings.getBufferSize());
+        //spectrumAudio = new SpectrumAudio(audioSettings.getBufferSize());
 
         if (audioRecord == null) {
             try {
                 audioRecord = new AudioRecord(audioSettings.getAudioSource(),
                         audioSettings.getSampleRate(),
-                        audioSettings.getChannel(),
+                        audioSettings.getChannelConfig(),
                         audioSettings.getEncoding(),
                         audioSettings.getBufferSize());
 
-                spectrumAudio.initSpectrumAudio(audioSettings.getSampleRate());
+                //spectrumAudio.initSpectrumAudio(audioSettings.getSampleRate());
                 logger("RecordTask ready.");
             }
             catch (Exception ex) {
@@ -166,7 +166,7 @@ public class RecordTask extends AsyncTask<Void, Integer, String> {
                         WriteProcessor.writeAudioFile(bufferArray, bufferRead);
                     }
                     // test spectrumAudio processing - not as quick
-                    spectrumAudio.processSpectrumAudio(bufferArray, bufferRead);
+                    //spectrumAudio.processSpectrumAudio(bufferArray, bufferRead);
                 } while (!isCancelled());
             }
             catch (IllegalStateException exState) {
@@ -204,8 +204,7 @@ public class RecordTask extends AsyncTask<Void, Integer, String> {
         else {
             logger("audioRecord is null.");
         }
-
-        spectrumAudio.finishSpectrumAudio();
+        //spectrumAudio.finishSpectrumAudio();
     }
 
     /********************************************************************/
