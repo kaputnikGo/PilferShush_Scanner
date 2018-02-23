@@ -16,7 +16,6 @@ import java.util.List;
 import pilfershush.cityfreqs.com.pilfershush.assist.AppEntry;
 
 public class BackgroundChecker {
-    //private static final String TAG = "PS-Checker";
     private PackageManager packageManager;
     private List<ApplicationInfo> packages;
     private PackageInfo packageInfo;
@@ -37,14 +36,16 @@ public class BackgroundChecker {
     // alphabetical list of package names
     private static final String[] SDK_NAMES =
             {
+                    "fidzup",
                     "lisnr",
+                    "shopkick",
                     "signal360",
                     "silverpush",
                     "sonicnotify"
             };
 
     protected boolean initChecker(PackageManager packageManager) {
-        //
+        // need a user updatable SDK_NAMES list insert...
         this.packageManager = packageManager;
         appEntries = new ArrayList<>();
         audioAppEntries = new ArrayList<>();
