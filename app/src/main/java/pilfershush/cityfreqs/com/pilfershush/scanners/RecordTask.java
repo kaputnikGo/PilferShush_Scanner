@@ -63,6 +63,13 @@ public class RecordTask extends AsyncTask<Void, Integer, String> {
     public void setOnResultsListener(RecordTaskListener recordTaskListener) {
         this.recordTaskListener = recordTaskListener;
     }
+    /********************************************************************/
+/*
+ * BufferScanner, rem'd till fix
+ *
+ */
+
+/*
 
     public boolean runCurrentBufferScan(ArrayList<Integer> freqList) {
         // get rid of audioRecord
@@ -78,6 +85,7 @@ public class RecordTask extends AsyncTask<Void, Integer, String> {
             return false;
         }
     }
+*/
 
     /********************************************************************/
 
@@ -211,13 +219,14 @@ public class RecordTask extends AsyncTask<Void, Integer, String> {
 
     private void magnitudeRecordScan(int windowType) {
         // TODO so many type conversions (x3)
+        // need to add diff version of scanning, not freqStepper version
         int bufferSize;
         if (bufferRead > 0) {
             bufferSize = audioSettings.getBufferSize();
 
             recordScan = new double[bufferSize]; // working array
             tempBuffer = new Integer[bufferSize]; // for bufferStorage scans
-            byteBuffer = new byte[bufferSize]; // for log writes
+            byteBuffer = new byte[bufferSize]; // for pcm file writes
 
             for (int i = 0; i < recordScan.length; i++) {
                 recordScan[i] = (double)bufferArray[i];
@@ -258,6 +267,7 @@ public class RecordTask extends AsyncTask<Void, Integer, String> {
     private boolean magnitudeBufferScan(int windowType, ArrayList<Integer> freqList) {
         // use existing bufferStorage array for scanning.
         // will result in same findings as magnitudeRecordScan()...
+        // not freqStep, change method, ie for binmods @32ms
         if ((freqList == null) || (freqList.isEmpty())) {
             activityLogger("Buffer scan list empty.");
             return false;

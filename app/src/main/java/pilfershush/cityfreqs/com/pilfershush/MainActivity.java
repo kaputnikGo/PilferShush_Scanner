@@ -727,7 +727,8 @@ public class MainActivity extends AppCompatActivity
             mainScanLogger("No detected audio beacon signals.", false);
         }
 
-        pilferShushScanner.stopBufferScanner();
+        //pilferShushScanner.stopBufferScanner();
+
         mainScanLogger("\n[>-:end of scan:-<]\n\n", false);
     }
 

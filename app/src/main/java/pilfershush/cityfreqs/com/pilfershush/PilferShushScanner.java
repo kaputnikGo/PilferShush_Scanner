@@ -14,7 +14,9 @@ public class PilferShushScanner {
     private AudioScanner audioScanner;
     private WriteProcessor writeProcessor;
     private int scanBufferSize;
+    /*
     private String bufferScanReport;
+    */
 
     protected void onDestroy() {
         audioChecker.destroy();
@@ -188,7 +190,12 @@ public class PilferShushScanner {
             }
         }
     }
-
+    /********************************************************************/
+/*
+ * BufferScanner functions, rem'd out till fix
+ *
+ */
+/*
     protected boolean hasBufferStorage() {
         return scanBufferSize > 0;
     }
@@ -217,6 +224,7 @@ public class PilferShushScanner {
     protected void stopBufferScanner() {
         audioScanner.stopBufferScanner();
     }
+*/
 
     /********************************************************************/
 

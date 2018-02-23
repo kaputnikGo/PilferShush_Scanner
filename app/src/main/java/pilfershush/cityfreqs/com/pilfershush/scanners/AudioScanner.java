@@ -1,11 +1,6 @@
 package pilfershush.cityfreqs.com.pilfershush.scanners;
 
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Map.Entry;
 
 import pilfershush.cityfreqs.com.pilfershush.MainActivity;
 import pilfershush.cityfreqs.com.pilfershush.assist.AudioSettings;
@@ -17,14 +12,17 @@ public class AudioScanner {
     private AudioSettings audioSettings;
     public boolean audioDetected;
     private int freqStep;
-    //private double magnitude;
 
     private ArrayList<Integer> frequencySequence;
     private ArrayList<Integer[]> bufferStorage;
+
+    /*
+    // BufferScanner vars
     private HashMap<Integer, Integer> freqMap;
     private ArrayList<Map.Entry<Integer,Integer>> mapEntries;
     private Entry<Integer, Integer> logicZero;
     private Entry<Integer, Integer> logicOne;
+    */
 
     public AudioScanner(AudioSettings audioSettings) {
         this.audioSettings = audioSettings;
@@ -79,6 +77,8 @@ public class AudioScanner {
                 bufferStorage = freqDetector.getBufferStorage();
             }
             freqDetector.stopRecording();
+            freqDetector.cleanup();
+            resetAudioScanner();
         }
         catch (Exception ex) {
             MainActivity.logger("Stop AudioScanner failed.");
@@ -101,8 +101,14 @@ public class AudioScanner {
             return 0;
     }
 
+    /********************************************************************/
+/*
+ * BufferScanner rem'd till fix
+ *
+ */
     //TODO
     // secondary scans using the bufferStorage, ideally looking for binMods.
+/*
     public boolean runBufferScanner() {
         //
         return freqDetector.runBufferScanner(frequencySequence);
@@ -168,6 +174,7 @@ public class AudioScanner {
         }
         return report;
     }
+*/
 
     /********************************************************************/
 

@@ -7,14 +7,8 @@ import java.nio.ByteBuffer;
 public class AudioSettings {
     // helper vars and defaults
     // guaranteed default for Android is 44.1kHz, PCM_16BIT, CHANNEL_IN_DEFAULT
-    public static final int RATE_48 = 48000;
-    public static final int RATE_44 = 44100;
-    public static final int RATE_22 = 22050;
-    public static final int RATE_16 = 16000;
-    public static final int RATE_11 = 11025;
-    public static final int RATE_8 = 8000;
     public static final int[] SAMPLE_RATES = new int[] {
-            RATE_48, RATE_44, RATE_22, RATE_16, RATE_11, RATE_8 };
+            48000, 44100, 22050, 16000, 11025, 8000 };
 
     public static final int[] POWERS_TWO_HIGH = new int[] {
             512, 1024, 2048, 4096, 8192, 16384 };
@@ -64,7 +58,7 @@ public class AudioSettings {
     // 1=Hann(ing), 2=Blackman, 3=Hamming, 4=Nuttall, 5=Blackman-Nuttall
     public static final int DEFAULT_WINDOW_TYPE = 2;
 
-    // scanning delay for runner
+    // scanning delay for runner - never changed
     //public static final int MICRO_DELAY = 1; // for modulated code
     public static final int SHORT_DELAY = 1000;
     public static final int SEC_2_DELAY = 2000;
@@ -99,6 +93,7 @@ public class AudioSettings {
         this.channelConfig = channelConfig;
         this.channelCount = channelCount;
     }
+
     public void setEncoding(int encoding) {
         this.encoding = encoding;
     }

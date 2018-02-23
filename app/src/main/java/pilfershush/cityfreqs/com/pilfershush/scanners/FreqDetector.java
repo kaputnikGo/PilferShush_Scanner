@@ -3,7 +3,6 @@ package pilfershush.cityfreqs.com.pilfershush.scanners;
 import android.os.AsyncTask;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 
 import pilfershush.cityfreqs.com.pilfershush.assist.AudioSettings;
 
@@ -52,8 +51,12 @@ public class FreqDetector {
     }
 
     /********************************************************************/
+/*
+ * BufferScanner, rem'd till fix
+ *
+ */
 
-
+/*
     protected boolean runBufferScanner(ArrayList<Integer> freqList) {
         int countSize = 0;
         //recordTask = new RecordTask(audioSettings, frequencyStepper);
@@ -71,6 +74,8 @@ public class FreqDetector {
     protected HashMap<Integer, Integer> getFrequencyCountMap() {
         return recordTask.getFrequencyCountMap();
     }
+
+*/
 
     protected boolean hasBufferStorage() {
         if (recordTask != null) {
