@@ -5,7 +5,7 @@ Test application for researching methods of discovering use of audio beacons.
 Proper for Android Studio build/release  
 Cleaning for F-Droid fork
 
-   vers. 2.0.19
+   vers. 2.0.x
    - min API 18 (4.3)
    - target API 23 (6.x)
    - compiled API 26 (8.x)
