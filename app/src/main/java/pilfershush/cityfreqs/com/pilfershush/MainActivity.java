@@ -726,8 +726,10 @@ public class MainActivity extends AppCompatActivity
         else {
             mainScanLogger("No detected audio beacon signals.", false);
         }
-
         //pilferShushScanner.stopBufferScanner();
+
+        // allow freq list processing above first, then
+        pilferShushScanner.resetAudioScanner();
 
         mainScanLogger("\n[>-:end of scan:-<]\n\n", false);
     }

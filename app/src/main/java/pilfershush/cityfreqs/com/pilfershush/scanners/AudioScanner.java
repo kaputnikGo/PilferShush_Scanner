@@ -78,7 +78,6 @@ public class AudioScanner {
             }
             freqDetector.stopRecording();
             freqDetector.cleanup();
-            resetAudioScanner();
         }
         catch (Exception ex) {
             MainActivity.logger("Stop AudioScanner failed.");

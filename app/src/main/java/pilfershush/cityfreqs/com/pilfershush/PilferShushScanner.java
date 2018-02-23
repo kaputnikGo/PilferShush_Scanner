@@ -190,6 +190,11 @@ public class PilferShushScanner {
             }
         }
     }
+
+    protected void resetAudioScanner() {
+        audioScanner.resetAudioScanner();
+    }
+
     /********************************************************************/
 /*
  * BufferScanner functions, rem'd out till fix
