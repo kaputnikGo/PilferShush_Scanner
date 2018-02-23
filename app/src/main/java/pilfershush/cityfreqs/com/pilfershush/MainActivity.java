@@ -41,9 +41,11 @@ public class MainActivity extends AppCompatActivity
     private static final String TAG = "PilferShush";
     private static final boolean DEBUG = true;
     private static final boolean INIT_WRITE_FILES = true;
+    // not until propered
+    private static final boolean WRITE_WAV = false;
 
     // dev internal version numbering
-    public static final String VERSION = "2.0.18";
+    public static final String VERSION = "2.0.19";
 
     private ViewSwitcher viewSwitcher;
     private boolean mainView;
@@ -331,15 +333,12 @@ public class MainActivity extends AppCompatActivity
         Iterator<UsbDevice> deviceIterator = deviceList.values().iterator();
 
         boolean found = false;
-        //int i = 0;
-        //deviceContainer = new DeviceContainer();
 
         while(deviceIterator.hasNext()) {
             UsbDevice device = deviceIterator.next();
             deviceContainer = new DeviceContainer(device);
             found = true;
             logger("USB: " + deviceContainer.toString());
-            //i++;
         }
         if (!found) logger("usb device(s) not found.");
         // clean up
@@ -375,7 +374,7 @@ public class MainActivity extends AppCompatActivity
     private void initPilferShush() {
         audioManager = (AudioManager)getSystemService(Context.AUDIO_SERVICE);
         if (pilferShushScanner.initScanner(this, scanUsbDevices(),
-                getResources().getString(R.string.session_default_name), INIT_WRITE_FILES)) {
+                getResources().getString(R.string.session_default_name), INIT_WRITE_FILES, WRITE_WAV)) {
             checkAble = pilferShushScanner.checkScanner();
             micChecking = false;
             toggleHeadset(output);
@@ -392,10 +391,7 @@ public class MainActivity extends AppCompatActivity
 
     private void reportInitialState() {
         mainScanText.setText("PilferShush scanner version " + VERSION);
-        /*
-        mainScanLogger(AudioSettings.DEFAULT_FREQUENCY_MIN + " Hz + in "
-                + AudioSettings.DEFAULT_FREQ_STEP + "Hz steps.", false);
-        */
+
         mainScanLogger("\nFound: " + pilferShushScanner.getAudioCheckerReport(), false);
 
         mainScanLogger("\nSettings can be changed via the Options menu.", true);
@@ -404,7 +400,13 @@ public class MainActivity extends AppCompatActivity
                 "It also has a continuous Mic check and intermittent polling check " +
                 "to look for other apps using the microphone.", false);
 
-        mainScanLogger("\nInit save log output and audio as raw pcm file: " + Boolean.toString(INIT_WRITE_FILES), true);
+        mainScanLogger("\nInit: save log output and audio to files: " + Boolean.toString(INIT_WRITE_FILES), true);
+        if (WRITE_WAV) {
+            mainScanLogger("\nWav audio: pcm, 48 kHz, signed 16 bit, little-endian, mono", false);
+        }
+        else {
+            mainScanLogger("\nRaw audio: import as 48 kHz, signed 16 bit, big-endian, mono", false);
+        }
 
         mainScanLogger("\nPress 'Run Scanner' button to start and stop scanning for audio.", false);
 
@@ -520,9 +522,6 @@ public class MainActivity extends AppCompatActivity
 
     private void changePollingSpeed() {
         // set the interval delay for polling,
-        // make it a radio button list of presets, or slow, med, fast
-        // limits are: 1000 and 6000 (1 sec and 6 sec) ??
-
         if (polling) {
             // stop it
             togglePollingCheck();
@@ -706,6 +705,8 @@ public class MainActivity extends AppCompatActivity
             writeLogger("Original sequence as transmitted:");
             writeLogger(pilferShushScanner.getFrequencySequence());
 
+
+            // below function can hang the UI thread if buffer large...
             /*
             if (pilferShushScanner.hasBufferStorage()) {
                 Toast scanToast = Toast.makeText(this, "Processing buffer scan data...", Toast.LENGTH_LONG);

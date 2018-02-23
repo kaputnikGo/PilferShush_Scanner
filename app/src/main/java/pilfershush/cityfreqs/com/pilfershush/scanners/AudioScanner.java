@@ -176,7 +176,7 @@ public class AudioScanner {
     }
 
     public String getFrequencySequenceLogic() {
-        return "Found logic: \n" + processAudio.getLogicZero()
+        return "Found possible binary logic: \n" + processAudio.getLogicZero()
                 + "\n" + processAudio.getLogicOne() + "\n";
     }
 

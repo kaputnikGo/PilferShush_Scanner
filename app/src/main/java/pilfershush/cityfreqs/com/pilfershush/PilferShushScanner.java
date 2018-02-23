@@ -25,12 +25,12 @@ public class PilferShushScanner {
 /*
 *
 */
-    protected boolean initScanner(Context context, boolean hasUSB, String sessionName, boolean writeFiles) {
+    protected boolean initScanner(Context context, boolean hasUSB, String sessionName, boolean writeFiles, boolean writeWav) {
         this.context = context;
         scanBufferSize = 0;
         audioSettings = new AudioSettings(writeFiles);
         audioChecker = new AudioChecker(audioSettings);
-        writeProcessor = new WriteProcessor(sessionName);
+        writeProcessor = new WriteProcessor(sessionName, audioSettings, writeWav);
         // writes txt file to same location as audio records.
         // write init checks then close the file.
         // called again at runScanner.
@@ -171,6 +171,9 @@ public class PilferShushScanner {
             entryLogger("AudioScanning stop.", false);
             // below nulls the recordTask...
             audioScanner.stopAudioScanner();
+
+            // TODO insert writeProcessor convert pcm to wav
+
 
             if (audioScanner.canProcessBufferStorage()) {
                 scanBufferSize = audioScanner.getSizeBufferStorage();

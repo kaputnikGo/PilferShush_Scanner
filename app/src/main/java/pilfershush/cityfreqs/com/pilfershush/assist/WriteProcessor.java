@@ -21,31 +21,46 @@ import java.util.Locale;
 import pilfershush.cityfreqs.com.pilfershush.MainActivity;
 
 public class WriteProcessor {
-    // until we bother with wav headers, this is raw format buffer writes
     // pcm savefile for raw import into Audacity as 48 kHz, signed 16 bit, big-endian, mono
+
     // wav has a little-endian
+
+    // laborious process to export files from Download(s) folder to PC, need Music folder or similar
+    // with proper file read access for external - possibly just a samsung pita
+
+    private AudioSettings audioSettings;
 
     private File extDirectory;
 
     private String audioFilename;
     private String logFilename;
     private String sessionFilename;
+    private static boolean writeWav;
 
     public static File AUDIO_OUTPUT_FILE;
-    public static DataOutputStream AUDIO_DATA_STREAM;
+    public static FileOutputStream AUDIO_WAV_STREAM;
+
     public static BufferedOutputStream AUDIO_OUTPUT_STREAM;
+    public static DataOutputStream AUDIO_RAW_STREAM;
 
     public static File LOG_OUTPUT_FILE;
     public static FileOutputStream LOG_OUTPUT_STREAM;
     public static OutputStreamWriter LOG_OUTPUT_WRITER;
 
     private static final String APP_DIRECTORY_NAME = "PilferShush";
-    private static final String AUDIO_FILE_EXTENSION = ".pcm";
+    private static final String AUDIO_FILE_EXTENSION_RAW = ".pcm";
+    private static final String AUDIO_FILE_EXTENSION_WAV = ".wav";
     private static final String LOG_FILE_EXTENSION = ".txt";
+
+    // diff OS can pattern the date in the following -
+    // underscore: 20180122-12_37_29-capture
+    // nospace: 20180122-123729-capture
     private static final SimpleDateFormat TIMESTAMP_FORMAT = new SimpleDateFormat("yyyyMMdd-HH:mm:ss", Locale.ENGLISH);
 
-    public WriteProcessor(String sessionName) {
+    public WriteProcessor(String sessionName, AudioSettings audioSettings, boolean writeWav) {
         setSessionName(sessionName);
+        this.audioSettings = audioSettings;
+        this.writeWav = writeWav;
 
         log("Check: Download(s)/PilferShush/");
         // checks for read/write state
@@ -141,7 +156,7 @@ public class WriteProcessor {
 
     /**************************************************************/
     /*
-        audio logging
+        audio logging init
      */
 
     public void prepareWriteAudioFile() {
@@ -152,17 +167,33 @@ public class WriteProcessor {
             return;
         }
         // add the extension and timestamp
-        // eg: 20151218-10:14:32-capture.pcm
-        audioFilename = getTimestamp() + "-" + sessionFilename + AUDIO_FILE_EXTENSION;
+        // eg: 20151218-10:14:32-capture.pcm(.wav)
+        if (writeWav) {
+            audioFilename = getTimestamp() + "-" + sessionFilename + AUDIO_FILE_EXTENSION_WAV;
+        }
+        else {
+            audioFilename = getTimestamp() + "-" + sessionFilename + AUDIO_FILE_EXTENSION_RAW;
+        }
+
         // file save will overwrite unless new name is used...
         try {
             AUDIO_OUTPUT_FILE = new File(location, audioFilename);
             if (!AUDIO_OUTPUT_FILE.exists()) {
                 AUDIO_OUTPUT_FILE.createNewFile();
             }
-            AUDIO_OUTPUT_STREAM = null;
-            AUDIO_OUTPUT_STREAM = new BufferedOutputStream(new FileOutputStream(AUDIO_OUTPUT_FILE, false));
-            AUDIO_DATA_STREAM = new DataOutputStream(AUDIO_OUTPUT_STREAM);
+
+            if (writeWav) {
+                AUDIO_WAV_STREAM = new FileOutputStream(AUDIO_OUTPUT_FILE);
+                writeWavHeader(AUDIO_WAV_STREAM,
+                        (short) audioSettings.getChannel(),
+                        audioSettings.getSampleRate(),
+                        (short) audioSettings.getBitDepth());
+            }
+            else {
+                AUDIO_OUTPUT_STREAM = null;
+                AUDIO_OUTPUT_STREAM = new BufferedOutputStream(new FileOutputStream(AUDIO_OUTPUT_FILE, false));
+                AUDIO_RAW_STREAM = new DataOutputStream(AUDIO_OUTPUT_STREAM);
+            }
         }
         catch (FileNotFoundException ex) {
             ex.printStackTrace();
@@ -174,17 +205,22 @@ public class WriteProcessor {
         }
     }
 
+
+    /**************************************************************/
+    /*
+        audio logging writes
+     */
+
     public static void writeAudioFile(short[] shortBuffer, int bufferRead) {
         if (shortBuffer != null) {
             try {
-                for (int i = 0; i < bufferRead; i++) {
-                    AUDIO_DATA_STREAM.writeShort(shortBuffer[i]);
-                    /*
-                    ByteBuffer byteBuffer = ByteBuffer.allocate(Short.SIZE / Byte.SIZE);
-                    byteBuffer.order(ByteOrder.BIG_ENDIAN);
-                    byteBuffer.putShort(shortBuffer[i]);
-                    AUDIO_OUTPUT_STREAM.write(byteBuffer.array(), 0, byteBuffer.limit());
-                    */
+                if (writeWav) {
+                    writeWavBuffer(shortBuffer, bufferRead);
+                }
+                else {
+                    for (int i = 0; i < bufferRead; i++) {
+                        AUDIO_RAW_STREAM.writeShort(shortBuffer[i]);
+                    }
                 }
             } catch (IOException e) {
                 e.printStackTrace();
@@ -194,10 +230,20 @@ public class WriteProcessor {
 
     public void closeWriteFile() {
         try {
+            if (writeWav) {
+                if (updateWavHeader()) {
+                    // wait for it...
+                    if (AUDIO_WAV_STREAM != null) {
+                        AUDIO_WAV_STREAM.flush();
+                        AUDIO_WAV_STREAM.close();
+                    }
+                }
+            }
             if (AUDIO_OUTPUT_STREAM != null) {
                 AUDIO_OUTPUT_STREAM.flush();
                 AUDIO_OUTPUT_STREAM.close();
-                AUDIO_DATA_STREAM.close();
+                AUDIO_RAW_STREAM.close();
+
             }
         }
         catch (IOException e) {
@@ -211,49 +257,12 @@ public class WriteProcessor {
     /**************************************************************/
     //TODO
     /*
-        wav + header logging
+        audio logging wav header, buffer and close
+        glitchy...
+
+        from: https://gist.github.com/kmark/d8b1b01fb0d2febf5770
      */
-
-    public static void initAudioBuffer(short channels, int sampleRate, short bitDepth) {
-        try {
-            writeWavHeader(AUDIO_OUTPUT_STREAM, channels, sampleRate, bitDepth);
-        }
-        catch (IOException ex) {
-            //
-        }
-    }
-
-    public static void writeAudioBuffer(short[] bufferIn, int length) {
-        // too much overhead?
-        int short_index, byte_index;
-        int iterations = length;
-        byte [] buffer = new byte[length * 2];
-        short_index = byte_index = 0;
-
-        for( ; short_index != iterations ; ) {
-            buffer[byte_index]     = (byte) (bufferIn[short_index] & 0x00FF);
-            buffer[byte_index + 1] = (byte) ((bufferIn[short_index] & 0xFF00) >> 8);
-            ++short_index; byte_index += 2;
-        }
-
-        try {
-            AUDIO_OUTPUT_STREAM.write(buffer, 0, length);
-        }
-        catch (IOException ex) {
-            //
-        }
-    }
-
-    public static void closeWriteBuffer() {
-        try {
-            updateWavHeader();
-        }
-        catch (IOException ex) {
-            //
-        }
-    }
-
-    private static void writeWavHeader(OutputStream out, short channels, int sampleRate, short bitDepth) throws IOException {
+    private static void writeWavHeader(OutputStream out, short channels, int sampleRate, short bitDepth) {
         // Convert the multi-byte integers to raw bytes in little endian format as required by the spec
         byte[] littleBytes = ByteBuffer
                 .allocate(14)
@@ -265,29 +274,56 @@ public class WriteProcessor {
                 .putShort(bitDepth)
                 .array();
 
-        out.write(new byte[]{
-                // RIFF header
-                'R', 'I', 'F', 'F', // ChunkID
-                0, 0, 0, 0, // ChunkSize (must be updated later)
-                'W', 'A', 'V', 'E', // Format
-                // fmt subchunk
-                'f', 'm', 't', ' ', // Subchunk1ID
-                16, 0, 0, 0, // Subchunk1Size
-                1, 0, // AudioFormat
-                littleBytes[0], littleBytes[1], // NumChannels
-                littleBytes[2], littleBytes[3], littleBytes[4], littleBytes[5], // SampleRate
-                littleBytes[6], littleBytes[7], littleBytes[8], littleBytes[9], // ByteRate
-                littleBytes[10], littleBytes[11], // BlockAlign
-                littleBytes[12], littleBytes[13], // BitsPerSample
-                // data subchunk
-                'd', 'a', 't', 'a', // Subchunk2ID
-                0, 0, 0, 0, // Subchunk2Size (must be updated later)
-        });
+        try {
+            out.write(new byte[]{
+                    // RIFF header
+                    'R', 'I', 'F', 'F', // ChunkID
+                    0, 0, 0, 0, // ChunkSize (must be updated later)
+                    'W', 'A', 'V', 'E', // Format
+                    // fmt subchunk
+                    'f', 'm', 't', ' ', // Subchunk1ID
+                    16, 0, 0, 0, // Subchunk1Size - PCM
+                    1, 0, // AudioFormat - PCM
+                    littleBytes[0], littleBytes[1], // NumChannels - MONO
+                    littleBytes[2], littleBytes[3], littleBytes[4], littleBytes[5], // SampleRate
+                    littleBytes[6], littleBytes[7], littleBytes[8], littleBytes[9], // ByteRate
+                    littleBytes[10], littleBytes[11], // BlockAlign
+                    littleBytes[12], littleBytes[13], // BitsPerSample
+                    // data subchunk
+                    'd', 'a', 't', 'a', // Subchunk2ID
+                    0, 0, 0, 0, // Subchunk2Size (must be updated later)
+            });
+        }
+        catch (IOException ex) {
+            //
+            log("Error setting up wav file header write.");
+        }
     }
 
-    private static void updateWavHeader() throws IOException {
-        //AUDIO_OUTPUT_FILE
+    private static void writeWavBuffer(short[] bufferIn, int length) {
+        // too much overhead?
+        int short_index, byte_index;
+        int iterations = length;
+        byte [] buffer = new byte[length * 2];
+        short_index = byte_index = 0;
 
+        for( ; short_index != iterations ; ) {
+            buffer[byte_index] = (byte) (bufferIn[short_index] & 0x00FF);
+            buffer[byte_index + 1] = (byte) ((bufferIn[short_index] & 0xFF00) >> 8);
+            ++short_index;
+            byte_index += 2;
+        }
+
+        try {
+            AUDIO_WAV_STREAM.write(buffer, 0, length);
+        }
+        catch (IOException ex) {
+            //
+            log("Error writing wav audio buffer.");
+        }
+    }
+
+    private static boolean updateWavHeader() throws IOException {
         byte[] sizes = ByteBuffer
                 .allocate(8)
                 .order(ByteOrder.LITTLE_ENDIAN)
@@ -312,18 +348,23 @@ public class WriteProcessor {
         }
         catch (IOException ex) {
             // Rethrow but we still close accessWave in our finally
+            log("Error writing updated wav header.");
             throw ex;
         }
         finally {
             if (accessWave != null) {
                 try {
                     accessWave.close();
+                    return true;
                 }
                 catch (IOException ex) {
                     //
+                    log("Error closing wav file.");
+                    return false;
                 }
             }
         }
+        return false;
     }
 
     /**************************************************************/
@@ -393,7 +434,7 @@ public class WriteProcessor {
         return TIMESTAMP_FORMAT.format(new Date());
     }
 
-    private void log(String message) {
+    private static void log(String message) {
         MainActivity.logger(message);
     }
 }

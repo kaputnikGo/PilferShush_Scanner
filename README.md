@@ -1,7 +1,7 @@
 # PilferShush_prod
-Android near ultra-high frequency listener
+Android near-ultra high frequency listener, microphone polling and audio beacon SDK detector
 
-   * - vers. 2.0
+   * - vers. 2.0.19
    
    * - min API 18 (4.3)
    * - target API 23 (6.x)
@@ -16,5 +16,7 @@ Proper for Android Studio build/release
  
  TODO:
  - unravel the bufferscan/magnitude scan to enable proper write to file
+ - WAV file proper
+ - USB Audio routing test
 
 # 2018 Kaputnik Go

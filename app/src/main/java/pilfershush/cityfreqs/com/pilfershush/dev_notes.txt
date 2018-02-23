@@ -17,7 +17,7 @@
 -- maybe::
 - bt beacon scanner
 - background service for scanner.
-- make usb audio work
+- make usb audio work (fails on test dev device due to hardware MIC failure: new daughter board required)
 
 /*****************/
 
@@ -75,11 +75,35 @@ we need a 32ms ability.
 find a short burst tone (32ms) and then analyse it.
 
 LISNR
+
 18.7-19.2 kHz
+LISNR SmartTones are comprised of FSK audio signals varying between frequencies of 18.75 kHz and 19.2kHZ,
+-30dB, -25dB, -20dB, -15dB, -10dB, -5dB, -1dB
+
+
 detect time: 0.6 - 3 sec
 start bit, record 10 secs or so using hpf, then look for payload within:
 mic->(Lpf)filter->(10sec)buffer->decode/demod
 
 hexArray = "0123456789abcdef".toCharArray(); for hashedPayload
+
+"Peer to Peer"
 lisnr as of API 5 now uses phone to broadcast as well...
+
+
+startBroadcastingTone(Lcom/lisnr/sdk/LisnrTone)
+textTone == US-ASCII,
+    toneDuration = text.length() * 6 * 40 + 1280;
+dataTone = byte.length < 255 && > 1,
+    toneDuration = data.length * 6 * 40 + 1280
+IDTone = { toneID (long), startingIteration(int), lastIteration(int) }
+    toneDuration = ((lastIteration + 1) * 2.72D) * 1000L;
+
+dataContents.type.equals("video" || "web" || "photo" || "notification")
+
+payload = bytesToHex(hashData(paramArrayOfByte))
+
+
+in Feb 2017 someone on the Unity forums:
+"I'm trying to wrap the LISNR sdk ( http://lisnr.com ) into an android plugin for Unity"...
 

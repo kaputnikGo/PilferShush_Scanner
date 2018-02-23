@@ -1,12 +1,12 @@
 package pilfershush.cityfreqs.com.pilfershush.assist;
 
 import android.media.AudioFormat;
-import android.media.MediaRecorder.AudioSource;
 
 import java.nio.ByteBuffer;
 
 public class AudioSettings {
     // helper vars and defaults
+    // guaranteed default for Android is 44.1kHz, PCM_16BIT, CHANNEL_IN_DEFAULT
     public static final int RATE_48 = 48000;
     public static final int RATE_44 = 44100;
     public static final int RATE_22 = 22050;
@@ -26,13 +26,6 @@ public class AudioSettings {
     public static final double PI4 = 12.566370614359172;
     public static final double PI6 = 18.84955592153876d;
 
-    // guaranteed default for Android is 44.1kHz, PCM_16BIT, CHANNEL_IN_DEFAULT
-    public static final int DEFAULT_CHANNEL_CONFIG = AudioFormat.CHANNEL_IN_DEFAULT;
-    public static final int DEFAULT_AUDIO_FORMAT = AudioFormat.ENCODING_PCM_16BIT;
-    public static final int DEFAULT_AUDIO_SOURCE = AudioSource.DEFAULT; // AudioSource.MIC;
-    public static final int DEFAULT_SAMPLE_RATE = RATE_44;
-
-    public static final int DEFAULT_THRESHOLD_JUMP = 3000;
     // max frequency range is 3000hz (between min and max)
     public static final int DEFAULT_FREQUENCY_MIN = 18000;
     public static final int DEFAULT_FREQUENCY_MAX = 21000;
@@ -56,7 +49,7 @@ public class AudioSettings {
 
     // steps in the frequencies to consider as a coded signal and not noise
     public static final int MIN_FREQ_STEP = 1;
-    public static final int FREQ_STEP_5 = 5;
+    //public static final int FREQ_STEP_5 = 5;
     public static final int FREQ_STEP_10 = 10;
     public static final int FREQ_STEP_25 = 25;
     public static final int FREQ_STEP_50 = 50;
@@ -66,13 +59,13 @@ public class AudioSettings {
     public static final int FREQ_DIVISOR = 25;
 
     // possible number of audio signals to sequence (32 bits)
-    public static final int MAX_SEQUENCE_LENGTH = 32;
+    //public static final int MAX_SEQUENCE_LENGTH = 32;
 
-    // 1=Hann(ing), 2=Blackman, 3=Hamming, 4=Nuttall, 5=Blacknman-Nuttall
+    // 1=Hann(ing), 2=Blackman, 3=Hamming, 4=Nuttall, 5=Blackman-Nuttall
     public static final int DEFAULT_WINDOW_TYPE = 2;
 
     // scanning delay for runner
-    public static final int MICRO_DELAY = 1; // for modulated code
+    //public static final int MICRO_DELAY = 1; // for modulated code
     public static final int SHORT_DELAY = 1000;
     public static final int SEC_2_DELAY = 2000;
     public static final int SEC_3_DELAY = 3000;
@@ -81,7 +74,6 @@ public class AudioSettings {
     // vars for AudioRecord creation and use
     private int sampleRate;
     private int bufferSize; // in bytes
-    private int bufferOverlap;
     private int encoding;
     private int channel;
     private int audioSource;
@@ -105,21 +97,8 @@ public class AudioSettings {
         this.encoding = encoding;
         this.channel = channel;
     }
-
-    public void setSampleRate(int sampleRate) {
-        this.sampleRate = sampleRate;
-    }
-    public void setBufferSize(int bufferSize) {
-        this.bufferSize = bufferSize;
-    }
-    public void setBufferOverlap(int bufferOverlap) {
-        this.bufferOverlap = bufferOverlap;
-    }
     public void setEncoding(int encoding) {
         this.encoding = encoding;
-    }
-    public void setChannel(int channel) {
-        this.channel = channel;
     }
     public void setAudioSource(int audioSource) {
         this.audioSource = audioSource;
@@ -130,9 +109,6 @@ public class AudioSettings {
     }
     public int getBufferSize() {
         return bufferSize;
-    }
-    public int getBufferOverlap() {
-        return bufferOverlap;
     }
     public int getEncoding() {
         return encoding;
@@ -167,9 +143,19 @@ public class AudioSettings {
 
     public String toString() {
         return "AudioSetting: " + sampleRate + ", " + bufferSize + ", "
-                + bufferOverlap + ", " + encoding + ", " + channel + ", " + audioSource;
+                + encoding + ", " + channel + ", " + audioSource;
     }
 
+    public int getBitDepth() {
+        // encoding == int value of bit depth
+        if (encoding == AudioFormat.ENCODING_PCM_8BIT) return 8;
+        else if (encoding == AudioFormat.ENCODING_PCM_16BIT) return 16;
+        else if (encoding == AudioFormat.ENCODING_PCM_FLOAT) return 32;
+        else {
+            // default or error, return "guaranteed" default
+            return 16;
+        }
+    }
 
     /********************************************************************/
 /*
