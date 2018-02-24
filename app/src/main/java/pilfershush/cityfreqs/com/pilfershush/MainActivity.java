@@ -2,16 +2,19 @@ package pilfershush.cityfreqs.com.pilfershush;
 
 import android.Manifest;
 import android.app.AlertDialog;
+import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.hardware.usb.UsbDevice;
 import android.hardware.usb.UsbManager;
 import android.media.AudioManager;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
@@ -38,18 +41,25 @@ import pilfershush.cityfreqs.com.pilfershush.assist.WriteProcessor;
 
 public class MainActivity extends AppCompatActivity
         implements ActivityCompat.OnRequestPermissionsResultCallback {
+
     private static final String TAG = "PilferShush";
     private static final boolean DEBUG = true;
     private static final boolean INIT_WRITE_FILES = true;
     // not until propered
     private static final boolean WRITE_WAV = false;
 
+
     // dev internal version numbering
-    public static final String VERSION = "2.0.20";
+    public static final String VERSION = "2.0.21";
 
     private ViewSwitcher viewSwitcher;
     private boolean mainView;
     private static TextView debugText;
+    private TextView timerText;
+    private long startTime;
+    private Handler timerHandler;
+    private Runnable timerRunnable;
+
     private TextView focusText;
     private Button micCheckButton;
     private Button micPollingButton;
@@ -65,14 +75,14 @@ public class MainActivity extends AppCompatActivity
     private String[] storageAdmins;
 
     // USB
+    private static final String ACTION_USB_PERMISSION = "pilfershush.USB_PERMISSION";
+    private PendingIntent permissionIntent;
     private DeviceContainer deviceContainer;
     private UsbManager usbManager;
     private boolean hasUSB;
 
-    private boolean output;
-    private boolean checkAble;
-    private boolean micChecking;
-    private boolean polling;
+    private boolean MIC_CHECKING;
+    private boolean POLLING;
     private boolean SCANNING;
 
     private PilferShushScanner pilferShushScanner;
@@ -92,7 +102,6 @@ public class MainActivity extends AppCompatActivity
         mainView = true;
 
         pilferShushScanner = new PilferShushScanner();
-        output = false;
         SCANNING = false;
 
         //MAIN VIEW
@@ -147,6 +156,11 @@ public class MainActivity extends AppCompatActivity
                 switchViews();
             }
         });
+
+        usbManager = (UsbManager) getSystemService(Context.USB_SERVICE);
+        permissionIntent = PendingIntent.getBroadcast(this, 0, new Intent(ACTION_USB_PERMISSION), 0);
+        IntentFilter filter = new IntentFilter(ACTION_USB_PERMISSION);
+        registerReceiver(usbReceiver, filter);
 
         // permissions ask:
         // check API version, above 23 permissions are asked at runtime
@@ -265,6 +279,7 @@ public class MainActivity extends AppCompatActivity
                     new String[]{Manifest.permission.RECORD_AUDIO}, 1);
         }
     }
+
     private void requestExtStorageWritePermission() {
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE)
                 != PackageManager.PERMISSION_GRANTED) {
@@ -306,8 +321,9 @@ public class MainActivity extends AppCompatActivity
         }
     }
 
-    /*
-* USB device
+
+/*
+* USB device - need replacement daughterboard before implementing this : S5-dev
 */
     // https://source.android.com/devices/audio/usb.html
     // http://developer.android.com/guide/topics/connectivity/usb/host.html
@@ -327,7 +343,7 @@ public class MainActivity extends AppCompatActivity
         // create a DeviceContainer for them.
         // add a listener service in case user unplugs usb and audio gets re-routed (fdbk)
         //TODO
-        logger("checking usb host for audio device(s).");
+        logger("checking usb host for audio device.");
         usbManager = (UsbManager) getSystemService(Context.USB_SERVICE);
         HashMap<String, UsbDevice> deviceList = usbManager.getDeviceList();
         Iterator<UsbDevice> deviceIterator = deviceList.values().iterator();
@@ -340,32 +356,41 @@ public class MainActivity extends AppCompatActivity
             found = true;
             logger("USB: " + deviceContainer.toString());
         }
-        if (!found) logger("usb device(s) not found.");
+        if (!found) logger("usb audio device not found, using internal.");
         // clean up
         // check if audio compliant device, then return
         return found;
     }
 
-    BroadcastReceiver usbReceiver = new BroadcastReceiver() {
+    private final BroadcastReceiver usbReceiver = new BroadcastReceiver() {
+        @Override
         public void onReceive(Context context, Intent intent) {
             String action = intent.getAction();
 
             if (UsbManager.ACTION_USB_DEVICE_DETACHED.equals(action)) {
-                UsbDevice device = (UsbDevice)intent.getParcelableExtra(UsbManager.EXTRA_DEVICE);
-                if (device != null) {
-                    // prepare for re-routing of audio to handset
-                    hasUSB = false;
-                    logger("USB device is unplugged, mute output");
-                    toggleHeadset(false);
-                }
-            }
-            else if (UsbManager.ACTION_USB_DEVICE_ATTACHED.equals(action)) {
-                UsbDevice device = (UsbDevice)intent.getParcelableExtra(UsbManager.EXTRA_DEVICE);
-                if (device != null) {
-                    // prepare for re-routing of audio to USB
-                    hasUSB = true;
-                    logger("USB device is plugged in, allow output");
-                    toggleHeadset(true);
+                synchronized (this) {
+                    if (intent.getBooleanExtra(UsbManager.EXTRA_PERMISSION_GRANTED, false)) {
+                        if ((deviceContainer != null) && (deviceContainer.hasDevice()))  {
+                            //call method to set up device communication
+                            if (usbManager.hasPermission(deviceContainer.getDevice())) {
+                                //
+                                hasUSB = true;
+                                // re-route audio to usb audio device
+                                toggleHeadset(true);
+                                logger(" has permission for USB device.");
+                            }
+                            else {
+                                usbManager.requestPermission(deviceContainer.getDevice(), permissionIntent);
+                            }
+                        }
+                        // has no deviceContainer/device
+
+                    }
+                    else {
+                        // re-route audio to phone hardware
+                        toggleHeadset(false);
+                        logger(" permission denied for USB device.");
+                    }
                 }
             }
         }
@@ -373,11 +398,27 @@ public class MainActivity extends AppCompatActivity
 
     private void initPilferShush() {
         audioManager = (AudioManager)getSystemService(Context.AUDIO_SERVICE);
-        if (pilferShushScanner.initScanner(this, scanUsbDevices(),
-                getResources().getString(R.string.session_default_name), INIT_WRITE_FILES, WRITE_WAV)) {
-            checkAble = pilferShushScanner.checkScanner();
-            micChecking = false;
-            toggleHeadset(output);
+
+        timerText = (TextView) findViewById(R.id.timer_text);
+
+        // on screen timer
+        timerHandler = new Handler();
+        timerRunnable = new Runnable() {
+            @Override
+            public void run() {
+                long millis = System.currentTimeMillis() - startTime;
+                int seconds = (int)(millis / 1000);
+                int minutes = seconds / 60;
+                seconds = seconds % 60;
+                timerText.setText(String.format("timer - %02d:%02d", minutes, seconds));
+                timerHandler.postDelayed(this, 500);
+            }
+        };
+
+        if (pilferShushScanner.initScanner(this, scanUsbDevices(), getResources().getString(R.string.session_default_name), INIT_WRITE_FILES, WRITE_WAV)) {
+            pilferShushScanner.checkScanner();
+            MIC_CHECKING = false;
+            toggleHeadset(false); // default state at init
             quickAudioFocusCheck();
             initAudioFocusListener();
             populateMenuItems();
@@ -409,6 +450,13 @@ public class MainActivity extends AppCompatActivity
             mainScanLogger("\nRaw audio: " + pilferShushScanner.getSaveFileType() + ", big-endian.", false);
         }
 
+        // run at init for awareness
+        mainScanLogger("\nFree storage space: " + printFreeSize(), true);
+        if (pilferShushScanner.cautionFreeSpace()) {
+            // has under a minimum of 2048 bytes , pop a toast.
+            cautionStorageSize();
+        }
+
         mainScanLogger("\nPress 'Run Scanner' button to start and stop scanning for audio.", false);
 
         mainScanLogger("\nDO NOT RUN SCANNER FOR A LONG TIME.\n", true);
@@ -437,10 +485,26 @@ public class MainActivity extends AppCompatActivity
         dbLevel[1] = getResources().getString(R.string.magnitude_90_text);
         dbLevel[2] = getResources().getString(R.string.magnitude_100_text);
 
-        storageAdmins = new String[3];
+        storageAdmins = new String[4];
         storageAdmins[0] = getResources().getString(R.string.dialog_storage_size);
         storageAdmins[1] = getResources().getString(R.string.dialog_delete_empty_logs);
         storageAdmins[2] = getResources().getString(R.string.dialog_delete_all_files);
+        storageAdmins[3] = getResources().getString(R.string.dialog_free_storage_size);
+    }
+
+    private void cautionStorageSize() {
+        dialogBuilder = new AlertDialog.Builder(this);
+
+        dialogBuilder.setTitle(R.string.dialog_storage_warn_title);
+        dialogBuilder.setMessage(R.string.dialog_storage_warn_text);
+        dialogBuilder.setPositiveButton(R.string.dialog_button_okay, new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int id) {
+                mainScanLogger("Limited storage space found.", true);
+            }
+        });
+
+        alertDialog = dialogBuilder.create();
+        alertDialog.show();
     }
 
     private void setSessionName() {
@@ -477,7 +541,7 @@ public class MainActivity extends AppCompatActivity
             public void onClick(DialogInterface dialogInterface, int which) {
                 switch(which) {
                     case 0:
-                        mainScanLogger("Log storage size: " + printableBytesize(), false);
+                        mainScanLogger("Log storage size: " + printUsedSize(), false);
                         break;
                     case 1:
                         mainScanLogger("Delete empty log files.", false);
@@ -486,6 +550,9 @@ public class MainActivity extends AppCompatActivity
                     case 2:
                         mainScanLogger("Delete ALL log files.", true);
                         pilferShushScanner.clearLogStorageFolder();
+                        break;
+                    case 3:
+                        mainScanLogger("Free storage space: " + printFreeSize(), false);
                         break;
                     default:
                         // do nothing, catch dismisses
@@ -523,7 +590,7 @@ public class MainActivity extends AppCompatActivity
 
     private void changePollingSpeed() {
         // set the interval delay for polling,
-        if (polling) {
+        if (POLLING) {
             // stop it
             togglePollingCheck();
         }
@@ -630,8 +697,12 @@ public class MainActivity extends AppCompatActivity
     }
 
 
-    private String printableBytesize() {
+    private String printUsedSize() {
         return android.text.format.Formatter.formatShortFileSize(this, pilferShushScanner.getLogStorageSize());
+    }
+
+    private String printFreeSize() {
+        return android.text.format.Formatter.formatShortFileSize(this, pilferShushScanner.getFreeStorageSize());
     }
 
 
@@ -643,10 +714,14 @@ public class MainActivity extends AppCompatActivity
         logger("Scanning button pressed");
         if (SCANNING) {
             SCANNING = false;
+            timerHandler.removeCallbacks(timerRunnable);
+            timerText.setText("timer - 00:00");
             stopScanner();
         }
         else {
             SCANNING = true;
+            startTime = System.currentTimeMillis();
+            timerHandler.postDelayed(timerRunnable, 0);
             runScanner();
         }
     }
@@ -705,29 +780,10 @@ public class MainActivity extends AppCompatActivity
             // a debug, output in order of capture:
             writeLogger("Original sequence as transmitted:");
             writeLogger(pilferShushScanner.getFrequencySequence());
-
-
-            // below function can hang the UI thread if buffer large...
-            /*
-            if (pilferShushScanner.hasBufferStorage()) {
-                Toast scanToast = Toast.makeText(this, "Processing buffer scan data...", Toast.LENGTH_LONG);
-                scanToast.show();
-
-                mainScanLogger("Running scans on captured signals...", false);
-                if (pilferShushScanner.runBufferScanner()) {
-                    mainScanLogger("Found buffer scan data:", true);
-                    // do something with it...
-                    mainScanLogger(pilferShushScanner.getBufferScanReport(), true);
-                }
-                scanToast.cancel();
-            }
-            */
         }
         else {
             mainScanLogger("No detected audio beacon signals.", false);
         }
-        //pilferShushScanner.stopBufferScanner();
-
         // allow freq list processing above first, then
         pilferShushScanner.resetAudioScanner();
 
@@ -800,9 +856,9 @@ public class MainActivity extends AppCompatActivity
         }
     }
 
-    private void toggleHeadset(boolean output) {
+    private void toggleHeadset(boolean hasHeadset) {
         // if no headset, mute the audio output
-        if (output) {
+        if (hasHeadset) {
             // volume to 50%
             audioManager.setStreamVolume(AudioManager.STREAM_MUSIC,
                     audioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC) / 2,
@@ -817,41 +873,41 @@ public class MainActivity extends AppCompatActivity
     }
 
     private void toggleMicCheck() {
-        if (polling) {
+        if (POLLING) {
             // do not do this as well
             entryLogger("DO NOT CHECK WHEN POLLING", true);
             return;
         }
 
-        if (micChecking) {
+        if (MIC_CHECKING) {
             // currently running, stop it
-            pilferShushScanner.micChecking(micChecking = false);
+            pilferShushScanner.micChecking(MIC_CHECKING = false);
             micCheckButton.setText("MICROPHONE CHECK");
             micCheckButton.setBackgroundColor(Color.LTGRAY);
         }
         else {
             // not running, start it
-            if (checkAble) {
+            if (pilferShushScanner.checkScanner()) {
                 micCheckButton.setText("CHECKING...");
                 micCheckButton.setBackgroundColor(Color.RED);
-                pilferShushScanner.micChecking(micChecking = true);
+                pilferShushScanner.micChecking(MIC_CHECKING = true);
             }
         }
     }
 
     private void togglePollingCheck() {
-        if (micChecking) {
+        if (MIC_CHECKING) {
             // do not do this as well
             entryLogger("DO NOT POLL WHEN MIC CHECKING", true);
             return;
         }
-        if (polling) {
-            pilferShushScanner.pollingCheck(polling = false);
+        if (POLLING) {
+            pilferShushScanner.pollingCheck(POLLING = false);
             micPollingButton.setText("POLLING CHECK");
             micPollingButton.setBackgroundColor(Color.LTGRAY);
         }
         else {
-            pilferShushScanner.pollingCheck(polling = true);
+            pilferShushScanner.pollingCheck(POLLING = true);
             micPollingButton.setText("POLLING...");
             micPollingButton.setBackgroundColor(Color.RED);
         }

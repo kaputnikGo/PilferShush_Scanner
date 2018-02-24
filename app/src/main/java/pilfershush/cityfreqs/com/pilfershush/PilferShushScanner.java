@@ -14,9 +14,6 @@ public class PilferShushScanner {
     private AudioScanner audioScanner;
     private WriteProcessor writeProcessor;
     private int scanBufferSize;
-    /*
-    private String bufferScanReport;
-    */
 
     protected void onDestroy() {
         audioChecker.destroy();
@@ -83,8 +80,16 @@ public class PilferShushScanner {
         return audioSettings.getWriteFiles();
     }
 
-    protected int getLogStorageSize() {
+    protected long getLogStorageSize() {
         return writeProcessor.getStorageSize();
+    }
+
+    protected long getFreeStorageSize() {
+        return writeProcessor.getFreeStorageSpace();
+    }
+
+    protected boolean cautionFreeSpace() {
+        return writeProcessor.cautionFreeSpace();
     }
 
     protected void clearEmptyLogFiles() {
@@ -194,42 +199,6 @@ public class PilferShushScanner {
     protected void resetAudioScanner() {
         audioScanner.resetAudioScanner();
     }
-
-    /********************************************************************/
-/*
- * BufferScanner functions, rem'd out till fix
- *
- */
-/*
-    protected boolean hasBufferStorage() {
-        return scanBufferSize > 0;
-    }
-
-    protected boolean runBufferScanner() {
-        if (audioScanner.runBufferScanner()) {
-            entryLogger("Buffer Scan found data.", true);
-            bufferScanReport = "";
-            audioScanner.storeBufferScanMap();
-            if (audioScanner.processBufferScanMap()) {
-                bufferScanReport = "Buffer Scan data: \n" + audioScanner.getLogicEntries();
-                entryLogger(bufferScanReport, true);
-                return true;
-            }
-        }
-        else {
-            entryLogger("BufferScan nothing found.", false);
-        }
-        return false;
-    }
-
-    protected String getBufferScanReport() {
-        return bufferScanReport;
-    }
-
-    protected void stopBufferScanner() {
-        audioScanner.stopBufferScanner();
-    }
-*/
 
     /********************************************************************/
 

@@ -16,14 +16,6 @@ public class AudioScanner {
     private ArrayList<Integer> frequencySequence;
     private ArrayList<Integer[]> bufferStorage;
 
-    /*
-    // BufferScanner vars
-    private HashMap<Integer, Integer> freqMap;
-    private ArrayList<Map.Entry<Integer,Integer>> mapEntries;
-    private Entry<Integer, Integer> logicZero;
-    private Entry<Integer, Integer> logicOne;
-    */
-
     public AudioScanner(AudioSettings audioSettings) {
         this.audioSettings = audioSettings;
         freqStep = AudioSettings.DEFAULT_FREQ_STEP;
@@ -99,81 +91,6 @@ public class AudioScanner {
         else
             return 0;
     }
-
-    /********************************************************************/
-/*
- * BufferScanner rem'd till fix
- *
- */
-    //TODO
-    // secondary scans using the bufferStorage, ideally looking for binMods.
-/*
-    public boolean runBufferScanner() {
-        //
-        return freqDetector.runBufferScanner(frequencySequence);
-    }
-
-    public void storeBufferScanMap() {
-        freqMap = freqDetector.getFrequencyCountMap();
-    }
-
-    public void stopBufferScanner() {
-        // this will null RecordTask
-        freqDetector.stopRecording();
-        freqDetector.cleanup();
-        resetAudioScanner();
-    }
-
-    // this can take time...
-    public boolean processBufferScanMap() {
-        if (freqMap != null) {
-            if (freqMap.size() > 0 ) {
-                // sort into list with highest values order
-                mapEntries = new ArrayList<Map.Entry<Integer,Integer>>(freqMap.entrySet());
-
-                Collections.sort(mapEntries, new Comparator<Entry<Integer, Integer>>() {
-                    public int compare(Map.Entry<Integer, Integer> a, Map.Entry<Integer, Integer> b) {
-                        return b.getValue().compareTo(a.getValue());
-                    }
-                });
-
-                // top 2 entries are of interest?
-                if (mapEntries != null && !mapEntries.isEmpty()) {
-                    // we need at least two entries for this:
-                    if (mapEntries.get(0) != null) {
-                        logicZero = mapEntries.get(0);
-                        if (mapEntries.size() >= 2) {
-                            if (mapEntries.get(1) != null) {
-                                logicOne = mapEntries.get(1);
-                                return true;
-                            }
-                        }
-                        return true;
-                    }
-                }
-            }
-        }
-        return false;
-    }
-
-    public String getLogicEntries() {
-        String report = "";
-        if (logicZero != null) {
-            report = "Freq 0: " + logicZero.getKey() + " : " + logicZero.getValue();
-        }
-        else {
-            report = "Freq 0: not found";
-        }
-
-        if (logicOne != null) {
-            report += "\nFreq 1: " + logicOne.getKey() + " : " + logicOne.getValue();
-        }
-        else {
-            report += "\nFreq 1: not found";
-        }
-        return report;
-    }
-*/
 
     /********************************************************************/
 

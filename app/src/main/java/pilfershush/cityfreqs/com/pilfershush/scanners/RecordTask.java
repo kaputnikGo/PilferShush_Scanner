@@ -1,13 +1,11 @@
 package pilfershush.cityfreqs.com.pilfershush.scanners;
 
-import android.annotation.SuppressLint;
 import android.media.AudioRecord;
 import android.os.AsyncTask;
 import android.util.Log;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashMap;
 
 import pilfershush.cityfreqs.com.pilfershush.MainActivity;
 import pilfershush.cityfreqs.com.pilfershush.assist.AudioSettings;
@@ -17,10 +15,8 @@ import pilfershush.cityfreqs.com.pilfershush.scanners.FreqDetector.RecordTaskLis
 public class RecordTask extends AsyncTask<Void, Integer, String> {
     private static final String TAG = "RecordTask";
 
-    //private SpectrumAudio spectrumAudio;
     private short[] bufferArray; // (shorts do not make a byte)
     private double[] recordScan;
-    private double[] scanArray;
     private RecordTaskListener recordTaskListener;
     private AudioRecord audioRecord;
     private AudioSettings audioSettings;
@@ -30,9 +26,8 @@ public class RecordTask extends AsyncTask<Void, Integer, String> {
     private int candidateFreq;
     private Integer[] tempBuffer;
     private byte[] byteBuffer;
-
     private ArrayList<Integer[]> bufferStorage;
-    private HashMap<Integer, Integer> freqMap;
+
 
     public RecordTask(AudioSettings audioSettings, int freqStepper, double magnitude) {
         this.audioSettings = audioSettings;
@@ -40,7 +35,6 @@ public class RecordTask extends AsyncTask<Void, Integer, String> {
         minMagnitude = magnitude;
         bufferArray = new short[audioSettings.getBufferSize()];
         bufferStorage = new ArrayList<Integer[]>();
-        //spectrumAudio = new SpectrumAudio(audioSettings.getBufferSize());
 
         if (audioRecord == null) {
             try {
@@ -50,7 +44,6 @@ public class RecordTask extends AsyncTask<Void, Integer, String> {
                         audioSettings.getEncoding(),
                         audioSettings.getBufferSize());
 
-                //spectrumAudio.initSpectrumAudio(audioSettings.getSampleRate());
                 logger("RecordTask ready.");
             }
             catch (Exception ex) {
@@ -63,29 +56,6 @@ public class RecordTask extends AsyncTask<Void, Integer, String> {
     public void setOnResultsListener(RecordTaskListener recordTaskListener) {
         this.recordTaskListener = recordTaskListener;
     }
-    /********************************************************************/
-/*
- * BufferScanner, rem'd till fix
- *
- */
-
-/*
-
-    public boolean runCurrentBufferScan(ArrayList<Integer> freqList) {
-        // get rid of audioRecord
-        if (audioRecord != null) {
-            audioRecord = null;
-        }
-        if (bufferStorage != null) {
-            activityLogger("run Buffer Scan...");
-            return magnitudeBufferScan(AudioSettings.DEFAULT_WINDOW_TYPE, freqList);
-        }
-        else {
-            activityLogger("Buffer Scan storage null.");
-            return false;
-        }
-    }
-*/
 
     /********************************************************************/
 
@@ -98,24 +68,6 @@ public class RecordTask extends AsyncTask<Void, Integer, String> {
 
     protected ArrayList<Integer[]> getBufferStorage() {
         return bufferStorage;
-    }
-
-    protected boolean hasFrequencyCountMap() {
-        if (freqMap != null) {
-            return freqMap.size() > 0;
-        }
-        return false;
-    }
-
-    protected int getFrequencyCountMapSize() {
-        if (freqMap != null) {
-            return freqMap.size();
-        }
-        return 0;
-    }
-
-    protected HashMap<Integer, Integer> getFrequencyCountMap() {
-        return freqMap;
     }
 
     /********************************************************************/
@@ -173,8 +125,6 @@ public class RecordTask extends AsyncTask<Void, Integer, String> {
                     if (audioSettings.getWriteFiles()) {
                         WriteProcessor.writeAudioFile(bufferArray, bufferRead);
                     }
-                    // test spectrumAudio processing - not as quick
-                    //spectrumAudio.processSpectrumAudio(bufferArray, bufferRead);
                 } while (!isCancelled());
             }
             catch (IllegalStateException exState) {
@@ -212,7 +162,6 @@ public class RecordTask extends AsyncTask<Void, Integer, String> {
         else {
             logger("audioRecord is null.");
         }
-        //spectrumAudio.finishSpectrumAudio();
     }
 
     /********************************************************************/
@@ -263,75 +212,6 @@ public class RecordTask extends AsyncTask<Void, Integer, String> {
         }
     }
 
-    @SuppressLint("UseSparseArrays")
-    private boolean magnitudeBufferScan(int windowType, ArrayList<Integer> freqList) {
-        // use existing bufferStorage array for scanning.
-        // will result in same findings as magnitudeRecordScan()...
-        // not freqStep, change method, ie for binmods @32ms
-        if ((freqList == null) || (freqList.isEmpty())) {
-            activityLogger("Buffer scan list empty.");
-            return false;
-        }
-
-        if (bufferStorage != null) {
-            activityLogger("Start buffer scanning in " + bufferStorage.size() + " buffers.");
-
-            // bufferStorage is ArrayList of Integer arrays,
-            // each Integer array *may* contain a binMod signal
-            freqMap = new HashMap<Integer, Integer>();
-            int freq;
-            double candidateMag;
-            ArrayList<Integer> freqCounter;
-            Goertzel goertzel;
-
-            //TODO
-            // may want a maximum on this cos it could get big and ugly...
-            for (Integer[] tempArray : bufferStorage) {
-                // in each array, scan for magnitude
-                scanArray = new double[tempArray.length];
-                for (int i = 0; i < scanArray.length; i++) {
-                    scanArray[i] = (double)tempArray[i];
-                }
-
-                //
-                // default value set to 2
-                scanArray = windowArray(windowType, scanArray);
-                // end windowing
-                for (int checkFreq : freqList) {
-                    freq = 0;
-                    freqCounter = new ArrayList<Integer>();
-
-                    // range here may be too small..
-                    for (freq = checkFreq - AudioSettings.MAX_FREQ_STEP;
-                         freq <= checkFreq + AudioSettings.MAX_FREQ_STEP;
-                         freq += freqStepper) {
-
-                        // set Goertzel up to count candidates in dArr
-                        goertzel = new Goertzel((float)audioSettings.getSampleRate(), (float)freq, scanArray);
-                        goertzel.initGoertzel();
-
-                        // get its magnitude
-                        candidateMag = goertzel.getOptimisedMagnitude();
-                        // set magnitude floor, raises it
-                        // check if above threshold
-                        if (candidateMag >= minMagnitude) {
-                            // the freq has a magnitude,
-                            // note it and then allow loop to continue
-                            freqCounter.add(freq);
-                        }
-                    }
-                    // store any finds for later analysis
-                    if (!freqCounter.isEmpty()) {
-                        mapFrequencyCounts(freqCounter);
-                    }
-                }
-            }
-            // end bufferStorage loop thru
-        }
-        activityLogger("finished  Buffer Scan loop.");
-        return true;
-    }
-
     /********************************************************************/
 
     private double[] windowArray(int windowType, double[] dArr) {
@@ -378,25 +258,12 @@ public class RecordTask extends AsyncTask<Void, Integer, String> {
         return dArr;
     }
 
-
-    private void mapFrequencyCounts(ArrayList<Integer> freqList) {
-        // SparseIntArray is suggested...
-        // this only counts, order of occurrence is not preserved.
-        for (int freq : freqList) {
-            if (freqMap.containsKey(freq)) {
-                freqMap.put(freq, freqMap.get(freq) + 1);
-            }
-            else {
-                freqMap.put(freq, 1);
-            }
-        }
-    }
-
     /********************************************************************/
-
+/*
     private void activityLogger(String message) {
         MainActivity.logger(message);
     }
+  */
 
     private void logger(String message) {
         Log.d(TAG, message);

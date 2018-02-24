@@ -50,33 +50,6 @@ public class FreqDetector {
         this.magnitude = magnitude;
     }
 
-    /********************************************************************/
-/*
- * BufferScanner, rem'd till fix
- *
- */
-
-/*
-    protected boolean runBufferScanner(ArrayList<Integer> freqList) {
-        int countSize = 0;
-        //recordTask = new RecordTask(audioSettings, frequencyStepper);
-        if (recordTask.runCurrentBufferScan(freqList)) {
-            // can scan..
-            countSize = recordTask.getFrequencyCountMapSize();
-        }
-
-        if (countSize > 0) {
-            return true;
-        }
-        return false;
-    }
-
-    protected HashMap<Integer, Integer> getFrequencyCountMap() {
-        return recordTask.getFrequencyCountMap();
-    }
-
-*/
-
     protected boolean hasBufferStorage() {
         if (recordTask != null) {
             return recordTask.hasBufferStorage();

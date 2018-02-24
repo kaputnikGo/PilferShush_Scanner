@@ -38,14 +38,22 @@
                 android:id="@+id/audio_visualiser_view"
                 android:layout_width="match_parent"
                 android:background="@layout/border"
-                android:layout_height="120dp"
+                android:layout_height="100dp"
                 android:layout_below="@+id/debug_view_button" />
+
+            <TextView
+                android:id="@+id/timer_text"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/audio_visualiser_view"
+                android:layout_alignParentEnd="true"
+                android:text="@string/timer_text" />
 
             <TextView
                 android:id="@+id/main_scan_text"
                 android:layout_width="match_parent"
                 android:layout_height="fill_parent"
-                android:layout_below="@+id/audio_visualiser_view"
+                android:layout_below="@+id/timer_text"
                 android:background="#404040"
                 android:padding="10dp"
                 android:text="@string/main_scan_text" />

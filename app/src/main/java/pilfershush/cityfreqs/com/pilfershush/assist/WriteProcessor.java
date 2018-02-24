@@ -52,6 +52,8 @@ public class WriteProcessor {
     private static final String AUDIO_FILE_EXTENSION_WAV = ".wav";
     private static final String LOG_FILE_EXTENSION = ".txt";
 
+    private static final long MINIMUM_STORAGE_SIZE_BYTES = 2048; // approx 2 mins pcm audio
+
     // diff OS can pattern the date in the following -
     // underscore: 20180122-12_37_29-capture
     // nospace: 20180122-123729-capture
@@ -79,8 +81,12 @@ public class WriteProcessor {
         }
     }
 
-    public int getStorageSize() {
-        return (int)calculateStorageSize();
+    public long getStorageSize() {
+        return calculateStorageSize();
+    }
+
+    public long getFreeStorageSpace() {
+        return calculateFreeStorageSpace();
     }
 
     public void deleteEmptyLogFiles() {
@@ -92,6 +98,13 @@ public class WriteProcessor {
         if (calculateStorageSize() > 0) {
             deleteAllStorageFiles();
         }
+    }
+
+    public boolean cautionFreeSpace() {
+        if (calculateFreeStorageSpace() <= MINIMUM_STORAGE_SIZE_BYTES) {
+            return true;
+        }
+        return false;
     }
 
     /**************************************************************/
@@ -414,6 +427,7 @@ public class WriteProcessor {
     }
 
     private long calculateStorageSize() {
+        // returns long size in bytes
         if (!extDirectory.exists()) {
             log("No storage folder found.");
             return 0;
@@ -426,6 +440,16 @@ public class WriteProcessor {
         }
         log("Storage size: " + (int)length);
         return length;
+    }
+
+    private long calculateFreeStorageSpace() {
+        // returns long size in bytes
+        if (!extDirectory.exists()) {
+            log("No storage folder found.");
+            return 0;
+        }
+        // getFreeSpace == unallocated
+        return extDirectory.getUsableSpace();
     }
 
     private String getTimestamp() {

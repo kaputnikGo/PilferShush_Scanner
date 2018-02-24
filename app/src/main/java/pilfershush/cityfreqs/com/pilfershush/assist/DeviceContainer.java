@@ -1,14 +1,46 @@
 package pilfershush.cityfreqs.com.pilfershush.assist;
 
 import android.hardware.usb.UsbDevice;
+import android.hardware.usb.UsbDeviceConnection;
+import android.hardware.usb.UsbEndpoint;
 import android.hardware.usb.UsbInterface;
 
+import pilfershush.cityfreqs.com.pilfershush.MainActivity;
+
+import static android.hardware.usb.UsbConstants.USB_CLASS_AUDIO;
+import static android.hardware.usb.UsbConstants.USB_DIR_IN;
+import static android.hardware.usb.UsbConstants.USB_DIR_OUT;
+
 public class DeviceContainer {
-    // container for usb device info and
-    // possible functions
-    // ie: vendor-id="1234" product-id="5678" class="255" subclass="66" protocol="1"
+    // TODO -->  MUST BE MIN API 21 (Android 5.0) for host-mode audio
+    /*
+    - USB audio is not supported in development mode.
+    - dev mode is for adb, fastboot etc
+    - host mode: allows use of a USB peripheral
+        Android 5.0 (API level 21) and above supports a subset of USB audio class 1 (UAC1) features:
+
+    - accessory mode: turns Android into USB peripheral
+        Android 4.1 (API level 16) added limited support for audio playback to the host.
+
+    - add UI control for audio source switching (mic, default, etc
+    - call Headset state at resume/oncreate
+    */
+
     private UsbDevice device;
-    private UsbInterface usbInterface;
+    private boolean IS_AUDIO = false;
+
+    private UsbInterface usbInterfaceOut;
+    private UsbInterface usbInterfaceIn;
+
+    private UsbEndpoint usbEndpointOut;
+    private UsbEndpoint usbEndpointIn;
+
+    private int packetSizeOut;
+    private int packetSizeIn;
+
+    private UsbDeviceConnection usbConnectionOut;
+    private UsbDeviceConnection usbConnectionIn;
+
     //TODO
     // need to access UsbInterface to determine type audio and Playback/Capture
     // need to check for Endpoint
@@ -20,30 +52,139 @@ public class DeviceContainer {
 
     public DeviceContainer(UsbDevice device) {
         this.device = device;
-        usbInterface = device.getInterface(0);
-    }
-
-    public void setUsbDevice(UsbDevice device) {
-        this.device = device;
-        usbInterface = device.getInterface(0);
+        // need outbound: interface Num, direction (0 (0x0)) endpoint Num
+        // need inbound:  interface Num, direction (128 (0x80)) endpoint Num
+        // may need max Packet size...
+        if (enumerateDevice()) {
+            // all good
+            IS_AUDIO = true;
+        }
+        else {
+            IS_AUDIO = false;
+            MainActivity.logger("Failed to enumerate USB Audio device.");
+        }
     }
 
     public UsbDevice getDevice() {
         return device;
     }
 
-    public UsbInterface getInterface() {
-        return usbInterface;
-    }
-
     public boolean hasDevice() {
         return device != null;
     }
 
+    /********************************************************************/
+/*
+*
+*/
+
+    private boolean enumerateDevice() {
+        boolean endOut = false, endIn = false;
+        // test device has 5 interfaces, 1 in, 1 out, some have no endpoints
+        // TODO diff between audio and midi devices...
+        UsbInterface usbInterface;
+        int direction;
+        for (int i = 0; i < getInterfaceCount(); i++) {
+            usbInterface = device.getInterface(i);
+            if (usbInterface != null) {
+                if (usbInterface.getInterfaceClass() == USB_CLASS_AUDIO) {
+                    if (usbInterface.getEndpointCount() > 0) {
+                        for (int j = 0; j < usbInterface.getEndpointCount(); j++) {
+                            direction = usbInterface.getEndpoint(j).getDirection();
+                            if (direction == USB_DIR_OUT) {
+                                usbInterfaceOut = usbInterface;
+                                usbEndpointOut = usbInterfaceOut.getEndpoint(j);
+                                packetSizeOut = usbInterfaceOut.getEndpoint(j).getMaxPacketSize();
+                                //usbConnectionOut.claimInterface(usbInterfaceOut, true);
+                                endOut = true;
+                            } else if (direction == USB_DIR_IN) {
+                                usbInterfaceIn = usbInterface;
+                                usbEndpointIn = usbInterfaceIn.getEndpoint(j);
+                                packetSizeIn = usbInterfaceIn.getEndpoint(j).getMaxPacketSize();
+                                //usbConnectionIn.claimInterface(usbInterfaceIn, true);
+                                endIn = true;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        return ((endOut == true) && (endIn == true));
+    }
+
+    public void usbTransferOut(byte[] bytes) {
+        usbConnectionOut.bulkTransfer(usbEndpointOut, bytes, bytes.length, 0); //do in another thread
+    }
+
+    public void usbTransferIn(byte[] bytes) {
+        usbConnectionIn.bulkTransfer(usbEndpointIn, bytes, bytes.length, 0); //do in another thread
+    }
+
+    public UsbInterface getInterfaceOut() {
+        return usbInterfaceOut;
+    }
+    public UsbInterface getInterfaceIn() {
+        return usbInterfaceIn;
+    }
+
+    public UsbEndpoint getEndpointOut() {
+        return usbEndpointOut;
+    }
+    public UsbEndpoint getEndpointIn() {
+        return usbEndpointIn;
+    }
+
+    public UsbDeviceConnection getConnectionOut() {
+        return usbConnectionOut;
+    }
+    public UsbDeviceConnection getConnectionIn() {
+        return usbConnectionIn;
+    }
+
+    /********************************************************************/
+/*
+*       specific int to string getters
+*/
+
+    public String getDeviceName() {
+        return device.getDeviceName();
+    }
+
+    public int getInterfaceCount() {
+        return device.getInterfaceCount();
+    }
+
+    public int getVendorId() {
+        return device.getVendorId();
+    }
+
+    public int getDeviceId() {
+        return device.getDeviceId();
+    }
+
+    public int getProductId() {
+        return device.getProductId();
+    }
+
+    public int getUsbClass() {
+        return device.getDeviceClass();
+    }
+
+    public int getUsbSubClass() {
+        return device.getDeviceSubclass();
+    }
+
+    public int getUsbProtocol() {
+        return device.getDeviceProtocol();
+    }
+
+    public boolean checkAudioClass() {
+        return IS_AUDIO;
+    }
     @Override
     public String toString() {
         return new StringBuilder()
-                .append("Device name: ").append(getDeviceName())
+                .append("Device location: ").append(getDeviceName())
                 .append(", Interface count: ").append(getInterfaceCount())
                 .append(", VendorId: ").append(getVendorId())
                 .append(", DeviceId: ").append(getDeviceId())
@@ -53,36 +194,12 @@ public class DeviceContainer {
                 .append(", USB protocol: ").append(getUsbProtocol()).toString();
     }
 
-    /*
-    * specific getters
-    */
-    public String getDeviceName() {
-        return device.getDeviceName();
-    }
-    public int getInterfaceCount() {
-        return device.getInterfaceCount();
-    }
-    public int getVendorId() {
-        return device.getVendorId();
-    }
-    public int getDeviceId() {
-        return device.getDeviceId();
-    }
-    public int getProductId() {
-        return device.getProductId();
-    }
-    public int getUsbClass() {
-        return device.getDeviceClass();
-    }
-    public int getUsbSubClass() {
-        return device.getDeviceSubclass();
-    }
-    public int getUsbProtocol() {
-        return device.getDeviceProtocol();
-    }
+    /********************************************************************/
+/*
+*       NOTES REGARDING USB AUDIO DONGLE ATTACHED TO TEST DEVICE
+*/
 
 	/*
-	 * NOTES REGARDING USB AUDIO DONGLE ATTACHED TO TEST DEVICE
 	 * GeneralPlus Technology Inc ("7.1channel surround")
 	 * C-Media Electronics ("3D SOUND")
 	 * Sammy 5 says:

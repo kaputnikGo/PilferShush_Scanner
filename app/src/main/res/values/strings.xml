@@ -7,7 +7,10 @@
 
     <string name="dialog_button_save">Save</string>
     <string name="dialog_button_cancel">Cancel</string>
-    <string name="hello_world">Hello world!</string>
+    <string name="dialog_button_okay">OK</string>
+
+    <string name="dialog_storage_warn_title">Caution</string>
+    <string name="dialog_storage_warn_text">limited storage space for recording.</string>
 
     <string name="action_settings">Polling Speed</string>
     <string name="dialog_polling">Mic polling speed</string>
@@ -45,6 +48,7 @@
     <string name="dialog_storage_size">Print storage size</string>
     <string name="dialog_delete_empty_logs">Delete empty logs</string>
     <string name="dialog_delete_all_files">Delete all log files</string>
+    <string name="dialog_free_storage_size">Free storage space</string>
 
     <string name="dialog_cautioned">Cautioned List</string>
     <string name="action_services">get Services</string>
@@ -62,6 +66,7 @@
     <string name="debug_view_button_text">Detailed View</string>
     <string name="main_view_button_text">Simple View</string>
     <string name="main_scan_text">PilferShush scanner initialising.</string>
+    <string name="timer_text">timer - 00:00</string>
 
     <string name="action_sensitivity_settings">Sensitivity</string>
     <string name="dialog_sensitivity_text">Beacon loudness level</string>
