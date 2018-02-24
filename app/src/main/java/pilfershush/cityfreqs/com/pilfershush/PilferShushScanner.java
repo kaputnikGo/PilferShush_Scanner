@@ -158,9 +158,9 @@ public class PilferShushScanner {
         }
     }
 
-    protected void setFrequencyStep(int step) {
-        audioScanner.setFreqStep(step);
-        entryLogger("FreqStep changed to: " + step, false);
+    protected void setFrequencyStep(int freqStep) {
+        audioSettings.setFreqStep(freqStep);
+        entryLogger("Frequency Step changed to: " + freqStep, false);
     }
 
     protected void setMinMagnitude(double magnitude) {

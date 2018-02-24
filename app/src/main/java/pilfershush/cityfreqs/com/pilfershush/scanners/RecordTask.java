@@ -110,7 +110,7 @@ public class RecordTask extends AsyncTask<Void, Integer, String> {
             try {
                 audioRecord.startRecording();
                 logger("audioRecord started...");
-                audioRecord.setPositionNotificationPeriod(audioSettings.getBufferSize() / 2);
+                audioRecord.setPositionNotificationPeriod(audioSettings.getBufferSize());// / 2);
                 audioRecord.setRecordPositionUpdateListener(new AudioRecord.OnRecordPositionUpdateListener() {
                     public void onMarkerReached(AudioRecord audioRecord) {
                         logger("marker reached");

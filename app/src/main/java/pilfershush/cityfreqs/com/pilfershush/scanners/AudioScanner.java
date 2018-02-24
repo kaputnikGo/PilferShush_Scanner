@@ -32,17 +32,6 @@ public class AudioScanner {
         audioDetected = false;
     }
 
-    public void setFreqStep(int freqStep) {
-        if (freqStep > AudioSettings.MIN_FREQ_STEP ||
-                freqStep < AudioSettings.MAX_FREQ_STEP) {
-            this.freqStep = freqStep;
-        }
-        else {
-            // is a default...
-            this.freqStep = AudioSettings.DEFAULT_FREQ_STEP;
-        }
-    }
-
     public void setMinMagnitude(double magnitude) {
         freqDetector.setMagnitude(magnitude);
     }

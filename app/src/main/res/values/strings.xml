@@ -17,6 +17,8 @@
     <string name="polling_1_text">1 second</string>
     <string name="polling_2_text">2 seconds</string>
     <string name="polling_3_text">3 seconds</string>
+    <string name="polling_4_text">4 seconds</string>
+    <string name="polling_5_text">5 seconds</string>
     <string name="polling_default_text">6 secs (default)</string>
 
     <string name="action_audio_scan_settings">Audio Scan steps</string>
@@ -72,6 +74,7 @@
     <string name="dialog_sensitivity_text">Beacon loudness level</string>
     <string name="magnitude_80_text">80 dB (heavy traffic)</string>
     <string name="magnitude_90_text">90 dB (trucks, shouting)</string>
+    <string name="magnitude_93_text">93 dB (food mixer)</string>
     <string name="magnitude_100_text">100 dB (jack hammer, default)</string>
 
     <string name="action_window_settings">FFT Window</string>

@@ -50,7 +50,7 @@ public class MainActivity extends AppCompatActivity
 
 
     // dev internal version numbering
-    public static final String VERSION = "2.0.23";
+    public static final String VERSION = "2.0.24";
 
     private ViewSwitcher viewSwitcher;
     private boolean mainView;
@@ -458,11 +458,13 @@ public class MainActivity extends AppCompatActivity
     }
 
     private void populateMenuItems() {
-        pollSpeedList = new String[4];
+        pollSpeedList = new String[6];
         pollSpeedList[0] = getResources().getString(R.string.polling_1_text);
         pollSpeedList[1] = getResources().getString(R.string.polling_2_text);
         pollSpeedList[2] = getResources().getString(R.string.polling_3_text);
-        pollSpeedList[3] = getResources().getString(R.string.polling_default_text);
+        pollSpeedList[3] = getResources().getString(R.string.polling_4_text);
+        pollSpeedList[4] = getResources().getString(R.string.polling_5_text);
+        pollSpeedList[5] = getResources().getString(R.string.polling_default_text);
 
         freqSteps = new String[5];
         freqSteps[0] = getResources().getString(R.string.freq_step_10_text);
@@ -482,10 +484,11 @@ public class MainActivity extends AppCompatActivity
         windowTypes[3] = getResources().getString(R.string.dialog_window_fft_4);
         windowTypes[4] = getResources().getString(R.string.dialog_window_fft_5);
 
-        dbLevel = new String[3];
+        dbLevel = new String[4];
         dbLevel[0] = getResources().getString(R.string.magnitude_80_text);
         dbLevel[1] = getResources().getString(R.string.magnitude_90_text);
-        dbLevel[2] = getResources().getString(R.string.magnitude_100_text);
+        dbLevel[2] = getResources().getString(R.string.magnitude_93_text);
+        dbLevel[3] = getResources().getString(R.string.magnitude_100_text);
 
         storageAdmins = new String[4];
         storageAdmins[0] = getResources().getString(R.string.dialog_storage_size);
@@ -600,21 +603,9 @@ public class MainActivity extends AppCompatActivity
         dialogBuilder = new AlertDialog.Builder(this);
         dialogBuilder.setItems(pollSpeedList, new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialogInterface, int which) {
-                switch(which) {
-                    case 0:
-                        pilferShushScanner.setPollingSpeed(AudioSettings.SHORT_DELAY);
-                        break;
-                    case 1:
-                        pilferShushScanner.setPollingSpeed(AudioSettings.SEC_2_DELAY);
-                        break;
-                    case 2:
-                        pilferShushScanner.setPollingSpeed(AudioSettings.SEC_3_DELAY);
-                        break;
-                    case 3:
-                    default:
-                        pilferShushScanner.setPollingSpeed(AudioSettings.LONG_DELAY);
-                        break;
-                }
+                // 1000, 2000, 3000, 4000, 5000, 6000 (default) ms
+                pilferShushScanner.setPollingSpeed(AudioSettings.POLLING_DELAY[which]);
+                mainScanLogger("Polling speed (ms): " + AudioSettings.POLLING_DELAY[which], false);
             }
         });
         dialogBuilder.setTitle(R.string.dialog_polling);
@@ -626,25 +617,8 @@ public class MainActivity extends AppCompatActivity
         dialogBuilder = new AlertDialog.Builder(this);
         dialogBuilder.setItems(freqSteps, new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialogInterface, int which) {
-                switch(which) {
-                    case 0:
-                        pilferShushScanner.setFrequencyStep(AudioSettings.FREQ_STEP_10);
-                        break;
-                    case 1:
-                        pilferShushScanner.setFrequencyStep(AudioSettings.FREQ_STEP_25);
-                        break;
-                    case 2:
-                        pilferShushScanner.setFrequencyStep(AudioSettings.FREQ_STEP_50);
-                        break;
-                    case 3:
-                        pilferShushScanner.setFrequencyStep(AudioSettings.FREQ_STEP_75);
-                        break;
-                    case 4:
-                        pilferShushScanner.setFrequencyStep(AudioSettings.MAX_FREQ_STEP);
-                        break;
-                    default:
-                        pilferShushScanner.setFrequencyStep(AudioSettings.DEFAULT_FREQ_STEP);
-                }
+                pilferShushScanner.setFrequencyStep(AudioSettings.FREQ_STEPS[which]);
+                mainScanLogger("Frequency steps: " + AudioSettings.FREQ_STEPS[which], false);
             }
         });
 
@@ -678,19 +652,8 @@ public class MainActivity extends AppCompatActivity
         dialogBuilder = new AlertDialog.Builder(this);
         dialogBuilder.setItems(dbLevel, new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialogInterface, int which) {
-                switch(which) {
-                    case 0:
-                        pilferShushScanner.setMinMagnitude(AudioSettings.MAGNITUDE_80);
-                        break;
-                    case 1:
-                        pilferShushScanner.setMinMagnitude(AudioSettings.MAGNITUDE_90);
-                        break;
-                    case 2:
-                        pilferShushScanner.setMinMagnitude(AudioSettings.MAGNITUDE_100);
-                        break;
-                    default:
-                        pilferShushScanner.setMinMagnitude(AudioSettings.DEFAULT_MAGNITUDE);
-                }
+                pilferShushScanner.setMinMagnitude(AudioSettings.MAGNITUDES[which]);
+                mainScanLogger("Loudness level (dB): " + AudioSettings.DECIBELS[which], false);
             }
         });
         dialogBuilder.setTitle(R.string.dialog_sensitivity_text);

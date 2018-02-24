@@ -21,12 +21,8 @@ public class ProcessAudio {
     /********************************************************************/
 
     public boolean checkFrequency(int freq) {
-        if ((freq >= AudioSettings.DEFAULT_FREQUENCY_MIN) &&
-                (freq <= AudioSettings.DEFAULT_FREQUENCY_MAX)) {
-            // check if its a good number?
-            return checkFrequencyDivisor(freq);
-        }
-        return false;
+        return ((freq >= AudioSettings.DEFAULT_FREQUENCY_MIN) &&
+                (freq <= AudioSettings.DEFAULT_FREQUENCY_MAX));
     }
 
     public boolean hasFreqSequenceDuplicates(ArrayList<Integer> freqList) {
@@ -61,9 +57,11 @@ public class ProcessAudio {
 
     /********************************************************************/
 
+    /*
     private boolean checkFrequencyDivisor(int freq) {
-        return freq % AudioSettings.FREQ_DIVISOR == 0;
+        return freq % AudioSettings.getFreqStep() == 0;
     }
+    */
 
     @SuppressLint("UseSparseArrays")
     private boolean checkSequenceDuplicates(ArrayList<Integer> freqList) {

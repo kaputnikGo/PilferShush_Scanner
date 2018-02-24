@@ -26,31 +26,28 @@ public class AudioSettings {
     public static final int SECOND_FREQUENCY_MIN = 19000;
     public static final int SECOND_FREQUENCY_MAX = 22000;
 
-    // using dB SPL (sound pressure level) without distance
-    // db = 20 log10(goertzel_magnitude).
-    // mag_50, mag_70 are way too sensitive = false positives
-    //public static final double MAGNITUDE_50 = 500; // ~= 53.9794 dB
-    //public static final double MAGNITUDE_70 = 3000; // ~= 69.5425 dB
+    // below, rem'd, are way too sensitive = false positives
+    // public static final double MAGNITUDE_50 = 500; // ~= 53.9794 dB
+    // public static final double MAGNITUDE_70 = 3000; // ~= 69.5425 dB
 
-    public static final double MAGNITUDE_80 = 10000; // ~= 80.0000 dB
-    public static final double MAGNITUDE_90 = 30000; // ~= 89.5424 dB
-    public static final double MAGNITUDE_100 = 80000; // ~= 98.0618 dB
+    public static final double[] MAGNITUDES = new double[] {
+            10000, 30000, 50000, 80000
+    };
     public static final int DEFAULT_MAGNITUDE = 80000; // was 50000
-    // possible::
+    // using dB SPL (sound pressure level) without distance
     // db = 20 log10(goertzel_magnitude).
     // 50000 ~= 93.9794
     // 80000 ~= 98.0618
+    public static final int[] DECIBELS = new int[] {
+            80, 89, 93, 98
+    };
 
     // steps in the frequencies to consider as a coded signal and not noise
-    public static final int MIN_FREQ_STEP = 1;
-    //public static final int FREQ_STEP_5 = 5;
-    public static final int FREQ_STEP_10 = 10;
-    public static final int FREQ_STEP_25 = 25;
-    public static final int FREQ_STEP_50 = 50;
-    public static final int FREQ_STEP_75 = 75;
-    public static final int MAX_FREQ_STEP = 100;
+    // public static final int FREQ_STEP_5 = 5;
+    public static final int[] FREQ_STEPS = new int[] {
+            10, 25, 50, 75, 100
+    };
     public static final int DEFAULT_FREQ_STEP = 25;
-    public static final int FREQ_DIVISOR = 25;
 
     // possible number of audio signals to sequence (32 bits)
     //public static final int MAX_SEQUENCE_LENGTH = 32;
@@ -62,12 +59,10 @@ public class AudioSettings {
 
     public static final int DEFAULT_WINDOW_TYPE = 2;
 
-    // scanning delay for runner - never changed
     //public static final int MICRO_DELAY = 1; // for modulated code
-    public static final int SHORT_DELAY = 1000;
-    public static final int SEC_2_DELAY = 2000;
-    public static final int SEC_3_DELAY = 3000;
-    public static final int LONG_DELAY = 6000;
+    public static final int[] POLLING_DELAY = new int[] {
+            1000, 2000, 3000, 4000, 5000, 6000
+    };
 
     // vars for AudioRecord creation and use
     private int sampleRate;
@@ -79,6 +74,7 @@ public class AudioSettings {
 
     private int minFreq;
     private int maxFreq;
+    private int freqStep;
 
     private boolean writeFiles;
     private int USER_WINDOW_TYPE = DEFAULT_WINDOW_TYPE;
@@ -89,6 +85,7 @@ public class AudioSettings {
         this.writeFiles = writeFiles;
         minFreq = DEFAULT_FREQUENCY_MIN;
         maxFreq = DEFAULT_FREQUENCY_MAX;
+        freqStep = DEFAULT_FREQ_STEP;
     }
 
     public void setBasicAudioSettings(int sampleRate, int bufferSize, int encoding, int channelConfig, int channelCount) {
@@ -139,6 +136,13 @@ public class AudioSettings {
     }
     public int getMaxFreq() {
         return maxFreq;
+    }
+
+    public void setFreqStep(int freqStep) {
+        this.freqStep = freqStep;
+    }
+    public int getFreqStep() {
+        return freqStep;
     }
 
     public void setWriteFiles(boolean writeFiles) {
