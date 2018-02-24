@@ -111,6 +111,7 @@ public static final int HOTWORD = 1999; //  always-on software hotword detection
  */
     protected boolean determineInternalAudioType() {
         // guaranteed default for Android is 44.1kHz, PCM_16BIT, CHANNEL_IN_DEFAULT
+        int buffSize = 0;
         for (int rate : AudioSettings.SAMPLE_RATES) {
             for (short audioFormat : new short[] {
                     AudioFormat.ENCODING_PCM_16BIT,
@@ -122,8 +123,10 @@ public static final int HOTWORD = 1999; //  always-on software hotword detection
                         AudioFormat.CHANNEL_IN_STEREO }) {  // 12
                     try {
                         MainActivity.logger("Try rate " + rate + "Hz, bits: " + audioFormat + ", channelConfig: "+ channelConfig);
+                        buffSize = AudioRecord.getMinBufferSize(rate, channelConfig, audioFormat);
+                        // force buffSize to powersOfTwo if it isnt (ie.S5)
+                        buffSize = AudioSettings.getClosestPowersHigh(buffSize);
 
-                        int buffSize = AudioRecord.getMinBufferSize(rate, channelConfig, audioFormat);
                         if (buffSize != AudioRecord.ERROR_BAD_VALUE) {
                             AudioRecord recorder = new AudioRecord(
                                     audioSource,
@@ -159,6 +162,7 @@ public static final int HOTWORD = 1999; //  always-on software hotword detection
 
     protected boolean determineUsbAudioType(boolean hasUSB_audio) {
         // android should auto switch to using USB audio device as default...
+        int buffSize = 0;
         if (hasUSB_audio) {
             for (int rate : AudioSettings.SAMPLE_RATES) {
                 for (short audioFormat : new short[] {
@@ -171,8 +175,10 @@ public static final int HOTWORD = 1999; //  always-on software hotword detection
                             AudioFormat.CHANNEL_IN_STEREO }) { // 12
                         try {
                             MainActivity.logger("USB - try rate " + rate + "Hz, bits: " + audioFormat + ", channelConfig: "+ channelConfig);
+                            buffSize = AudioRecord.getMinBufferSize(rate, channelConfig, audioFormat);
+                            // force buffSize to powersOfTwo if it isnt (ie.S5)
+                            buffSize = AudioSettings.getClosestPowersHigh(buffSize);
 
-                            int buffSize = AudioRecord.getMinBufferSize(rate, channelConfig, audioFormat);
                             if (buffSize != AudioRecord.ERROR_BAD_VALUE) {
                                 AudioRecord recorder = new AudioRecord(
                                         audioSource,

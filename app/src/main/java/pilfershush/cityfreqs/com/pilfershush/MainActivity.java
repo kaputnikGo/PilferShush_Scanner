@@ -50,7 +50,7 @@ public class MainActivity extends AppCompatActivity
 
 
     // dev internal version numbering
-    public static final String VERSION = "2.0.21";
+    public static final String VERSION = "2.0.22";
 
     private ViewSwitcher viewSwitcher;
     private boolean mainView;
@@ -79,7 +79,6 @@ public class MainActivity extends AppCompatActivity
     private PendingIntent permissionIntent;
     private DeviceContainer deviceContainer;
     private UsbManager usbManager;
-    private boolean hasUSB;
 
     private boolean MIC_CHECKING;
     private boolean POLLING;
@@ -339,27 +338,20 @@ public class MainActivity extends AppCompatActivity
 	*/
 
     private boolean scanUsbDevices() {
-        // search for any attached usb devices that we can read properties,
-        // create a DeviceContainer for them.
-        // add a listener service in case user unplugs usb and audio gets re-routed (fdbk)
         //TODO
         logger("checking usb host for audio device.");
         usbManager = (UsbManager) getSystemService(Context.USB_SERVICE);
         HashMap<String, UsbDevice> deviceList = usbManager.getDeviceList();
         Iterator<UsbDevice> deviceIterator = deviceList.values().iterator();
 
-        boolean found = false;
-
         while(deviceIterator.hasNext()) {
             UsbDevice device = deviceIterator.next();
             deviceContainer = new DeviceContainer(device);
-            found = true;
             logger("USB: " + deviceContainer.toString());
+            return true;
         }
-        if (!found) logger("usb audio device not found, using internal.");
-        // clean up
-        // check if audio compliant device, then return
-        return found;
+        logger("usb audio device not found, using internal.");
+        return false;
     }
 
     private final BroadcastReceiver usbReceiver = new BroadcastReceiver() {
@@ -373,8 +365,6 @@ public class MainActivity extends AppCompatActivity
                         if ((deviceContainer != null) && (deviceContainer.hasDevice()))  {
                             //call method to set up device communication
                             if (usbManager.hasPermission(deviceContainer.getDevice())) {
-                                //
-                                hasUSB = true;
                                 // re-route audio to usb audio device
                                 toggleHeadset(true);
                                 logger(" has permission for USB device.");
@@ -383,8 +373,9 @@ public class MainActivity extends AppCompatActivity
                                 usbManager.requestPermission(deviceContainer.getDevice(), permissionIntent);
                             }
                         }
-                        // has no deviceContainer/device
-
+                        else {
+                            logger(" no USB deviceContainer / device.");
+                        }
                     }
                     else {
                         // re-route audio to phone hardware

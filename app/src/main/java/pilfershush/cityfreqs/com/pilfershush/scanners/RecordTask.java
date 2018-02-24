@@ -12,6 +12,8 @@ import pilfershush.cityfreqs.com.pilfershush.assist.AudioSettings;
 import pilfershush.cityfreqs.com.pilfershush.assist.WriteProcessor;
 import pilfershush.cityfreqs.com.pilfershush.scanners.FreqDetector.RecordTaskListener;
 
+import static android.os.Process.THREAD_PRIORITY_AUDIO;
+
 public class RecordTask extends AsyncTask<Void, Integer, String> {
     private static final String TAG = "RecordTask";
 
@@ -25,7 +27,6 @@ public class RecordTask extends AsyncTask<Void, Integer, String> {
     private int freqStepper;
     private int candidateFreq;
     private Integer[] tempBuffer;
-    private byte[] byteBuffer;
     private ArrayList<Integer[]> bufferStorage;
 
 
@@ -95,6 +96,8 @@ public class RecordTask extends AsyncTask<Void, Integer, String> {
 
     @Override
     protected String doInBackground(Void... paramArgs) {
+        android.os.Process.setThreadPriority(THREAD_PRIORITY_AUDIO);
+
         if (isCancelled()) {
             // check
             logger("isCancelled check");
@@ -167,7 +170,7 @@ public class RecordTask extends AsyncTask<Void, Integer, String> {
     /********************************************************************/
 
     private void magnitudeRecordScan(int windowType) {
-        // TODO so many type conversions (x3)
+        // TODO many type conversions (x2)
         // need to add diff version of scanning, not freqStepper version
         int bufferSize;
         if (bufferRead > 0) {
@@ -175,12 +178,10 @@ public class RecordTask extends AsyncTask<Void, Integer, String> {
 
             recordScan = new double[bufferSize]; // working array
             tempBuffer = new Integer[bufferSize]; // for bufferStorage scans
-            byteBuffer = new byte[bufferSize]; // for pcm file writes
 
             for (int i = 0; i < recordScan.length; i++) {
                 recordScan[i] = (double)bufferArray[i];
                 tempBuffer[i] = (int)bufferArray[i];
-                byteBuffer[i] = (byte)bufferArray[i];
             }
 
             // default value set to 2

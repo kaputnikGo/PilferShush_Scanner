@@ -1,6 +1,7 @@
 package pilfershush.cityfreqs.com.pilfershush.assist;
 
 
+import android.os.AsyncTask;
 import android.os.Environment;
 
 import java.io.BufferedOutputStream;
@@ -223,21 +224,51 @@ public class WriteProcessor {
     /*
         audio logging writes
      */
+    /********************************************************************/
 
-    public static void writeAudioFile(short[] shortBuffer, int bufferRead) {
-        if (shortBuffer != null) {
-            try {
-                if (writeWav) {
-                    writeWavBuffer(shortBuffer, bufferRead);
+    public static void writeAudioFile(final short[] shortBuffer, final int bufferRead) {
+            if (shortBuffer != null) {
+                //try {
+                    new AsyncFileWrite().execute(shortBuffer);
+                    /*
+                    if (writeWav) {
+                        writeWavBuffer(shortBuffer, bufferRead);
+                    }
+                    else {
+                        for (int i = 0; i < bufferRead; i++) {
+                            AUDIO_RAW_STREAM.writeShort(shortBuffer[i]);
+                        }
+                    }
+                    */
+                    /*
+                } catch (IOException e) {
+                    e.printStackTrace();
                 }
-                else {
-                    for (int i = 0; i < bufferRead; i++) {
-                        AUDIO_RAW_STREAM.writeShort(shortBuffer[i]);
+                */
+            }
+    }
+
+    private static class AsyncFileWrite extends AsyncTask<short[], Void, Void> {
+
+        @Override
+        protected Void doInBackground(short[]...buffer) {
+            //background
+            if (buffer.length > 0) {
+                try {
+                    if (writeWav) {
+                        writeWavBuffer(buffer[0], buffer.length);
+                    }
+                    else {
+                        for (int i = 0; i < buffer.length; i++) {
+                            AUDIO_RAW_STREAM.writeShort(buffer[0][i]);
+                        }
                     }
                 }
-            } catch (IOException e) {
-                e.printStackTrace();
+                catch (IOException e) {
+                    e.printStackTrace();
+                }
             }
+            return null;
         }
     }
 
