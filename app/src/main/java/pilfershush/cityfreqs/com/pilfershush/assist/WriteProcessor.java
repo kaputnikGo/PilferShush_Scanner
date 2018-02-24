@@ -228,9 +228,7 @@ public class WriteProcessor {
 
     public static void writeAudioFile(final short[] shortBuffer, final int bufferRead) {
             if (shortBuffer != null) {
-                //try {
-                    new AsyncFileWrite().execute(shortBuffer);
-                    /*
+                try {
                     if (writeWav) {
                         writeWavBuffer(shortBuffer, bufferRead);
                     }
@@ -239,34 +237,30 @@ public class WriteProcessor {
                             AUDIO_RAW_STREAM.writeShort(shortBuffer[i]);
                         }
                     }
-                    */
-                    /*
+
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
-                */
+
             }
     }
 
     private static class AsyncFileWrite extends AsyncTask<short[], Void, Void> {
-
         @Override
         protected Void doInBackground(short[]...buffer) {
             //background
-            if (buffer.length > 0) {
-                try {
-                    if (writeWav) {
-                        writeWavBuffer(buffer[0], buffer.length);
-                    }
-                    else {
-                        for (int i = 0; i < buffer.length; i++) {
-                            AUDIO_RAW_STREAM.writeShort(buffer[0][i]);
-                        }
+            try {
+                if (writeWav) {
+                    writeWavBuffer(buffer[0], buffer[0].length);
+                }
+                else {
+                    for (int i = 0; i < buffer[0].length; i++) {
+                        AUDIO_RAW_STREAM.writeShort(buffer[0][i]);
                     }
                 }
-                catch (IOException e) {
-                    e.printStackTrace();
-                }
+            }
+            catch (IOException e) {
+                e.printStackTrace();
             }
             return null;
         }
