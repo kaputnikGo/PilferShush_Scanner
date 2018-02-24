@@ -114,6 +114,7 @@ public class MainActivity extends AppCompatActivity
         mainScanText = (TextView) findViewById(R.id.main_scan_text);
         mainScanText.setTextColor(Color.parseColor("#00ff00"));
         mainScanText.setMovementMethod(new ScrollingMovementMethod());
+        mainScanText.setGravity(Gravity.BOTTOM);
 
         visualiserView = (AudioVisualiserView) findViewById(R.id.audio_visualiser_view);
 
@@ -395,7 +396,6 @@ public class MainActivity extends AppCompatActivity
         audioManager = (AudioManager)getSystemService(Context.AUDIO_SERVICE);
 
         timerText = (TextView) findViewById(R.id.timer_text);
-
         // on screen timer
         timerHandler = new Handler();
         timerRunnable = new Runnable() {
@@ -699,12 +699,12 @@ public class MainActivity extends AppCompatActivity
     }
 
     private void changeFFTWindowSettings() {
-        //TODO add logger text etc
         dialogBuilder = new AlertDialog.Builder(this);
         dialogBuilder.setItems(windowTypes, new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialogInterface, int which) {
                 // numerical values from 1-5
                 pilferShushScanner.setFFTWindowType(which + 1);
+                mainScanLogger("FFT Window set to: " + AudioSettings.FFT_WINDOWS[which], false);
             }
         });
         dialogBuilder.setTitle(R.string.dialog_window_text);

@@ -56,6 +56,10 @@ public class AudioSettings {
     //public static final int MAX_SEQUENCE_LENGTH = 32;
 
     // 1=Hann(ing), 2=Blackman, 3=Hamming, 4=Nuttall, 5=Blackman-Nuttall
+    public static final String[] FFT_WINDOWS = new String[] {
+            "Hann", "Blackman", "Hamming", "Nuttall", "Blackman-Nuttall"
+    };
+
     public static final int DEFAULT_WINDOW_TYPE = 2;
 
     // scanning delay for runner - never changed
