@@ -77,6 +77,7 @@ public class AudioSettings {
     private int maxFreq;
 
     private boolean writeFiles;
+    private int USER_WINDOW_TYPE = DEFAULT_WINDOW_TYPE;
 
     public AudioSettings(boolean writeFiles) {
         // convenience class to hold values for audio recording
@@ -141,6 +142,13 @@ public class AudioSettings {
     }
     public boolean getWriteFiles() {
         return writeFiles;
+    }
+
+    public void setUserWindowType(int userWindow) {
+        USER_WINDOW_TYPE = userWindow;
+    }
+    public int getUserWindowType() {
+        return USER_WINDOW_TYPE;
     }
 
     public String toString() {

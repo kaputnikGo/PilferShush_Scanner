@@ -168,6 +168,10 @@ public class PilferShushScanner {
         entryLogger("Magnitude level set: " + magnitude, false);
     }
 
+    protected void setFFTWindowType(int userWindow) {
+        audioSettings.setUserWindowType(userWindow);
+    }
+
     protected void runAudioScanner() {
         entryLogger("AudioScanning start...", false);
         scanBufferSize = 0;

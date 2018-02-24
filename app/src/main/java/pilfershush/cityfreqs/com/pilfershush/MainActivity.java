@@ -50,7 +50,7 @@ public class MainActivity extends AppCompatActivity
 
 
     // dev internal version numbering
-    public static final String VERSION = "2.0.22";
+    public static final String VERSION = "2.0.23";
 
     private ViewSwitcher viewSwitcher;
     private boolean mainView;
@@ -71,6 +71,7 @@ public class MainActivity extends AppCompatActivity
     private String[] pollSpeedList;
     private String[] freqSteps;
     private String[] freqRanges;
+    private String[] windowTypes;
     private String[] dbLevel;
     private String[] storageAdmins;
 
@@ -243,6 +244,9 @@ public class MainActivity extends AppCompatActivity
                 return true;
             case R.id.action_sensitivity_settings:
                 changeSensitivitySettings();
+                return true;
+            case R.id.action_fft_window_settings:
+                changeFFTWindowSettings();
                 return true;
             case R.id.action_audio_beacons:
                 hasAudioBeaconAppsList();
@@ -471,6 +475,13 @@ public class MainActivity extends AppCompatActivity
         freqRanges[0] = getResources().getString(R.string.freq_range_one);
         freqRanges[1] = getResources().getString(R.string.freq_range_two);
 
+        windowTypes = new String[5];
+        windowTypes[0] = getResources().getString(R.string.dialog_window_fft_1);
+        windowTypes[1] = getResources().getString(R.string.dialog_window_fft_2);
+        windowTypes[2] = getResources().getString(R.string.dialog_window_fft_3);
+        windowTypes[3] = getResources().getString(R.string.dialog_window_fft_4);
+        windowTypes[4] = getResources().getString(R.string.dialog_window_fft_5);
+
         dbLevel = new String[3];
         dbLevel[0] = getResources().getString(R.string.magnitude_80_text);
         dbLevel[1] = getResources().getString(R.string.magnitude_90_text);
@@ -683,6 +694,20 @@ public class MainActivity extends AppCompatActivity
             }
         });
         dialogBuilder.setTitle(R.string.dialog_sensitivity_text);
+        alertDialog = dialogBuilder.create();
+        alertDialog.show();
+    }
+
+    private void changeFFTWindowSettings() {
+        //TODO add logger text etc
+        dialogBuilder = new AlertDialog.Builder(this);
+        dialogBuilder.setItems(windowTypes, new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialogInterface, int which) {
+                // numerical values from 1-5
+                pilferShushScanner.setFFTWindowType(which + 1);
+            }
+        });
+        dialogBuilder.setTitle(R.string.dialog_window_text);
         alertDialog = dialogBuilder.create();
         alertDialog.show();
     }

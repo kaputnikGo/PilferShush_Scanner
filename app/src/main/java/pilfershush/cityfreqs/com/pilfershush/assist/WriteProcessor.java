@@ -1,7 +1,6 @@
 package pilfershush.cityfreqs.com.pilfershush.assist;
 
 
-import android.os.AsyncTask;
 import android.os.Environment;
 
 import java.io.BufferedOutputStream;
@@ -227,6 +226,7 @@ public class WriteProcessor {
     /********************************************************************/
 
     public static void writeAudioFile(final short[] shortBuffer, final int bufferRead) {
+
             if (shortBuffer != null) {
                 try {
                     if (writeWav) {
@@ -241,29 +241,8 @@ public class WriteProcessor {
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
+            }
 
-            }
-    }
-
-    private static class AsyncFileWrite extends AsyncTask<short[], Void, Void> {
-        @Override
-        protected Void doInBackground(short[]...buffer) {
-            //background
-            try {
-                if (writeWav) {
-                    writeWavBuffer(buffer[0], buffer[0].length);
-                }
-                else {
-                    for (int i = 0; i < buffer[0].length; i++) {
-                        AUDIO_RAW_STREAM.writeShort(buffer[0][i]);
-                    }
-                }
-            }
-            catch (IOException e) {
-                e.printStackTrace();
-            }
-            return null;
-        }
     }
 
     public void closeWriteFile() {

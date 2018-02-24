@@ -104,7 +104,7 @@ public class RecordTask extends AsyncTask<Void, Integer, String> {
             return "isCancelled()";
         }
         // check audioRecord object first
-        // TODO getting a couple of RecordThread: buffer overflow warnings in adb at start of record
+        // TODO getting a couple of RecordThread: buffer overflow warnings etc in adb at start of record
 
         if ((audioRecord != null) || (audioRecord.getState() == AudioRecord.STATE_INITIALIZED)) {
             try {
@@ -117,7 +117,7 @@ public class RecordTask extends AsyncTask<Void, Integer, String> {
                     }
 
                     public void onPeriodicNotification(AudioRecord audioRecord) {
-                        magnitudeRecordScan(AudioSettings.DEFAULT_WINDOW_TYPE);
+                        magnitudeRecordScan(audioSettings.getUserWindowType());
                         MainActivity.visualiserView.updateVisualiser(bufferArray); //byteBuffer
                     }
                 });

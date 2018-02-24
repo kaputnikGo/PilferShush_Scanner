@@ -73,4 +73,13 @@
     <string name="magnitude_80_text">80 dB (heavy traffic)</string>
     <string name="magnitude_90_text">90 dB (trucks, shouting)</string>
     <string name="magnitude_100_text">100 dB (jack hammer, default)</string>
+
+    <string name="action_window_settings">FFT Window</string>
+    <string name="dialog_window_text">FFT Window type</string>
+    <string name="dialog_window_fft_1">Hann</string>
+    <string name="dialog_window_fft_2">Blackman (default)</string>
+    <string name="dialog_window_fft_3">Hamming</string>
+    <string name="dialog_window_fft_4">Nuttall</string>
+    <string name="dialog_window_fft_5">Blackman-Nuttall</string>
+
 </resources>
