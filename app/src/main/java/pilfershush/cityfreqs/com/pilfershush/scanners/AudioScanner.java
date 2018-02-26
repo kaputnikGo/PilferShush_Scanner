@@ -87,6 +87,13 @@ public class AudioScanner {
         return processAudio.hasFreqSequenceDuplicates(frequencySequence);
     }
 
+    public int getFrequencySequenceSize() {
+        if (frequencySequence != null) {
+            return frequencySequence.size();
+        }
+        return 0;
+    }
+
     public String getFrequencySequenceLogic() {
         return "Found possible binary logic: \n" + processAudio.getLogicZero()
                 + "\n" + processAudio.getLogicOne() + "\n";

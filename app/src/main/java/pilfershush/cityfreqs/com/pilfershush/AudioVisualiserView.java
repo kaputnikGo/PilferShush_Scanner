@@ -1,11 +1,8 @@
 package pilfershush.cityfreqs.com.pilfershush;
 
 import android.content.Context;
-import android.graphics.Bitmap;
-import android.graphics.Bitmap.Config;
 import android.graphics.Canvas;
 import android.graphics.Color;
-import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.PorterDuff.Mode;
 import android.graphics.PorterDuffXfermode;
@@ -13,13 +10,11 @@ import android.graphics.Rect;
 import android.util.AttributeSet;
 import android.view.View;
 
+import java.util.LinkedList;
+
 import pilfershush.cityfreqs.com.pilfershush.assist.AudioSettings;
 
 public class AudioVisualiserView extends View {
-    private float[] mPoints;
-    private Bitmap mCanvasBitmap;
-    private Canvas mCanvas;
-    private Matrix mMatrix;
     private Rect mRect = new Rect();
     private int rectMidHeight;
     private Paint mForePaint = new Paint();
@@ -35,6 +30,13 @@ public class AudioVisualiserView extends View {
     private static final int CAUTION_LINE_MEDIAN = 90;
     private static final int CAUTION_MAX = 128;
 
+    //
+    private static final int HISTORY_SIZE = 6;
+    private static final float MAX_AMPLITUDE_TO_DRAW = 8192.0f;
+    private final LinkedList<short[]> mAudioData = new LinkedList<short[]>();
+    private int colourDelta;
+    private int brightness;
+
     public AudioVisualiserView(Context context) {
         super(context);
         init();
@@ -49,47 +51,42 @@ public class AudioVisualiserView extends View {
     }
 
     private void init() {
-        mForePaint.setStrokeWidth(2f); // 1f
-        mForePaint.setAntiAlias(false); // true
-        mForePaint.setColor(Color.rgb(128, 166, 206));
+        colourDelta = 0;
+        brightness = 0;
+        mForePaint.setStyle(Paint.Style.STROKE);
+        mForePaint.setStrokeWidth(6f);
+        mForePaint.setAntiAlias(false);
+        mForePaint.setColor(Color.argb(brightness,128, 166, 206));
 
         mCautionPaint.setColor(Color.argb(238, 255, 0, 0));
         mCautionPaint.setXfermode(new PorterDuffXfermode(Mode.MULTIPLY));
         mCautionPaint.setStrokeWidth(CAUTION_LINE_WIDTH);
 
-        mMatrix = new Matrix();
         rectMidHeight = 0;
-
-        cautionLines = new float[CAUTION_MAX];
-        cautionLines[0] = 0;
-        cautionLines[1] = 0;
-        cautionLines[2] = 0;
-        cautionLines[3] = 0;
-
         lineCounter = 0;
         lineSpacer = 0;
         freqValue = 0;
+        clearFrequencyCaution();
     }
 
-    public void updateVisualiser(short[] shortBuffer) {
+    public synchronized void updateVisualiser(short[] buffer) {
+        short[] newBuffer;
         mRect.set(0, 0, getWidth(), getHeight());
         rectMidHeight = mRect.height() / 2;
 
-        if (mPoints == null || mPoints.length < shortBuffer.length * MULTIPLIER) {
-            mPoints = new float[shortBuffer.length * MULTIPLIER];
+        // keep a history for fading effect.
+        if (mAudioData.size() == HISTORY_SIZE) {
+            newBuffer = mAudioData.removeFirst();
+            System.arraycopy(buffer, 0, newBuffer, 0, buffer.length);
+        } else {
+            newBuffer = buffer.clone();
         }
-
-        for (int i = 0; i < shortBuffer.length - 1; i++) {
-            mPoints[i * MULTIPLIER] = mRect.width() * i / (shortBuffer.length - 1);
-            mPoints[i * MULTIPLIER + 1] = rectMidHeight + ((byte)(shortBuffer[i] + RANGE)) * (rectMidHeight) / RANGE;
-            mPoints[i * MULTIPLIER + 2] = mRect.width() * (i + 1) / (shortBuffer.length - 1);
-            mPoints[i * MULTIPLIER + 3] = rectMidHeight + ((byte)(shortBuffer[i + 1] + RANGE)) * (rectMidHeight) / RANGE;
-        }
+        mAudioData.addLast(newBuffer);
+        // Update the display.
         invalidate();
     }
 
     public void frequencyCaution(int frequency) {
-        // flash something or other
         // canvas.drawLine(line.startX, line.startY, line.stopX, line.stopY, paint);
         lineSpacer = RANGE - (lineCounter * (CAUTION_LINE_WIDTH + 2));
         if (lineSpacer <= 0) lineSpacer = 0;
@@ -109,24 +106,41 @@ public class AudioVisualiserView extends View {
         }
     }
 
+    public void clearFrequencyCaution() {
+        cautionLines = new float[CAUTION_MAX];
+        cautionLines[0] = 0;
+        cautionLines[1] = 0;
+        cautionLines[2] = 0;
+        cautionLines[3] = 0;
+    }
+
     @Override
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
-        if (mPoints == null) {
-            MainActivity.logger("no audio to draw");
-            return;
-        }
-        if (mCanvasBitmap == null) {
-            mCanvasBitmap = Bitmap.createBitmap(canvas.getWidth(), canvas.getHeight(), Config.ARGB_8888);
-        }
-        if (mCanvas == null) {
-            mCanvas = new Canvas(mCanvasBitmap);
-        }
-        //clear previous drawings
-        mCanvas.drawColor(Color.TRANSPARENT, Mode.CLEAR);
-        mCanvas.drawLines(mPoints, mForePaint);
+        colourDelta = 255 / (HISTORY_SIZE + 1);
+        brightness = colourDelta;
 
-        canvas.drawBitmap(mCanvasBitmap, mMatrix, null);
+        for (short[] buffer : mAudioData) {
+            mForePaint.setColor(Color.argb(brightness,128, 166, 206));
+            float lastX = -1;
+            float lastY = -1;
+            float centerY = getHeight() / 2;
+
+            // only draw lines that align with pixel boundaries.
+            for (int x = 0; x < getWidth(); x++) {
+                int index = (int) ((x / getWidth()) * buffer.length);
+                short sample = buffer[index];
+                float y = (sample / MAX_AMPLITUDE_TO_DRAW) * centerY + centerY;
+
+                if (lastX != -1) {
+                    canvas.drawLine(lastX, lastY, x, y, mForePaint);
+                }
+                lastX = x;
+                lastY = y;
+            }
+            brightness += colourDelta;
+        }
+        // any caution lines draw here
         canvas.drawLines(cautionLines, mCautionPaint);
     }
 }

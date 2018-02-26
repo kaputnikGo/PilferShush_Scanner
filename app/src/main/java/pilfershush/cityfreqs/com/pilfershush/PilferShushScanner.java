@@ -263,6 +263,10 @@ public class PilferShushScanner {
         return audioScanner.hasFrequencySequence();
     }
 
+    protected int getFrequencySequenceSize() {
+        return audioScanner.getFrequencySequenceSize();
+    }
+
     protected String getModFrequencyLogic() {
         return audioScanner.getFrequencySequenceLogic();
     }

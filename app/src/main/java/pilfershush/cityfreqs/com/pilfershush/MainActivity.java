@@ -55,7 +55,7 @@ public class MainActivity extends AppCompatActivity
     private static final int REQUEST_MULTIPLE_PERMISSIONS = 123;
 
     // dev internal version numbering
-    public static final String VERSION = "2.0.25";
+    public static final String VERSION = "2.0.26";
 
     private ViewSwitcher viewSwitcher;
     private boolean mainView;
@@ -758,10 +758,11 @@ public class MainActivity extends AppCompatActivity
             }
         }
         else {
-
             SCANNING = true;
             startTime = System.currentTimeMillis();
             timerHandler.postDelayed(timerRunnable, 0);
+            // clear any caution lines from previous session
+            visualiserView.clearFrequencyCaution();
             runScanner();
             wakeLock.acquire();
         }
@@ -809,14 +810,18 @@ public class MainActivity extends AppCompatActivity
         mainScanLogger("Stop listening for audio.", false);
 
         if (pilferShushScanner.hasAudioScanSequence()) {
-            mainScanLogger("Detected audio beacon signal: \n", true);
+            mainScanLogger("\n Detected possible n-uhf audio. \n", true);
+
+            // to main debug view candidate numbers for logic 1,0
             mainScanLogger(pilferShushScanner.getModFrequencyLogic(), true);
 
-            // all modfreq captures
-            mainScanLogger("All freq logic entries: \n", true);
-            mainScanLogger(pilferShushScanner.getFreqSeqLogicEntries(), true);
+            // all captures to detailed view:
+            pilferShushScanner.getFreqSeqLogicEntries();
 
-            // a debug, output in order of capture:
+            // simple report to main logger
+            mainScanLogger("Frequency list size: " + pilferShushScanner.getFrequencySequenceSize(), true);
+
+            // output in order of capture sent to log file:
             writeLogger("Original sequence as transmitted:");
             writeLogger(pilferShushScanner.getFrequencySequence());
         }
