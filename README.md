@@ -36,3 +36,6 @@ Screenshots (as of 2.0.26)
 
 - Post capture
 <img src="https://github.com/kaputnikGo/PilferShush_prod/blob/master/images/post_capture.jpg" height="612px" />
+
+- Option menu
+<img src="https://github.com/kaputnikGo/PilferShush_prod/blob/master/images/option-menu.jpg" height="612px" />
