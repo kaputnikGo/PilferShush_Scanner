@@ -115,12 +115,23 @@ public class PilferShushScanner {
     }
 
     protected void resumeLogWrite() {
-        if (audioSettings.getWriteFiles()) {
-            writeProcessor.prepareLogToFile();
+        if (audioSettings == null) {
+            //skip as a resume call
+            return;
+        }
+        else {
+            if (audioSettings.getWriteFiles()) {
+                writeProcessor.prepareLogToFile();
+            }
         }
     }
 
     protected void closeLogWrite() {
+        // handle onPause from perms requests
+        if (audioSettings == null) {
+            //skip as a resume call
+            return;
+        }
         writeProcessor.closeLogFile();
     }
 

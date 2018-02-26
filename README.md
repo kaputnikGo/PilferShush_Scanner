@@ -5,7 +5,7 @@ Test application for researching methods of discovering use of audio beacons.
 Proper for Android Studio build/release  
 Cleaning for F-Droid fork
 
-   vers. 2.0.23
+   vers. 2.0.25
    - min API 18 (4.3)
    - target API 23 (6.x)
    - compiled API 26 (8.x)
@@ -18,5 +18,6 @@ Cleaning for F-Droid fork
  TODO:
  - WAV file proper
  - USB Audio routing test
+ - build for API 26, 8.x, 'O' and up features
 
 # 2018 Kaputnik Go

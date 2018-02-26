@@ -15,8 +15,8 @@ import android.hardware.usb.UsbManager;
 import android.media.AudioManager;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.PowerManager;
 import android.support.v4.app.ActivityCompat;
-import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.text.Spannable;
 import android.text.method.ScrollingMovementMethod;
@@ -30,10 +30,14 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.Toast;
 import android.widget.ViewSwitcher;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 
 import pilfershush.cityfreqs.com.pilfershush.assist.AudioSettings;
 import pilfershush.cityfreqs.com.pilfershush.assist.DeviceContainer;
@@ -48,9 +52,10 @@ public class MainActivity extends AppCompatActivity
     // not until propered
     private static final boolean WRITE_WAV = false;
 
+    private static final int REQUEST_MULTIPLE_PERMISSIONS = 123;
 
     // dev internal version numbering
-    public static final String VERSION = "2.0.24";
+    public static final String VERSION = "2.0.25";
 
     private ViewSwitcher viewSwitcher;
     private boolean mainView;
@@ -85,6 +90,9 @@ public class MainActivity extends AppCompatActivity
     private boolean POLLING;
     private boolean SCANNING;
 
+    private PowerManager powerManager;
+    private PowerManager.WakeLock wakeLock;
+    private HeadsetIntentReceiver headsetReceiver;
     private PilferShushScanner pilferShushScanner;
     private AudioManager audioManager;
     private AudioManager.OnAudioFocusChangeListener audioFocusListener;
@@ -100,6 +108,9 @@ public class MainActivity extends AppCompatActivity
         setContentView(R.layout.activity_main);
         viewSwitcher = (ViewSwitcher) findViewById(R.id.main_view_switcher);
         mainView = true;
+
+        headsetReceiver = new HeadsetIntentReceiver();
+        powerManager = (PowerManager) this.getSystemService(Context.POWER_SERVICE);
 
         pilferShushScanner = new PilferShushScanner();
         SCANNING = false;
@@ -167,16 +178,46 @@ public class MainActivity extends AppCompatActivity
         // check API version, above 23 permissions are asked at runtime
         // if API version < 23 (6.x) fallback is manifest.xml file permission declares
         if (android.os.Build.VERSION.SDK_INT > android.os.Build.VERSION_CODES.LOLLIPOP) {
-            if (ActivityCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO)
-                    == PackageManager.PERMISSION_DENIED) {
-                requestRecordAudioPermission();
+
+            List<String> permissionsNeeded = new ArrayList<String>();
+            final List<String> permissionsList = new ArrayList<String>();
+
+            if (!addPermission(permissionsList, Manifest.permission.RECORD_AUDIO))
+                permissionsNeeded.add("Record Audio");
+            if (!addPermission(permissionsList, Manifest.permission.WRITE_EXTERNAL_STORAGE))
+                permissionsNeeded.add("Save Audio Files");
+
+            if (permissionsList.size() > 0) {
+                if (permissionsNeeded.size() > 0) {
+                    // Need Rationale
+                    String message = "Permissions request: " + permissionsNeeded.get(0);
+                    for (int i = 1; i < permissionsNeeded.size(); i++) {
+                        message = message + ", " + permissionsNeeded.get(i);
+                    }
+                    showPermissionsDialog(message,
+                            new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int which) {
+                                    ActivityCompat.requestPermissions(MainActivity.this,
+                                            permissionsList.toArray(new String[permissionsList.size()]),
+                                            REQUEST_MULTIPLE_PERMISSIONS);
+                                }
+                            });
+                    return;
+                }
+                ActivityCompat.requestPermissions(this,
+                        permissionsList.toArray(new String[permissionsList.size()]),
+                        REQUEST_MULTIPLE_PERMISSIONS);
+                return;
             }
             else {
                 // assume already runonce, has permissions
                 initPilferShush();
             }
+
         }
         else {
+            // pre API 23
             initPilferShush();
         }
     }
@@ -184,23 +225,28 @@ public class MainActivity extends AppCompatActivity
     @Override
     protected void onResume() {
         super.onResume();
+        IntentFilter filter = new IntentFilter(Intent.ACTION_HEADSET_PLUG);
+        registerReceiver(headsetReceiver, filter);
         audioManager = (AudioManager)getSystemService(Context.AUDIO_SERVICE);
         // refocus app, ready for fresh scanner run
-        //TODO
+        toggleHeadset(false); // default state at init
+        audioFocusCheck();
         pilferShushScanner.resumeLogWrite();
     }
 
     @Override
     protected void onPause() {
         super.onPause();
-        //TODO
-        // sort out things here, clean up and ready for a possible restart/refocus
+        // backgrounded, stop recording, possible audio_focus loss due to telephony...
+        unregisterReceiver(headsetReceiver);
+        interruptRequestAudio();
         pilferShushScanner.closeLogWrite();
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        pilferShushScanner.closeLogWrite();
         pilferShushScanner.onDestroy();
     }
 
@@ -275,53 +321,53 @@ public class MainActivity extends AppCompatActivity
 /*
  * 	INIT
  */
-    private void requestRecordAudioPermission() {
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO)
-                != PackageManager.PERMISSION_GRANTED) {
-            // request the permission.
-            ActivityCompat.requestPermissions(this,
-                    new String[]{Manifest.permission.RECORD_AUDIO}, 1);
-        }
+
+    private void showPermissionsDialog(String message, DialogInterface.OnClickListener okListener) {
+        new AlertDialog.Builder(MainActivity.this)
+                .setMessage(message)
+                .setPositiveButton("OK", okListener)
+                .setNegativeButton("Cancel", null)
+                .create()
+                .show();
     }
 
-    private void requestExtStorageWritePermission() {
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE)
-                != PackageManager.PERMISSION_GRANTED) {
-            // request the permission.
-            ActivityCompat.requestPermissions(this,
-                    new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, 2);
+    private boolean addPermission(List<String> permissionsList, String permission) {
+        if (ActivityCompat.checkSelfPermission(this, permission) != PackageManager.PERMISSION_GRANTED) {
+            permissionsList.add(permission);
+            // Check for Rationale Option
+            if (!ActivityCompat.shouldShowRequestPermissionRationale(this, permission))
+                return false;
         }
+        return true;
     }
 
     @Override
     public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
-        if (requestCode == 1) {
-            // If request is cancelled, the result arrays are empty.
-            // case:1 == RECORD_AUDIO permission
-            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                entryLogger("App record audio permission granted.", false);
-                initPilferShush();
+        switch (requestCode) {
+            case REQUEST_MULTIPLE_PERMISSIONS: {
+                Map<String, Integer> perms = new HashMap<String, Integer>();
+                // Initial
+                perms.put(Manifest.permission.RECORD_AUDIO, PackageManager.PERMISSION_GRANTED);
+                perms.put(Manifest.permission.WRITE_EXTERNAL_STORAGE, PackageManager.PERMISSION_GRANTED);
+                // Fill with results
+                for (int i = 0; i < permissions.length; i++) {
+                    perms.put(permissions[i], grantResults[i]);
+                }
+                // Check for RECORD_AUDIO
+                if (perms.get(Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED
+                        && perms.get(Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED) {
+                    // All Permissions Granted
+                    initPilferShush();
+                } else
+                    {
+                    // Permission Denied
+                    Toast.makeText(MainActivity.this, "Some Permissions Denied", Toast.LENGTH_SHORT)
+                            .show();
+                }
             }
-            else {
-                entryLogger("App record audio permission denied.", true);
-                // no point in running the app ?
-                // have a non recording state, just an app checker?
-                finish();
-            }
-        }
-        else if (requestCode == 2) {
-            // If request is cancelled, the result arrays are empty.
-            // case:2 == WRITE_EXTERNAL_STORAGE permission
-            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                entryLogger("Write external storage permission granted.", false);
-            }
-            else {
-                entryLogger("Write external storage permission denied, using internal.", true);
-                // fall back to internal
-            }
-        }
-        else {
-            super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+            break;
+            default:
+                super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         }
     }
 
@@ -414,7 +460,7 @@ public class MainActivity extends AppCompatActivity
             pilferShushScanner.checkScanner();
             MIC_CHECKING = false;
             toggleHeadset(false); // default state at init
-            quickAudioFocusCheck();
+            audioFocusCheck();
             initAudioFocusListener();
             populateMenuItems();
             reportInitialState();
@@ -684,31 +730,46 @@ public class MainActivity extends AppCompatActivity
         return android.text.format.Formatter.formatShortFileSize(this, pilferShushScanner.getFreeStorageSize());
     }
 
+    private void interruptRequestAudio() {
+        // system app requests audio focus, respond here
+        mainScanLogger("AudioFocus interrupt request.", true);
+        if (SCANNING) {
+            toggleScanning();
+        }
+    }
+
 
     /********************************************************************/
 /*
  * ACTION SCANS
  */
     private void toggleScanning() {
-        logger("Scanning button pressed");
+        if (wakeLock == null) {
+            wakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, TAG);
+        }
         if (SCANNING) {
             SCANNING = false;
             timerHandler.removeCallbacks(timerRunnable);
             timerText.setText("timer - 00:00");
             stopScanner();
+            if (wakeLock.isHeld()) {
+                wakeLock.release(); // this
+                wakeLock = null;
+            }
         }
         else {
+
             SCANNING = true;
             startTime = System.currentTimeMillis();
             timerHandler.postDelayed(timerRunnable, 0);
             runScanner();
+            wakeLock.acquire();
         }
     }
 
     private void runScanner() {
         runScansButton.setText("SCANNING...");
         runScansButton.setBackgroundColor(Color.RED);
-
         mainScanLogger("Running scans on user installed apps...", false);
 
         // two diff methods of doing same thing... lols
@@ -745,7 +806,6 @@ public class MainActivity extends AppCompatActivity
         pilferShushScanner.stopAudioScanner();
         runScansButton.setText("Run Scanner");
         runScansButton.setBackgroundColor(Color.LTGRAY);
-
         mainScanLogger("Stop listening for audio.", false);
 
         if (pilferShushScanner.hasAudioScanSequence()) {
@@ -816,9 +876,9 @@ public class MainActivity extends AppCompatActivity
 /*
  * 	AUDIO
  */
-    private void quickAudioFocusCheck() {
+    private void audioFocusCheck() {
         // this may not work as SDKs requesting focus may not get it cos we already have it?
-
+        // also: getting MIC access does not require getting AUDIO_FOCUS
         entryLogger("AudioFocus check...", false);
         int result = audioManager.requestAudioFocus(audioFocusListener,
                 AudioManager.STREAM_MUSIC,
@@ -854,7 +914,7 @@ public class MainActivity extends AppCompatActivity
     private void toggleMicCheck() {
         if (POLLING) {
             // do not do this as well
-            entryLogger("DO NOT CHECK WHEN POLLING", true);
+            entryLogger("DO NOT MIC CHECK WHEN POLLING", true);
             return;
         }
 
@@ -876,7 +936,6 @@ public class MainActivity extends AppCompatActivity
 
     private void togglePollingCheck() {
         if (MIC_CHECKING) {
-            // do not do this as well
             entryLogger("DO NOT POLL WHEN MIC CHECKING", true);
             return;
         }
@@ -893,15 +952,6 @@ public class MainActivity extends AppCompatActivity
     }
 
     private void initAudioFocusListener() {
-        //Audio Focus Listener: STATE
-        //focusText.setText("Audio Focus Listener: running.");
-        //TODO
-        // proper notifications sent to audioManger and UI...
-
-        // eg. use Do/While loop in onAudioFocusChange() method:
-        // do (if(focusChange == 1) runnable listener @ 60ms)
-        // while (focusChange != -1)
-
         audioFocusListener = new AudioManager.OnAudioFocusChangeListener() {
             @Override
             public void onAudioFocusChange(int focusChange) {
@@ -911,16 +961,19 @@ public class MainActivity extends AppCompatActivity
                         // loss for unknown duration
                         focusText.setText("Audio Focus Listener: LOSS.");
                         audioManager.abandonAudioFocus(audioFocusListener);
+                        interruptRequestAudio();
                         break;
                     case AudioManager.AUDIOFOCUS_LOSS_TRANSIENT:
                         // -2
                         // temporary loss ? API docs says a "transient loss"!
                         focusText.setText("Audio Focus Listener: LOSS_TRANSIENT.");
+                        interruptRequestAudio();
                         break;
                     case AudioManager.AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK:
                         // -3
                         // loss to other audio source, this can duck for the short duration if it wants
                         focusText.setText("Audio Focus Listener: LOSS_TRANSIENT_DUCK.");
+                        interruptRequestAudio();
                         break;
                     case AudioManager.AUDIOFOCUS_REQUEST_FAILED:
                         // 0
@@ -949,6 +1002,26 @@ public class MainActivity extends AppCompatActivity
                 }
             }
         };
+    }
+
+    private class HeadsetIntentReceiver extends BroadcastReceiver {
+        @Override public void onReceive(Context context, Intent intent) {
+            if (intent.getAction().equals(Intent.ACTION_HEADSET_PLUG)) {
+                int state = intent.getIntExtra("state", -1);
+                switch (state) {
+                    case 0:
+                        mainScanLogger("Headset is unplugged, mute output", false);
+                        toggleHeadset(false);
+                        break;
+                    case 1:
+                        mainScanLogger("Headset is plugged in.", false);
+                        toggleHeadset(true);
+                        break;
+                    default:
+                        mainScanLogger("Headset state unknown", false);
+                }
+            }
+        }
     }
 
     /********************************************************************/
