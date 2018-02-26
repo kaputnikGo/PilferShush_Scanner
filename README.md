@@ -21,3 +21,18 @@ Cleaning for F-Droid fork
  - build for API 26, 8.x, 'O' and up features
 
 # 2018 Kaputnik Go
+
+
+Screenshots (as of 2.0.26)
+
+- App open
+<img src="https://github.com/kaputnikGo/PilferShush_prod/blob/master/images/app-open.jpg" width="auto" height="50%" />
+
+- Detailed View
+<img src="https://github.com/kaputnikGo/PilferShush_prod/blob/master/images/detailed-view.jpg" width="auto" height="50%" />
+
+- Capture live
+<img src="https://github.com/kaputnikGo/PilferShush_prod/blob/master/images/capture-live.jpg" width="auto" height="50%" />
+
+- Post capture
+<img src="https://github.com/kaputnikGo/PilferShush_prod/blob/master/images/post_capture.jpg" width="auto" height="50%" />
