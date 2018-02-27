@@ -4,16 +4,18 @@ package pilfershush.cityfreqs.com.pilfershush.assist;
 import android.os.Environment;
 
 import java.io.BufferedOutputStream;
+import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.OutputStream;
 import java.io.OutputStreamWriter;
-import java.io.RandomAccessFile;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
+import java.nio.channels.FileChannel;
+import java.nio.charset.Charset;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
@@ -33,12 +35,13 @@ public class WriteProcessor {
     private File extDirectory;
 
     private String audioFilename;
+    private String waveFilename;
     private String logFilename;
     private String sessionFilename;
     private static boolean writeWav;
 
     public static File AUDIO_OUTPUT_FILE;
-    public static FileOutputStream AUDIO_WAV_STREAM;
+    public static File WAV_OUTPUT_FILE;
 
     public static BufferedOutputStream AUDIO_OUTPUT_STREAM;
     public static DataOutputStream AUDIO_RAW_STREAM;
@@ -53,6 +56,8 @@ public class WriteProcessor {
     private static final String LOG_FILE_EXTENSION = ".txt";
 
     private static final long MINIMUM_STORAGE_SIZE_BYTES = 2048; // approx 2 mins pcm audio
+    private static final int INT_BYTES = Integer.SIZE / Byte.SIZE;
+    private static final int SHORT_BYTES = Short.SIZE / Byte.SIZE;
 
     // diff OS can pattern the date in the following -
     // underscore: 20180122-12_37_29-capture
@@ -181,11 +186,10 @@ public class WriteProcessor {
         }
         // add the extension and timestamp
         // eg: 20151218-10:14:32-capture.pcm(.wav)
+        audioFilename = getTimestamp() + "-" + sessionFilename + AUDIO_FILE_EXTENSION_RAW;
         if (writeWav) {
-            audioFilename = getTimestamp() + "-" + sessionFilename + AUDIO_FILE_EXTENSION_WAV;
-        }
-        else {
-            audioFilename = getTimestamp() + "-" + sessionFilename + AUDIO_FILE_EXTENSION_RAW;
+            waveFilename = getTimestamp() + "-" + sessionFilename + AUDIO_FILE_EXTENSION_WAV;
+
         }
 
         // file save will overwrite unless new name is used...
@@ -194,18 +198,15 @@ public class WriteProcessor {
             if (!AUDIO_OUTPUT_FILE.exists()) {
                 AUDIO_OUTPUT_FILE.createNewFile();
             }
+            AUDIO_OUTPUT_STREAM = null;
+            AUDIO_OUTPUT_STREAM = new BufferedOutputStream(new FileOutputStream(AUDIO_OUTPUT_FILE, false));
+            AUDIO_RAW_STREAM = new DataOutputStream(AUDIO_OUTPUT_STREAM);
 
             if (writeWav) {
-                AUDIO_WAV_STREAM = new FileOutputStream(AUDIO_OUTPUT_FILE);
-                writeWavHeader(AUDIO_WAV_STREAM,
-                        (short) audioSettings.getChannelCount(),
-                        audioSettings.getSampleRate(),
-                        (short) audioSettings.getBitDepth());
-            }
-            else {
-                AUDIO_OUTPUT_STREAM = null;
-                AUDIO_OUTPUT_STREAM = new BufferedOutputStream(new FileOutputStream(AUDIO_OUTPUT_FILE, false));
-                AUDIO_RAW_STREAM = new DataOutputStream(AUDIO_OUTPUT_STREAM);
+                WAV_OUTPUT_FILE = new File(location, waveFilename);
+                if (!WAV_OUTPUT_FILE.exists()) {
+                    WAV_OUTPUT_FILE.createNewFile();
+                }
             }
         }
         catch (FileNotFoundException ex) {
@@ -229,15 +230,9 @@ public class WriteProcessor {
 
             if (shortBuffer != null) {
                 try {
-                    if (writeWav) {
-                        writeWavBuffer(shortBuffer, bufferRead);
+                    for (int i = 0; i < bufferRead; i++) {
+                        AUDIO_RAW_STREAM.writeShort(shortBuffer[i]);
                     }
-                    else {
-                        for (int i = 0; i < bufferRead; i++) {
-                            AUDIO_RAW_STREAM.writeShort(shortBuffer[i]);
-                        }
-                    }
-
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
@@ -247,20 +242,10 @@ public class WriteProcessor {
 
     public void closeWriteFile() {
         try {
-            if (writeWav) {
-                if (updateWavHeader()) {
-                    // wait for it...
-                    if (AUDIO_WAV_STREAM != null) {
-                        AUDIO_WAV_STREAM.flush();
-                        AUDIO_WAV_STREAM.close();
-                    }
-                }
-            }
             if (AUDIO_OUTPUT_STREAM != null) {
                 AUDIO_OUTPUT_STREAM.flush();
                 AUDIO_OUTPUT_STREAM.close();
                 AUDIO_RAW_STREAM.close();
-
             }
         }
         catch (IOException e) {
@@ -271,117 +256,118 @@ public class WriteProcessor {
         closeLogFile();
     }
 
+    public void audioFileConvert() {
+        if (writeWav) {
+            convertToWav();
+            // when finished, delete the raw pcm file
+        }
+    }
+
     /**************************************************************/
     //TODO
     /*
-        audio logging wav header, buffer and close
-        glitchy...
-
-        from: https://gist.github.com/kmark/d8b1b01fb0d2febf5770
+        audio wav convert
+        glitchy... still requires import raw, not saving/reading as little-endian
     */
-    private static void writeWavHeader(OutputStream out, short channels, int sampleRate, short bitDepth) {
-        // Convert the multi-byte integers to raw bytes in little endian format as required by the spec
-        byte[] littleBytes = ByteBuffer
-                .allocate(14)
-                .order(ByteOrder.LITTLE_ENDIAN)
-                .putShort(channels)
-                .putInt(sampleRate)
-                .putInt(sampleRate * channels * (bitDepth / 8))
-                .putShort((short) (channels * (bitDepth / 8)))
-                .putShort(bitDepth)
-                .array();
-
+    private boolean convertToWav() {
+        // raw file is recent pcm save
+        if (!AUDIO_OUTPUT_FILE.exists()) {
+            log("no raw audio file found.");
+            return false;
+        }
+        if (!WAV_OUTPUT_FILE.exists()) {
+            log("no wav output file found.");
+            return false;
+        }
+        // send to converter
         try {
-            out.write(new byte[]{
-                    // RIFF header
-                    'R', 'I', 'F', 'F', // ChunkID
-                    0, 0, 0, 0, // ChunkSize (must be updated later)
-                    'W', 'A', 'V', 'E', // Format
-                    // fmt subchunk
-                    'f', 'm', 't', ' ', // Subchunk1ID
-                    16, 0, 0, 0, // Subchunk1Size - PCM
-                    1, 0, // AudioFormat - PCM
-                    littleBytes[0], littleBytes[1], // NumChannels - MONO
-                    littleBytes[2], littleBytes[3], littleBytes[4], littleBytes[5], // SampleRate
-                    littleBytes[6], littleBytes[7], littleBytes[8], littleBytes[9], // ByteRate
-                    littleBytes[10], littleBytes[11], // BlockAlign
-                    littleBytes[12], littleBytes[13], // BitsPerSample
-                    // data subchunk
-                    'd', 'a', 't', 'a', // Subchunk2ID
-                    0, 0, 0, 0, // Subchunk2Size (must be updated later)
-            });
+            log("Converting raw audio to wav file...");
+            rawToWave(AUDIO_OUTPUT_FILE, WAV_OUTPUT_FILE);
+
         }
         catch (IOException ex) {
             //
-            log("Error setting up wav file header write.");
+            log("Error writing pcm file to wav file.");
+            return false;
         }
+        log("Finished saving " + waveFilename);
+        return true;
     }
 
-    private static void writeWavBuffer(short[] bufferIn, int length) {
-        // too much overhead?
-        int short_index, byte_index;
-        int iterations = length;
-        byte [] buffer = new byte[length * 2];
-        short_index = byte_index = 0;
+    /****************************************************/
+    // pcm to wav post-record functions
 
-        for( ; short_index != iterations ; ) {
-            buffer[byte_index] = (byte) (bufferIn[short_index] & 0x00FF);
-            buffer[byte_index + 1] = (byte) ((bufferIn[short_index] & 0xFF00) >> 8);
-            ++short_index;
-            byte_index += 2;
-        }
-
+    private void rawToWave(final File rawFile, final File waveFile) throws IOException {
+        byte[] rawData = new byte[(int) rawFile.length()];
+        DataInputStream input = null;
         try {
-            AUDIO_WAV_STREAM.write(buffer, 0, length);
-        }
-        catch (IOException ex) {
-            //
-            log("Error writing wav audio buffer.");
-        }
-    }
-
-    private static boolean updateWavHeader() throws IOException {
-        byte[] sizes = ByteBuffer
-                .allocate(8)
-                .order(ByteOrder.LITTLE_ENDIAN)
-                // There are probably a bunch of different/better ways to calculate
-                // these two given your circumstances. Cast should be safe since if the WAV is
-                // > 4 GB we've already made a terrible mistake.
-                .putInt((int) (AUDIO_OUTPUT_FILE.length() - 8)) // ChunkSize
-                .putInt((int) (AUDIO_OUTPUT_FILE.length() - 44)) // Subchunk2Size
-                .array();
-
-        RandomAccessFile accessWave = null;
-        //noinspection CaughtExceptionImmediatelyRethrown
-        try {
-            accessWave = new RandomAccessFile(AUDIO_OUTPUT_FILE, "rw");
-            // ChunkSize
-            accessWave.seek(4);
-            accessWave.write(sizes, 0, 4);
-
-            // Subchunk2Size
-            accessWave.seek(40);
-            accessWave.write(sizes, 4, 4);
-        }
-        catch (IOException ex) {
-            // Rethrow but we still close accessWave in our finally
-            log("Error writing updated wav header.");
-            throw ex;
+            input = new DataInputStream(new FileInputStream(rawFile));
+            input.read(rawData);
         }
         finally {
-            if (accessWave != null) {
-                try {
-                    accessWave.close();
-                    return true;
-                }
-                catch (IOException ex) {
-                    //
-                    log("Error closing wav file.");
-                    return false;
-                }
+            if (input != null) {
+                input.close();
             }
         }
-        return false;
+
+        FileOutputStream output = null;
+        FileChannel fileChannel;
+
+        try {
+            output = new FileOutputStream(waveFile);
+            fileChannel = output.getChannel();
+            // WAVE header
+            writeString(fileChannel, "RIFF", ByteOrder.BIG_ENDIAN); // chunk id
+            writeInt(fileChannel, 36 + rawData.length, ByteOrder.LITTLE_ENDIAN); // chunk size
+            writeString(fileChannel, "WAVE", ByteOrder.BIG_ENDIAN); // format
+            writeString(fileChannel, "fmt ", ByteOrder.BIG_ENDIAN); // subchunk 1 id
+            writeInt(fileChannel, 16, ByteOrder.LITTLE_ENDIAN); // subchunk 1 size
+            writeShort(fileChannel, (short) 1, ByteOrder.LITTLE_ENDIAN); // audio format (1 = PCM)
+            writeShort(fileChannel, (short) 1, ByteOrder.LITTLE_ENDIAN); // number of channels
+            writeInt(fileChannel, audioSettings.getSampleRate(), ByteOrder.LITTLE_ENDIAN); // sample rate
+            writeInt(fileChannel, audioSettings.getSampleRate() * 2, ByteOrder.LITTLE_ENDIAN); // byte rate
+            writeShort(fileChannel, (short) 2, ByteOrder.LITTLE_ENDIAN); // block align
+            writeShort(fileChannel, (short) audioSettings.getBitDepth(), ByteOrder.LITTLE_ENDIAN); // bits per sample
+            writeString(fileChannel, "data", ByteOrder.BIG_ENDIAN); // subchunk 2 id
+            writeInt(fileChannel, rawData.length, ByteOrder.LITTLE_ENDIAN); // subchunk 2 size
+
+            short[] shorts = new short[rawData.length / 2];
+            ByteBuffer.wrap(rawData).order(ByteOrder.LITTLE_ENDIAN).asShortBuffer().get(shorts);
+            ByteBuffer bytes = ByteBuffer.allocate(shorts.length * 2);
+            for (short s : shorts) {
+                bytes.putShort(s);
+            }
+            output.write(bytes.array());
+        }
+        finally {
+            if (output != null) {
+                output.close();
+            }
+        }
+    }
+    private void writeInt(final FileChannel fc, final int value, ByteOrder order) throws IOException {
+        ByteBuffer bb = ByteBuffer.allocate(INT_BYTES);
+        bb.order(order);
+        bb.putInt(value);
+        bb.flip();
+        fc.write(bb);
+    }
+
+    private void writeShort(final FileChannel fc, final short value, ByteOrder order) throws IOException {
+        ByteBuffer bb = ByteBuffer.allocate(SHORT_BYTES);
+        bb.order(order);
+        bb.putShort(value);
+        bb.flip();
+        fc.write(bb);
+    }
+
+    private void writeString(final FileChannel fc, final String value, ByteOrder order) throws IOException {
+        byte[] cc = value.getBytes(Charset.defaultCharset());
+        ByteBuffer bb = ByteBuffer.allocate(cc.length);
+        bb.order(order);
+        bb.put(cc);
+        bb.flip();
+        fc.write(bb);
     }
 
     /**************************************************************/

@@ -55,7 +55,7 @@ public class MainActivity extends AppCompatActivity
     private static final int REQUEST_MULTIPLE_PERMISSIONS = 123;
 
     // dev internal version numbering
-    public static final String VERSION = "2.0.26";
+    public static final String VERSION = "2.0.27";
 
     private ViewSwitcher viewSwitcher;
     private boolean mainView;

@@ -197,9 +197,8 @@ public class PilferShushScanner {
             entryLogger("AudioScanning stop.", false);
             // below nulls the recordTask...
             audioScanner.stopAudioScanner();
-
             // TODO insert writeProcessor convert pcm to wav
-
+            writeProcessor.audioFileConvert();
 
             if (audioScanner.canProcessBufferStorage()) {
                 scanBufferSize = audioScanner.getSizeBufferStorage();
