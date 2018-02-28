@@ -17,7 +17,6 @@ Cleaning for F-Droid fork
  
  TODO:
  - WAV file proper (working, handle pcm delete)
- - log texts to xml for translation ability
  - USB Audio routing test
  - build for API 26, 8.x, 'O' and up features
 

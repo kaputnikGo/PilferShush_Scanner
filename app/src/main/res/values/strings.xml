@@ -254,6 +254,35 @@
     <string name="process_audio_5">Freq 1: not found</string>
     <string name="process_audio_6">frequency list is empty.</string>
 
+    <!--
+    WriteProcessor.java
+    -->
+    <string name="writer_state_1">Check storage: Download(s)/PilferShush/</string>
+    <string name="writer_state_2">external directory location:\u0020</string>
+    <string name="writer_state_3">preparing text log file...</string>
+    <string name="writer_state_4">Error getting storage directory</string>
+    <string name="writer_state_5">File not found error.</string>
+    <string name="writer_state_6">Log file write error.</string>
+    <string name="writer_state_7">close text log file.</string>
+    <string name="writer_state_8">Error closing text log.</string>
+    <string name="writer_state_9">Prepare write audio file error.</string>
+    <string name="writer_state_10">Write audio file close error.</string>
+    <string name="writer_state_11">no raw audio file found.</string>
+    <string name="writer_state_12">no wav output file found.</string>
+    <string name="writer_state_13">Converting raw audio to wav file...</string>
+    <string name="writer_state_14">Error writing pcm file to wav file.</string>
+    <string name="writer_state_15">Finished saving\u0020</string>
+    <string name="writer_state_16">No storage folder found.</string>
+    <string name="writer_state_17">Deleting empty files...</string>
+    <string name="writer_state_18_1">Deleted\u0020</string>
+    <string name="writer_state_18_2">\u0020empty file(s) from storage.</string>
+    <string name="writer_state_18_3">\u0020files from storage...</string>
+    <string name="writer_state_19">Storage folder now empty.</string>
+    <string name="writer_state_20">Storage size:\u0020</string>
+
+
+
+
 
 
 </resources>

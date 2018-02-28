@@ -1,6 +1,7 @@
 package pilfershush.cityfreqs.com.pilfershush.assist;
 
 
+import android.content.Context;
 import android.os.Environment;
 
 import java.io.BufferedOutputStream;
@@ -21,6 +22,7 @@ import java.util.Date;
 import java.util.Locale;
 
 import pilfershush.cityfreqs.com.pilfershush.MainActivity;
+import pilfershush.cityfreqs.com.pilfershush.R;
 
 public class WriteProcessor {
     // pcm savefile for raw import into Audacity as 48 kHz, signed 16 bit, big-endian, mono
@@ -30,6 +32,7 @@ public class WriteProcessor {
     // laborious process to export files from Download(s) folder to PC, need Music folder or similar
     // with proper file read access for external - possibly just a samsung pita
 
+    private Context context;
     private AudioSettings audioSettings;
 
     private File extDirectory;
@@ -51,6 +54,7 @@ public class WriteProcessor {
     public static OutputStreamWriter LOG_OUTPUT_WRITER;
 
     private static final String APP_DIRECTORY_NAME = "PilferShush";
+    private static final String DEFAULT_SESSION_NAME = "capture";
     private static final String AUDIO_FILE_EXTENSION_RAW = ".pcm";
     private static final String AUDIO_FILE_EXTENSION_WAV = ".wav";
     private static final String LOG_FILE_EXTENSION = ".txt";
@@ -64,22 +68,23 @@ public class WriteProcessor {
     // nospace: 20180122-123729-capture
     private static final SimpleDateFormat TIMESTAMP_FORMAT = new SimpleDateFormat("yyyyMMdd-HH:mm:ss", Locale.ENGLISH);
 
-    public WriteProcessor(String sessionName, AudioSettings audioSettings, boolean writeWav) {
+    public WriteProcessor(Context context, String sessionName, AudioSettings audioSettings, boolean writeWav) {
+        this.context = context;
         setSessionName(sessionName);
         this.audioSettings = audioSettings;
         this.writeWav = writeWav;
 
-        log("Check: Download(s)/PilferShush/");
+        log(context.getString(R.string.writer_state_1));
         // checks for read/write state
         if (Environment.MEDIA_MOUNTED.equals(Environment.getExternalStorageState())) {
             createDirectory();
-            log("ext dir: " + extDirectory.toString());
+            log(context.getString(R.string.writer_state_2) + extDirectory.toString());
         }
     }
 
     public void setSessionName(String sessionName) {
         if (sessionName == null || sessionName == "") {
-            sessionFilename = "capture";
+            sessionFilename = DEFAULT_SESSION_NAME;
         }
         else {
             sessionFilename = sessionName;
@@ -118,10 +123,10 @@ public class WriteProcessor {
      */
     public void prepareLogToFile() {
         // need to build the filename AND path
-        log("prepare log file...");
+        log(context.getString(R.string.writer_state_3));
         File location = extDirectory;
         if (location == null) {
-            log("Error getting storage directory");
+            log(context.getString(R.string.writer_state_4));
             return;
         }
         // add the extension and timestamp
@@ -135,11 +140,11 @@ public class WriteProcessor {
         }
         catch (FileNotFoundException ex) {
             ex.printStackTrace();
-            log("File not found error.");
+            log(context.getString(R.string.writer_state_5));
         }
         catch (IOException e) {
             e.printStackTrace();
-            log("Log file write error.");
+            log(context.getString(R.string.writer_state_6));
         }
     }
 
@@ -156,7 +161,7 @@ public class WriteProcessor {
 
     public void closeLogFile() {
         // final act, no more writes possible.
-        log("close log file.");
+        log(context.getString(R.string.writer_state_7));
         try {
             if (LOG_OUTPUT_WRITER != null) {
                 LOG_OUTPUT_WRITER.flush();
@@ -168,7 +173,7 @@ public class WriteProcessor {
             }
         }
         catch (IOException e) {
-            log("Error closing log output stream.");
+            log(context.getString(R.string.writer_state_8));
         }
     }
 
@@ -181,7 +186,7 @@ public class WriteProcessor {
         // need to build the filename AND path
         File location = extDirectory;
         if (location == null) {
-            log("Error getting storage directory");
+            log(context.getString(R.string.writer_state_4));
             return;
         }
         // add the extension and timestamp
@@ -211,11 +216,11 @@ public class WriteProcessor {
         }
         catch (FileNotFoundException ex) {
             ex.printStackTrace();
-            log("File not found error.");
+            log(context.getString(R.string.writer_state_5));
         }
         catch (IOException e) {
             e.printStackTrace();
-            log("Audio write file error.");
+            log(context.getString(R.string.writer_state_9));
         }
     }
 
@@ -250,7 +255,7 @@ public class WriteProcessor {
         }
         catch (IOException e) {
             e.printStackTrace();
-            log("onCancelled write stream close error.");
+            log(context.getString(R.string.writer_state_10));
         }
         // then close text logging
         closeLogFile();
@@ -272,25 +277,25 @@ public class WriteProcessor {
     private boolean convertToWav() {
         // raw file is recent pcm save
         if (!AUDIO_OUTPUT_FILE.exists()) {
-            log("no raw audio file found.");
+            log(context.getString(R.string.writer_state_11));
             return false;
         }
         if (!WAV_OUTPUT_FILE.exists()) {
-            log("no wav output file found.");
+            log(context.getString(R.string.writer_state_12));
             return false;
         }
         // send to converter
         try {
-            log("Converting raw audio to wav file...");
+            log(context.getString(R.string.writer_state_13));
             rawToWave(AUDIO_OUTPUT_FILE, WAV_OUTPUT_FILE);
 
         }
         catch (IOException ex) {
             //
-            log("Error writing pcm file to wav file.");
+            log(context.getString(R.string.writer_state_14));
             return false;
         }
-        log("Finished saving " + waveFilename);
+        log(context.getString(R.string.writer_state_15) + waveFilename);
         return true;
     }
 
@@ -384,11 +389,11 @@ public class WriteProcessor {
     private void deleteZeroSizeLogFiles() {
         // assume MainActivity has cautioned first.
         if (!extDirectory.exists()) {
-            log("No storage folder found.");
+            log(context.getString(R.string.writer_state_16));
             return;
         }
 
-        log("Deleting empty files...");
+        log(context.getString(R.string.writer_state_17));
         int counter = 0;
         for (File file : extDirectory.listFiles()) {
             if (file.isFile()) {
@@ -398,28 +403,28 @@ public class WriteProcessor {
                 }
             }
         }
-        log("Deleted " + counter + " empty file(s).");
+        log(context.getString(R.string.writer_state_18_1) + counter + context.getString(R.string.writer_state_18_2));
 
     }
 
     private void deleteAllStorageFiles() {
         // assume MainActivity has cautioned first.
         if (!extDirectory.exists()) {
-            log("No storage folder found.");
+            log(context.getString(R.string.writer_state_16));
             return;
         }
         String[] filesDelete = extDirectory.list();
-        log("Deleting " + filesDelete.length + " files from storage...");
+        log(context.getString(R.string.writer_state_18_1) + filesDelete.length + context.getString(R.string.writer_state_18_3));
         for (int i = 0; i < filesDelete.length; i++) {
             new File(extDirectory, filesDelete[i]).delete();
         }
-        log("Storage folder now empty.");
+        log(context.getString(R.string.writer_state_19));
     }
 
     private long calculateStorageSize() {
         // returns long size in bytes
         if (!extDirectory.exists()) {
-            log("No storage folder found.");
+            log(context.getString(R.string.writer_state_16));
             return 0;
         }
         long length = 0;
@@ -428,14 +433,14 @@ public class WriteProcessor {
                 length += file.length();
             }
         }
-        log("Storage size: " + (int)length);
+        log(context.getString(R.string.writer_state_20) + (int)length);
         return length;
     }
 
     private long calculateFreeStorageSpace() {
         // returns long size in bytes
         if (!extDirectory.exists()) {
-            log("No storage folder found.");
+            log(context.getString(R.string.writer_state_16));
             return 0;
         }
         // getFreeSpace == unallocated
