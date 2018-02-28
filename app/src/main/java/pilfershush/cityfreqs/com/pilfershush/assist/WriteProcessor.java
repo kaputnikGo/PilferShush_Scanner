@@ -266,8 +266,15 @@ public class WriteProcessor {
 
     public void audioFileConvert() {
         if (writeWav) {
-            convertToWav();
-            // TODO when finished, delete the raw pcm file
+            if (convertToWav()) {
+                // TODO when finished, delete the raw pcm file
+                AUDIO_OUTPUT_FILE.delete();
+                log(context.getString(R.string.writer_state_21));
+            }
+            else {
+                // no file or error writing file,
+                // do not delete pcm
+            }
         }
     }
 

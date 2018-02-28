@@ -49,13 +49,13 @@ public class MainActivity extends AppCompatActivity
     private static final String TAG = "PilferShush";
     private static final boolean DEBUG = true;
     private static final boolean INIT_WRITE_FILES = true;
-    // not until propered
-    private static final boolean WRITE_WAV = false;
+    // keep as internal switch
+    private static final boolean WRITE_WAV = true;
 
     private static final int REQUEST_MULTIPLE_PERMISSIONS = 123;
 
     // dev internal version numbering
-    public static final String VERSION = "2.0.28";
+    public static final String VERSION = "2.0.29";
 
     private ViewSwitcher viewSwitcher;
     private boolean mainView;

@@ -279,5 +279,6 @@
     <string name="writer_state_18_3">\u0020files from storage...</string>
     <string name="writer_state_19">Storage folder now empty.</string>
     <string name="writer_state_20">Storage size:\u0020</string>
+    <string name="writer_state_21">temp raw audio file deleted.</string>
 
 </resources>

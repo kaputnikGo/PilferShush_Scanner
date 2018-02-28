@@ -88,6 +88,7 @@ public class AudioVisualiserView extends View {
 
     public void frequencyCaution(int frequency) {
         // canvas.drawLine(line.startX, line.startY, line.stopX, line.stopY, paint);
+        //TODO make a peak ghost line that remains, fade out previous caution lines
         lineSpacer = RANGE - (lineCounter * (CAUTION_LINE_WIDTH + 2));
         if (lineSpacer <= 0) lineSpacer = 0;
 
