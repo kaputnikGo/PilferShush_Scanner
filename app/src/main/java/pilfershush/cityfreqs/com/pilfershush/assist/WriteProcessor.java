@@ -78,7 +78,10 @@ public class WriteProcessor {
         // checks for read/write state
         if (Environment.MEDIA_MOUNTED.equals(Environment.getExternalStorageState())) {
             createDirectory();
-            log(context.getString(R.string.writer_state_2) + extDirectory.toString());
+            log(context.getString(R.string.writer_state_2) + "\n" + extDirectory.toString() + "\n");
+        }
+        else {
+            log(context.getString(R.string.writer_state_4));
         }
     }
 
@@ -264,15 +267,13 @@ public class WriteProcessor {
     public void audioFileConvert() {
         if (writeWav) {
             convertToWav();
-            // when finished, delete the raw pcm file
+            // TODO when finished, delete the raw pcm file
         }
     }
 
     /**************************************************************/
-    //TODO
     /*
         audio wav convert
-        glitchy... still requires import raw, not saving/reading as little-endian
     */
     private boolean convertToWav() {
         // raw file is recent pcm save

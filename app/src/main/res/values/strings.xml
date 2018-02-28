@@ -257,7 +257,7 @@
     <!--
     WriteProcessor.java
     -->
-    <string name="writer_state_1">Check storage: Download(s)/PilferShush/</string>
+    <string name="writer_state_1">Check storage.</string>
     <string name="writer_state_2">external directory location:\u0020</string>
     <string name="writer_state_3">preparing text log file...</string>
     <string name="writer_state_4">Error getting storage directory</string>
@@ -279,10 +279,5 @@
     <string name="writer_state_18_3">\u0020files from storage...</string>
     <string name="writer_state_19">Storage folder now empty.</string>
     <string name="writer_state_20">Storage size:\u0020</string>
-
-
-
-
-
 
 </resources>

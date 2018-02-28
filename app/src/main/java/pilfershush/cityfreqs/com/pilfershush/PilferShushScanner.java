@@ -44,6 +44,7 @@ public class PilferShushScanner {
             initBackgroundChecks();
             return true;
         }
+
         // TODO wont yet run usb audio, no return true, background checks...
         if(hasUSB) {
             if (audioChecker.determineUsbAudioType(hasUSB)) {
@@ -150,7 +151,7 @@ public class PilferShushScanner {
             audioChecker.checkAudioBufferState();
 
             //TODO
-            // this function is of concern...
+            // this function is of concern as it may not work, uses logcat
             backgroundChecker.auditLogAsync();
         }
         else {
