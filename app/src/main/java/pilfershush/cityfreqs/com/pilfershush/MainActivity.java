@@ -55,7 +55,7 @@ public class MainActivity extends AppCompatActivity
     private static final int REQUEST_MULTIPLE_PERMISSIONS = 123;
 
     // dev internal version numbering
-    public static final String VERSION = "2.0.27";
+    public static final String VERSION = "2.0.28";
 
     private ViewSwitcher viewSwitcher;
     private boolean mainView;
@@ -183,14 +183,14 @@ public class MainActivity extends AppCompatActivity
             final List<String> permissionsList = new ArrayList<String>();
 
             if (!addPermission(permissionsList, Manifest.permission.RECORD_AUDIO))
-                permissionsNeeded.add("Record Audio");
+                permissionsNeeded.add(getResources().getString(R.string.perms_state_1));
             if (!addPermission(permissionsList, Manifest.permission.WRITE_EXTERNAL_STORAGE))
-                permissionsNeeded.add("Save Audio Files");
+                permissionsNeeded.add(getResources().getString(R.string.perms_state_2));
 
             if (permissionsList.size() > 0) {
                 if (permissionsNeeded.size() > 0) {
                     // Need Rationale
-                    String message = "Permissions request: " + permissionsNeeded.get(0);
+                    String message = getResources().getString(R.string.perms_state_3) + permissionsNeeded.get(0);
                     for (int i = 1; i < permissionsNeeded.size(); i++) {
                         message = message + ", " + permissionsNeeded.get(i);
                     }
@@ -325,8 +325,8 @@ public class MainActivity extends AppCompatActivity
     private void showPermissionsDialog(String message, DialogInterface.OnClickListener okListener) {
         new AlertDialog.Builder(MainActivity.this)
                 .setMessage(message)
-                .setPositiveButton("OK", okListener)
-                .setNegativeButton("Cancel", null)
+                .setPositiveButton(getResources().getString(R.string.dialog_button_okay), okListener)
+                .setNegativeButton(getResources().getString(R.string.dialog_button_cancel), null)
                 .create()
                 .show();
     }
@@ -361,7 +361,7 @@ public class MainActivity extends AppCompatActivity
                 } else
                     {
                     // Permission Denied
-                    Toast.makeText(MainActivity.this, "Some Permissions Denied", Toast.LENGTH_SHORT)
+                    Toast.makeText(MainActivity.this, getResources().getString(R.string.perms_state_4), Toast.LENGTH_SHORT)
                             .show();
                 }
             }
@@ -390,7 +390,7 @@ public class MainActivity extends AppCompatActivity
 
     private boolean scanUsbDevices() {
         //TODO
-        logger("checking usb host for audio device.");
+        logger(getResources().getString(R.string.usb_state_1));
         usbManager = (UsbManager) getSystemService(Context.USB_SERVICE);
         HashMap<String, UsbDevice> deviceList = usbManager.getDeviceList();
         Iterator<UsbDevice> deviceIterator = deviceList.values().iterator();
@@ -398,10 +398,10 @@ public class MainActivity extends AppCompatActivity
         while(deviceIterator.hasNext()) {
             UsbDevice device = deviceIterator.next();
             deviceContainer = new DeviceContainer(device);
-            logger("USB: " + deviceContainer.toString());
+            logger(getResources().getString(R.string.usb_state_2) + deviceContainer.toString());
             return true;
         }
-        logger("usb audio device not found, using internal.");
+        logger(getResources().getString(R.string.usb_state_3));
         return false;
     }
 
@@ -418,20 +418,20 @@ public class MainActivity extends AppCompatActivity
                             if (usbManager.hasPermission(deviceContainer.getDevice())) {
                                 // re-route audio to usb audio device
                                 toggleHeadset(true);
-                                logger(" has permission for USB device.");
+                                logger(getResources().getString(R.string.usb_state_4));
                             }
                             else {
                                 usbManager.requestPermission(deviceContainer.getDevice(), permissionIntent);
                             }
                         }
                         else {
-                            logger(" no USB deviceContainer / device.");
+                            logger(getResources().getString(R.string.usb_state_5));
                         }
                     }
                     else {
                         // re-route audio to phone hardware
                         toggleHeadset(false);
-                        logger(" permission denied for USB device.");
+                        logger(getResources().getString(R.string.usb_state_6));
                     }
                 }
             }
@@ -466,41 +466,45 @@ public class MainActivity extends AppCompatActivity
             reportInitialState();
         }
         else {
-            mainScanLogger("PilferShush init failed.", true);
-            logger("Failed to init audio device.");
+            mainScanLogger(getResources().getString(R.string.init_state_12), true);
+            logger(getResources().getString(R.string.init_state_13));
         }
     }
 
     private void reportInitialState() {
-        mainScanText.setText("PilferShush scanner version " + VERSION);
+        mainScanText.setText(getResources().getString(R.string.init_state_1) + VERSION);
 
-        mainScanLogger("\nUsing " + pilferShushScanner.getAudioCheckerReport(), false);
+        mainScanLogger("\n" + getResources().getString(R.string.init_state_2) + pilferShushScanner.getAudioCheckerReport(), false);
 
-        mainScanLogger("\nSettings can be changed via the Options menu.", true);
+        mainScanLogger("\n" + getResources().getString(R.string.init_state_3), true);
 
-        mainScanLogger("\nThe Detailed View has logging and more information from scans. " +
-                "It also has a continuous Mic check and intermittent polling check " +
-                "to look for other apps using the microphone.", false);
+        mainScanLogger("\n" + getResources().getString(R.string.init_state_4) + getResources().getString(R.string.init_state_5), false);
 
-        mainScanLogger("\nInit: save log output and audio to files: " + Boolean.toString(INIT_WRITE_FILES), true);
+        mainScanLogger("\n" + getResources().getString(R.string.init_state_6) + Boolean.toString(INIT_WRITE_FILES), true);
 
         if (WRITE_WAV) {
-            mainScanLogger("\nWav audio: " + pilferShushScanner.getSaveFileType() + ", little-endian.", false);
+            mainScanLogger("\n" + getResources().getString(R.string.init_state_7_1) +
+                    pilferShushScanner.getSaveFileType() +
+                    getResources().getString(R.string.init_state_7_2), false);
         }
         else {
-            mainScanLogger("\nRaw audio: " + pilferShushScanner.getSaveFileType() + ", big-endian.", false);
+            mainScanLogger("\n" + getResources().getString(R.string.init_state_8_1) +
+                    pilferShushScanner.getSaveFileType() +
+                    getResources().getString(R.string.init_state_8_2), false);
         }
 
         // run at init for awareness
-        mainScanLogger("\nFree storage space: " + printFreeSize(), true);
+        mainScanLogger("\n" + getResources().getString(R.string.init_state_9) + printFreeSize(), true);
         if (pilferShushScanner.cautionFreeSpace()) {
             // has under a minimum of 2048 bytes , pop a toast.
             cautionStorageSize();
         }
 
-        mainScanLogger("\nPress 'Run Scanner' button to start and stop scanning for audio.", false);
+        mainScanLogger("\n" + getResources().getString(R.string.init_state_10_1) +
+                getResources().getString(R.string.main_scanner_11) +
+                getResources().getString(R.string.init_state_10_2), false);
 
-        mainScanLogger("\nDO NOT RUN SCANNER FOR A LONG TIME.\n", true);
+        mainScanLogger("\n" + getResources().getString(R.string.init_state_11) + "\n", true);
     }
 
     private void populateMenuItems() {
@@ -550,7 +554,7 @@ public class MainActivity extends AppCompatActivity
         dialogBuilder.setMessage(R.string.dialog_storage_warn_text);
         dialogBuilder.setPositiveButton(R.string.dialog_button_okay, new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int id) {
-                mainScanLogger("Limited storage space found.", true);
+                mainScanLogger(getResources().getString(R.string.option_dialog_1), true);
             }
         });
 
@@ -592,18 +596,18 @@ public class MainActivity extends AppCompatActivity
             public void onClick(DialogInterface dialogInterface, int which) {
                 switch(which) {
                     case 0:
-                        mainScanLogger("Log storage size: " + printUsedSize(), false);
+                        mainScanLogger(getResources().getString(R.string.option_dialog_2) + printUsedSize(), false);
                         break;
                     case 1:
-                        mainScanLogger("Delete empty log files.", false);
+                        mainScanLogger(getResources().getString(R.string.option_dialog_3), false);
                         pilferShushScanner.clearEmptyLogFiles();
                         break;
                     case 2:
-                        mainScanLogger("Delete ALL log files.", true);
+                        mainScanLogger(getResources().getString(R.string.option_dialog_4), true);
                         pilferShushScanner.clearLogStorageFolder();
                         break;
                     case 3:
-                        mainScanLogger("Free storage space: " + printFreeSize(), false);
+                        mainScanLogger(getResources().getString(R.string.option_dialog_5) + printFreeSize(), false);
                         break;
                     default:
                         // do nothing, catch dismisses
@@ -625,13 +629,13 @@ public class MainActivity extends AppCompatActivity
         dialogBuilder.setPositiveButton(R.string.dialog_write_file_yes, new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int id) {
                 pilferShushScanner.setWriteFiles(true);
-                mainScanLogger("Write to file enabled.", false);
+                mainScanLogger(getResources().getString(R.string.option_dialog_6), false);
             }
         });
         dialogBuilder.setNegativeButton(R.string.dialog_write_file_no, new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int id) {
                 pilferShushScanner.setWriteFiles(false);
-                mainScanLogger("Write to file disabled.", false);
+                mainScanLogger(getResources().getString(R.string.option_dialog_7), false);
             }
         });
 
@@ -651,7 +655,7 @@ public class MainActivity extends AppCompatActivity
             public void onClick(DialogInterface dialogInterface, int which) {
                 // 1000, 2000, 3000, 4000, 5000, 6000 (default) ms
                 pilferShushScanner.setPollingSpeed(AudioSettings.POLLING_DELAY[which]);
-                mainScanLogger("Polling speed (ms): " + AudioSettings.POLLING_DELAY[which], false);
+                mainScanLogger(getResources().getString(R.string.option_dialog_8) + AudioSettings.POLLING_DELAY[which], false);
             }
         });
         dialogBuilder.setTitle(R.string.dialog_polling);
@@ -664,7 +668,7 @@ public class MainActivity extends AppCompatActivity
         dialogBuilder.setItems(freqSteps, new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialogInterface, int which) {
                 pilferShushScanner.setFrequencyStep(AudioSettings.FREQ_STEPS[which]);
-                mainScanLogger("Frequency steps: " + AudioSettings.FREQ_STEPS[which], false);
+                mainScanLogger(getResources().getString(R.string.option_dialog_9) + AudioSettings.FREQ_STEPS[which], false);
             }
         });
 
@@ -680,11 +684,11 @@ public class MainActivity extends AppCompatActivity
                 switch(which) {
                     case 0:
                         pilferShushScanner.setFreqMinMax(1);
-                        mainScanLogger("Frequency range set 18kHz - 21kHz.", false);
+                        mainScanLogger(getResources().getString(R.string.option_dialog_10), false);
                         break;
                     case 1:
                         pilferShushScanner.setFreqMinMax(2);
-                        mainScanLogger("Frequency range set 19kHz - 22kHz.", false);
+                        mainScanLogger(getResources().getString(R.string.option_dialog_11), false);
                 }
             }
         });
@@ -699,7 +703,7 @@ public class MainActivity extends AppCompatActivity
         dialogBuilder.setItems(dbLevel, new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialogInterface, int which) {
                 pilferShushScanner.setMinMagnitude(AudioSettings.MAGNITUDES[which]);
-                mainScanLogger("Loudness level (dB): " + AudioSettings.DECIBELS[which], false);
+                mainScanLogger(getResources().getString(R.string.option_dialog_12) + AudioSettings.DECIBELS[which], false);
             }
         });
         dialogBuilder.setTitle(R.string.dialog_sensitivity_text);
@@ -713,7 +717,7 @@ public class MainActivity extends AppCompatActivity
             public void onClick(DialogInterface dialogInterface, int which) {
                 // numerical values from 1-5
                 pilferShushScanner.setFFTWindowType(which + 1);
-                mainScanLogger("FFT Window set to: " + AudioSettings.FFT_WINDOWS[which], false);
+                mainScanLogger(getResources().getString(R.string.option_dialog_13) + AudioSettings.FFT_WINDOWS[which], false);
             }
         });
         dialogBuilder.setTitle(R.string.dialog_window_text);
@@ -732,7 +736,7 @@ public class MainActivity extends AppCompatActivity
 
     private void interruptRequestAudio() {
         // system app requests audio focus, respond here
-        mainScanLogger("AudioFocus interrupt request.", true);
+        mainScanLogger(getResources().getString(R.string.audiofocus_check_5), true);
         if (SCANNING) {
             toggleScanning();
         }
@@ -769,48 +773,48 @@ public class MainActivity extends AppCompatActivity
     }
 
     private void runScanner() {
-        runScansButton.setText("SCANNING...");
+        runScansButton.setText(getResources().getString(R.string.main_scanner_1));
         runScansButton.setBackgroundColor(Color.RED);
-        mainScanLogger("Running scans on user installed apps...", false);
+        mainScanLogger(getResources().getString(R.string.main_scanner_2), false);
 
         // two diff methods of doing same thing... lols
         int audioNum = pilferShushScanner.getAudioRecordAppsNumber();
         if (audioNum > 0) {
-            mainScanLogger("Record audio apps found: " + audioNum, true);
+            mainScanLogger(getResources().getString(R.string.main_scanner_3) + audioNum, true);
         }
         else {
-            mainScanLogger("No record audio apps found.", false);
+            mainScanLogger(getResources().getString(R.string.main_scanner_4), false);
         }
         if (pilferShushScanner.hasAudioBeaconApps()) {
             mainScanLogger(pilferShushScanner.getAudioBeaconAppNumber()
-                    + " Audio Beacon SDKs detected.", true);
+                    + getResources().getString(R.string.main_scanner_5), true);
         }
         else {
-            mainScanLogger("No Audio Beacon SDKs detected.", false);
+            mainScanLogger(getResources().getString(R.string.main_scanner_6), false);
         }
 
-        mainScanLogger("Microphone check...", false);
+        mainScanLogger(getResources().getString(R.string.main_scanner_7), false);
         if (pilferShushScanner.mainPollingCheck()) {
-            mainScanLogger("Microphone use detected.", true);
+            mainScanLogger(getResources().getString(R.string.main_scanner_8), true);
         }
         else {
-            mainScanLogger("No microphone use detected.", false);
+            mainScanLogger(getResources().getString(R.string.main_scanner_9), false);
         }
         pilferShushScanner.mainPollingStop();
 
-        mainScanLogger("Listening for near-ultra high audio...", false);
+        mainScanLogger(getResources().getString(R.string.main_scanner_10), false);
         pilferShushScanner.runAudioScanner();
     }
 
     private void stopScanner() {
         // FINISHED, determine type of signal
         pilferShushScanner.stopAudioScanner();
-        runScansButton.setText("Run Scanner");
+        runScansButton.setText(getResources().getString(R.string.main_scanner_11));
         runScansButton.setBackgroundColor(Color.LTGRAY);
-        mainScanLogger("Stop listening for audio.", false);
+        mainScanLogger(getResources().getString(R.string.main_scanner_12), false);
 
         if (pilferShushScanner.hasAudioScanSequence()) {
-            mainScanLogger("\n Detected possible n-uhf audio. \n", true);
+            mainScanLogger("\n" + getResources().getString(R.string.main_scanner_13) + "\n", true);
 
             // to main debug view candidate numbers for logic 1,0
             mainScanLogger(pilferShushScanner.getModFrequencyLogic(), true);
@@ -819,19 +823,19 @@ public class MainActivity extends AppCompatActivity
             pilferShushScanner.getFreqSeqLogicEntries();
 
             // simple report to main logger
-            mainScanLogger("Frequency list size: " + pilferShushScanner.getFrequencySequenceSize(), true);
+            mainScanLogger(getResources().getString(R.string.main_scanner_14) + pilferShushScanner.getFrequencySequenceSize(), true);
 
             // output in order of capture sent to log file:
-            writeLogger("Original sequence as transmitted:");
+            writeLogger(getResources().getString(R.string.main_scanner_15));
             writeLogger(pilferShushScanner.getFrequencySequence());
         }
         else {
-            mainScanLogger("No detected audio beacon signals.", false);
+            mainScanLogger(getResources().getString(R.string.main_scanner_16), false);
         }
         // allow freq list processing above first, then
         pilferShushScanner.resetAudioScanner();
 
-        mainScanLogger("\n[>-:end of scan:-<]\n\n", false);
+        mainScanLogger("\n" + getResources().getString(R.string.main_scanner_17) + "\n\n", false);
     }
 
     private void hasAudioBeaconAppsList() {
@@ -852,7 +856,7 @@ public class MainActivity extends AppCompatActivity
         }
         else {
             // none found, inform user
-            entryLogger("NO AUDIO BEACON APPS FOUND.", true);
+            entryLogger(getResources().getString(R.string.audio_apps_check_1), true);
         }
     }
 
@@ -872,7 +876,7 @@ public class MainActivity extends AppCompatActivity
             alertDialog.show();
         }
         else {
-            entryLogger("NO USER APPS FOUND FOR OVERRIDE SCAN.", true);
+            entryLogger(getResources().getString(R.string.user_apps_check_1), true);
         }
     }
 
@@ -884,19 +888,19 @@ public class MainActivity extends AppCompatActivity
     private void audioFocusCheck() {
         // this may not work as SDKs requesting focus may not get it cos we already have it?
         // also: getting MIC access does not require getting AUDIO_FOCUS
-        entryLogger("AudioFocus check...", false);
+        entryLogger(getResources().getString(R.string.audiofocus_check_1), false);
         int result = audioManager.requestAudioFocus(audioFocusListener,
                 AudioManager.STREAM_MUSIC,
                 AudioManager.AUDIOFOCUS_GAIN);
 
         if (result == AudioManager.AUDIOFOCUS_REQUEST_GRANTED) {
-            entryLogger("AudioFocus request granted.", false);
+            entryLogger(getResources().getString(R.string.audiofocus_check_2), false);
         }
         else if (result == AudioManager.AUDIOFOCUS_REQUEST_FAILED) {
-            entryLogger("AudioFocus request failed.", false);
+            entryLogger(getResources().getString(R.string.audiofocus_check_3), false);
         }
         else {
-            entryLogger("AudioFocus unknown.", false);
+            entryLogger(getResources().getString(R.string.audiofocus_check_4), false);
         }
     }
 
@@ -919,20 +923,20 @@ public class MainActivity extends AppCompatActivity
     private void toggleMicCheck() {
         if (POLLING) {
             // do not do this as well
-            entryLogger("DO NOT MIC CHECK WHEN POLLING", true);
+            entryLogger(getResources().getString(R.string.mic_check_1), true);
             return;
         }
 
         if (MIC_CHECKING) {
             // currently running, stop it
             pilferShushScanner.micChecking(MIC_CHECKING = false);
-            micCheckButton.setText("MICROPHONE CHECK");
+            micCheckButton.setText(getResources().getString(R.string.mic_check_2));
             micCheckButton.setBackgroundColor(Color.LTGRAY);
         }
         else {
             // not running, start it
             if (pilferShushScanner.checkScanner()) {
-                micCheckButton.setText("CHECKING...");
+                micCheckButton.setText(getResources().getString(R.string.mic_check_3));
                 micCheckButton.setBackgroundColor(Color.RED);
                 pilferShushScanner.micChecking(MIC_CHECKING = true);
             }
@@ -941,17 +945,17 @@ public class MainActivity extends AppCompatActivity
 
     private void togglePollingCheck() {
         if (MIC_CHECKING) {
-            entryLogger("DO NOT POLL WHEN MIC CHECKING", true);
+            entryLogger(getResources().getString(R.string.poll_check_1), true);
             return;
         }
         if (POLLING) {
             pilferShushScanner.pollingCheck(POLLING = false);
-            micPollingButton.setText("POLLING CHECK");
+            micPollingButton.setText(getResources().getString(R.string.poll_check_2));
             micPollingButton.setBackgroundColor(Color.LTGRAY);
         }
         else {
             pilferShushScanner.pollingCheck(POLLING = true);
-            micPollingButton.setText("POLLING...");
+            micPollingButton.setText(getResources().getString(R.string.poll_check_3));
             micPollingButton.setBackgroundColor(Color.RED);
         }
     }
@@ -964,46 +968,46 @@ public class MainActivity extends AppCompatActivity
                     case AudioManager.AUDIOFOCUS_LOSS:
                         // -1
                         // loss for unknown duration
-                        focusText.setText("Audio Focus Listener: LOSS.");
+                        focusText.setText(getResources().getString(R.string.audiofocus_1));
                         audioManager.abandonAudioFocus(audioFocusListener);
                         interruptRequestAudio();
                         break;
                     case AudioManager.AUDIOFOCUS_LOSS_TRANSIENT:
                         // -2
                         // temporary loss ? API docs says a "transient loss"!
-                        focusText.setText("Audio Focus Listener: LOSS_TRANSIENT.");
+                        focusText.setText(getResources().getString(R.string.audiofocus_2));
                         interruptRequestAudio();
                         break;
                     case AudioManager.AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK:
                         // -3
                         // loss to other audio source, this can duck for the short duration if it wants
-                        focusText.setText("Audio Focus Listener: LOSS_TRANSIENT_DUCK.");
+                        focusText.setText(getResources().getString(R.string.audiofocus_3));
                         interruptRequestAudio();
                         break;
                     case AudioManager.AUDIOFOCUS_REQUEST_FAILED:
                         // 0
                         // failed focus change request
-                        focusText.setText("Audio Focus Listener: REQUEST_FAIL.");
+                        focusText.setText(getResources().getString(R.string.audiofocus_4));
                         break;
                     case AudioManager.AUDIOFOCUS_GAIN:
                         //case AudioManager.AUDIOFOCUS_REQUEST_GRANTED: <- duplicate int value...
                         // 1
                         // has gain, or request for gain, of unknown duration
-                        focusText.setText("Audio Focus Listener: GAIN.");
+                        focusText.setText(getResources().getString(R.string.audiofocus_5));
                         break;
                     case AudioManager.AUDIOFOCUS_GAIN_TRANSIENT:
                         // 2
                         // temporary gain or request for gain, for short duration (ie. notification)
-                        focusText.setText("Audio Focus Listener: GAIN_TRANSIENT.");
+                        focusText.setText(getResources().getString(R.string.audiofocus_6));
                         break;
                     case AudioManager.AUDIOFOCUS_GAIN_TRANSIENT_MAY_DUCK:
                         // 3
                         // as above but with other background audio ducked for duration
-                        focusText.setText("Audio Focus Listener: GAIN_TRANSIENT_DUCK.");
+                        focusText.setText(getResources().getString(R.string.audiofocus_7));
                         break;
                     default:
                         //
-                        focusText.setText("Audio Focus Listener: UNKNOWN STATE.");
+                        focusText.setText(getResources().getString(R.string.audiofocus_8));
                 }
             }
         };
@@ -1015,15 +1019,15 @@ public class MainActivity extends AppCompatActivity
                 int state = intent.getIntExtra("state", -1);
                 switch (state) {
                     case 0:
-                        mainScanLogger("Headset is unplugged, mute output", false);
+                        mainScanLogger(getResources().getString(R.string.headset_state_1), false);
                         toggleHeadset(false);
                         break;
                     case 1:
-                        mainScanLogger("Headset is plugged in.", false);
+                        mainScanLogger(getResources().getString(R.string.headset_state_2), false);
                         toggleHeadset(true);
                         break;
                     default:
-                        mainScanLogger("Headset state unknown", false);
+                        mainScanLogger(getResources().getString(R.string.headset_state_3), false);
                 }
             }
         }

@@ -28,7 +28,7 @@ public class PilferShushScanner {
         this.context = context;
         scanBufferSize = 0;
         audioSettings = new AudioSettings(writeFiles);
-        audioChecker = new AudioChecker(audioSettings);
+        audioChecker = new AudioChecker(context, audioSettings);
         writeProcessor = new WriteProcessor(sessionName, audioSettings, writeWav);
         // writes txt file to same location as audio records.
         // write init checks then close the file.
@@ -39,7 +39,7 @@ public class PilferShushScanner {
 
         if (audioChecker.determineInternalAudioType()) {
             entryLogger(audioChecker.getAudioSettings().toString(), false);
-            audioScanner = new AudioScanner(audioChecker.getAudioSettings());
+            audioScanner = new AudioScanner(context, audioChecker.getAudioSettings());
             // get internalAudio settings here.
             initBackgroundChecks();
             return true;
@@ -47,10 +47,10 @@ public class PilferShushScanner {
         // TODO wont yet run usb audio, no return true, background checks...
         if(hasUSB) {
             if (audioChecker.determineUsbAudioType(hasUSB)) {
-                MainActivity.logger("has usb audio type.");
+                MainActivity.logger(context.getString(R.string.usb_state_7));
             }
             else {
-                MainActivity.logger("no usb audio type found.");
+                MainActivity.logger(context.getString(R.string.usb_state_8));
             }
         }
         return false;
@@ -142,7 +142,7 @@ public class PilferShushScanner {
 
     protected void setPollingSpeed(int delayMS) {
         audioChecker.setPollingSpeed(delayMS);
-        entryLogger("Polling speed set to " + delayMS + " ms.", false);
+        entryLogger(context.getString(R.string.option_set_1) + delayMS, false);
     }
 
     protected void micChecking(boolean checking) {
@@ -171,12 +171,12 @@ public class PilferShushScanner {
 
     protected void setFrequencyStep(int freqStep) {
         audioSettings.setFreqStep(freqStep);
-        entryLogger("Frequency Step changed to: " + freqStep, false);
+        entryLogger(context.getString(R.string.option_set_2) + freqStep, false);
     }
 
     protected void setMinMagnitude(double magnitude) {
         audioScanner.setMinMagnitude(magnitude);
-        entryLogger("Magnitude level set: " + magnitude, false);
+        entryLogger(context.getString(R.string.option_set_3) + magnitude, false);
     }
 
     protected void setFFTWindowType(int userWindow) {
@@ -184,7 +184,7 @@ public class PilferShushScanner {
     }
 
     protected void runAudioScanner() {
-        entryLogger("AudioScanning start...", false);
+        entryLogger(context.getString(R.string.main_scanner_18), false);
         scanBufferSize = 0;
         if (audioSettings.getWriteFiles()) {
             writeProcessor.prepareWriteAudioFile();
@@ -194,18 +194,17 @@ public class PilferShushScanner {
 
     protected void stopAudioScanner() {
         if (audioScanner != null) {
-            entryLogger("AudioScanning stop.", false);
+            entryLogger(context.getString(R.string.main_scanner_19), false);
             // below nulls the recordTask...
             audioScanner.stopAudioScanner();
-            // TODO insert writeProcessor convert pcm to wav
             writeProcessor.audioFileConvert();
 
             if (audioScanner.canProcessBufferStorage()) {
                 scanBufferSize = audioScanner.getSizeBufferStorage();
-                entryLogger("BufferStorage size: " + scanBufferSize, false);
+                entryLogger(context.getString(R.string.main_scanner_20) + scanBufferSize, false);
             }
             else {
-                entryLogger("BufferStorage: FALSE", false);
+                entryLogger(context.getString(R.string.main_scanner_21), false);
             }
         }
     }
@@ -267,7 +266,7 @@ public class PilferShushScanner {
     }
 
     protected String getModFrequencyLogic() {
-        return audioScanner.getFrequencySequenceLogic();
+        return context.getString(R.string.audio_scan_1) + "\n" + audioScanner.getFrequencySequenceLogic();
     }
 
     // MainActivity.stopScanner() debug type outputs
@@ -297,7 +296,7 @@ public class PilferShushScanner {
         }
         else {
             // is bad
-            MainActivity.logger("is broke");
+            MainActivity.logger(context.getString(R.string.background_scan_1));
         }
     }
 
@@ -306,18 +305,17 @@ public class PilferShushScanner {
 */
     private void auditBackgroundChecks() {
         // is good
-        MainActivity.logger("run background checks...\n");
+        MainActivity.logger(context.getString(R.string.background_scan_2) + "\n");
         backgroundChecker.runChecker();
 
-        MainActivity.logger("USER APPs with RECORD AUDIO: "
-                + backgroundChecker.getUserRecordNumApps() + "\n");
+        MainActivity.logger(context.getString(R.string.background_scan_3) + backgroundChecker.getUserRecordNumApps() + "\n");
 
         backgroundChecker.audioAppEntryLog();
     }
 
     private void listAppAudioBeaconDetails(int selectedIndex) {
         if (backgroundChecker.getAudioBeaconAppEntry(selectedIndex).checkBeaconServiceNames()) {
-            entryLogger("Found audio beacon services for "
+            entryLogger(context.getString(R.string.background_scan_4)
                     + backgroundChecker.getAudioBeaconAppEntry(selectedIndex).getActivityName()
                     + ": " + backgroundChecker.getAudioBeaconAppEntry(selectedIndex).getBeaconServiceNamesNum(), true);
 
@@ -326,7 +324,7 @@ public class PilferShushScanner {
         //TODO
         // add a call for any receiver names too
         if (backgroundChecker.getAudioBeaconAppEntry(selectedIndex).checkBeaconReceiverNames()) {
-            entryLogger("Found audio beacon receivers for "
+            entryLogger(context.getString(R.string.background_scan_5)
                     + backgroundChecker.getAudioBeaconAppEntry(selectedIndex).getActivityName()
                     + ": " + backgroundChecker.getAudioBeaconAppEntry(selectedIndex).getBeaconReceiverNamesNum(), true);
 
@@ -336,7 +334,7 @@ public class PilferShushScanner {
 
     private void listAppOverrideScanDetails(int selectedIndex) {
         // check for receivers too?
-        entryLogger("Found User App services for "
+        entryLogger(context.getString(R.string.background_scan_6)
                 + backgroundChecker.getOverrideScanAppEntry(selectedIndex).getActivityName()
                 + ": " + backgroundChecker.getOverrideScanAppEntry(selectedIndex).getServicesNum(), true);
 
@@ -344,7 +342,7 @@ public class PilferShushScanner {
             logAppEntryInfo(backgroundChecker.getOverrideScanAppEntry(selectedIndex).getServiceNames());
         }
 
-        entryLogger("Found User App receivers for "
+        entryLogger(context.getString(R.string.background_scan_7)
                 + backgroundChecker.getOverrideScanAppEntry(selectedIndex).getActivityName()
                 + ": " + backgroundChecker.getOverrideScanAppEntry(selectedIndex).getReceiversNum(), true);
 
@@ -354,7 +352,7 @@ public class PilferShushScanner {
     }
 
     private void logAppEntryInfo(String[] appEntryInfoList) {
-        entryLogger("\nAppEntry list: \n", false);
+        entryLogger("\n" + context.getString(R.string.background_scan_8) + "\n", false);
         for (int i = 0; i < appEntryInfoList.length; i++) {
             entryLogger(appEntryInfoList[i] + "\n", false);
         }

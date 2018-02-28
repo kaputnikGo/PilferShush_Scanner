@@ -1,5 +1,6 @@
 package pilfershush.cityfreqs.com.pilfershush;
 
+import android.content.Context;
 import android.media.AudioFormat;
 import android.media.AudioRecord;
 import android.media.MediaRecorder.AudioSource;
@@ -13,14 +14,16 @@ public class AudioChecker {
     private int channelConfig;
     private int audioSource;
 
+    private Context context;
     private AudioRecord audioRecord;
     private PollAudioChecker pollAudioChecker;
     private int userPollSpeed;
 
     private AudioSettings audioSettings;
 
-    public AudioChecker(AudioSettings audioSettings) {
+    public AudioChecker(Context context, AudioSettings audioSettings) {
         //
+        this.context = context;
         userPollSpeed = PollAudioChecker.LONG_DELAY;
         this.audioSettings = audioSettings;
         // still need to determine if this is useful if user switchable, ie USB.
@@ -156,7 +159,7 @@ public static final int HOTWORD = 1999; //  always-on software hotword detection
                 }
             }
         }
-        MainActivity.logger("determine internal audio failure.");
+        MainActivity.logger(context.getString(R.string.audio_check_1));
         return false;
     }
 
@@ -210,10 +213,10 @@ public static final int HOTWORD = 1999; //  always-on software hotword detection
             }
         }
         else {
-            MainActivity.logger("Error: USB device container has no device.");
+            MainActivity.logger(context.getString(R.string.audio_check_2));
             return false;
         }
-        MainActivity.logger("determine USB audio failure.");
+        MainActivity.logger(context.getString(R.string.audio_check_3));
         return false;
     }
 
@@ -228,11 +231,11 @@ public static final int HOTWORD = 1999; //  always-on software hotword detection
             try {
                 audioRecord = new AudioRecord(audioSource, sampleRate, channelConfig, encoding, bufferSize);
                 //audioSessionId = audioRecord.getAudioSessionId();
-                MainActivity.logger("Can start Microphone Check.");
+                MainActivity.logger(context.getString(R.string.audio_check_4));
             }
             catch (Exception ex) {
                 ex.printStackTrace();
-                MainActivity.logger("Microphone in use...");
+                MainActivity.logger(context.getString(R.string.audio_check_5));
                 recordable = false;
             }
             finally {
@@ -269,18 +272,18 @@ public static final int HOTWORD = 1999; //  always-on software hotword detection
             // check for error on pre 6.x and 6.x API
             if(audioStatus == AudioRecord.ERROR_INVALID_OPERATION
                     || audioStatus == AudioRecord.STATE_UNINITIALIZED) {
-                MainActivity.logger("checkAudioBufferState error status: " + audioStatus);
+                MainActivity.logger(context.getString(R.string.audio_check_6) + audioStatus);
             }
         }
         catch(Exception e) {
-            MainActivity.logger("checkAudioBufferState exception on start.");
+            MainActivity.logger(context.getString(R.string.audio_check_7));
         }
         finally {
             try {
-                MainActivity.logger("checkAudioBufferState no error.");
+                MainActivity.logger(context.getString(R.string.audio_check_8));
             }
             catch(Exception e){
-                MainActivity.logger("checkAudioBufferState exception on close.");
+                MainActivity.logger(context.getString(R.string.audio_check_9));
             }
         }
     }
@@ -288,7 +291,7 @@ public static final int HOTWORD = 1999; //  always-on software hotword detection
     // currently this will start and then destroy after single use...
     protected boolean pollAudioCheckerInit() {
         //set for default
-        pollAudioChecker = new PollAudioChecker(audioSource, sampleRate, channelConfig, encoding, bufferSize);
+        pollAudioChecker = new PollAudioChecker(context, audioSource, sampleRate, channelConfig, encoding, bufferSize);
         return pollAudioChecker.setupPollAudio();
     }
 
@@ -322,16 +325,16 @@ public static final int HOTWORD = 1999; //  always-on software hotword detection
  */
     protected void stopAllAudio() {
         // ensure we don't keep resources
-        MainActivity.logger("stopAllAudio called.");
+        MainActivity.logger(context.getString(R.string.audio_check_10));
         if (audioRecord != null) {
             if (audioRecord.getRecordingState() == AudioRecord.RECORDSTATE_RECORDING) {
                 audioRecord.stop();
             }
             audioRecord.release();
-            MainActivity.logger("audioRecord stop and release.");
+            MainActivity.logger(context.getString(R.string.audio_check_11));
         }
         else {
-            MainActivity.logger("audioRecord is null.");
+            MainActivity.logger(context.getString(R.string.audio_check_12));
         }
     }
 }

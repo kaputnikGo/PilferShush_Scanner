@@ -1,38 +1,34 @@
 <resources>
-    <string name="app_name">PilferShush</string>
-
+    <!-- default language strings, some translatable -->
+    <string name="app_name" translatable="false">PilferShush</string>
     <string name="action_session_name">Set session name</string>
     <string name="dialog_session_name">Enter suffix for save files</string>
-    <string name="session_default_name">capture</string>
-
-    <string name="dialog_button_save">Save</string>
-    <string name="dialog_button_cancel">Cancel</string>
-    <string name="dialog_button_okay">OK</string>
+    <string name="session_default_name" translatable="false">capture</string>
 
     <string name="dialog_storage_warn_title">Caution</string>
     <string name="dialog_storage_warn_text">limited storage space for recording.</string>
 
     <string name="action_settings">Polling Speed</string>
     <string name="dialog_polling">Mic polling speed</string>
-    <string name="polling_1_text">1 second</string>
-    <string name="polling_2_text">2 seconds</string>
-    <string name="polling_3_text">3 seconds</string>
-    <string name="polling_4_text">4 seconds</string>
-    <string name="polling_5_text">5 seconds</string>
-    <string name="polling_default_text">6 secs (default)</string>
+    <string name="polling_1_text" translatable="false">1 second</string>
+    <string name="polling_2_text" translatable="false">2 seconds</string>
+    <string name="polling_3_text" translatable="false">3 seconds</string>
+    <string name="polling_4_text" translatable="false">4 seconds</string>
+    <string name="polling_5_text" translatable="false">5 seconds</string>
+    <string name="polling_default_text" translatable="false">6 secs (default)</string>
 
     <string name="action_audio_scan_settings">Audio Scan steps</string>
     <string name="dialog_freq_step">Frequency steps</string>
-    <string name="freq_step_10_text">10 Hz</string>
-    <string name="freq_step_25_text">25 Hz (default)</string>
-    <string name="freq_step_50_text">50 Hz</string>
-    <string name="freq_step_75_text">75 Hz</string>
-    <string name="freq_step_100_text">100 Hz</string>
+    <string name="freq_step_10_text" translatable="false">10 Hz</string>
+    <string name="freq_step_25_text" translatable="false">25 Hz (default)</string>
+    <string name="freq_step_50_text" translatable="false">50 Hz</string>
+    <string name="freq_step_75_text" translatable="false">75 Hz</string>
+    <string name="freq_step_100_text" translatable="false">100 Hz</string>
 
     <string name="action_audio_scan_ranges">Audio Scan range</string>
     <string name="dialog_freq_range">Frequency range</string>
-    <string name="freq_range_one">18kHz - 21kHz (default)</string>
-    <string name="freq_range_two">19kHz - 22kHz</string>
+    <string name="freq_range_one" translatable="false">18kHz - 21kHz (default)</string>
+    <string name="freq_range_two" translatable="false">19kHz - 22kHz</string>
 
     <string name="action_audio_beacons">Check Beacon Apps</string>
     <string name="dialog_audio_beacon_apps">Audio Beacon List</string>
@@ -61,10 +57,7 @@
 
     <string name="focus_text">Detailed View (scrollable): </string>
     <string name="debug_text">loading PilferShush.</string>
-    <string name="mic_check_button_text">MICROPHONE CHECK</string>
-    <string name="mic_polling_button_text">POLLING CHECK</string>
 
-    <string name="run_scans_button_text">Run Scanner</string>
     <string name="debug_view_button_text">Detailed View</string>
     <string name="main_view_button_text">Simple View</string>
     <string name="main_scan_text">PilferShush scanner initialising.</string>
@@ -79,10 +72,188 @@
 
     <string name="action_window_settings">FFT Window</string>
     <string name="dialog_window_text">FFT Window type</string>
-    <string name="dialog_window_fft_1">Hann</string>
-    <string name="dialog_window_fft_2">Blackman (default)</string>
-    <string name="dialog_window_fft_3">Hamming</string>
-    <string name="dialog_window_fft_4">Nuttall</string>
-    <string name="dialog_window_fft_5">Blackman-Nuttall</string>
+    <string name="dialog_window_fft_1" translatable="false">Hann</string>
+    <string name="dialog_window_fft_2" translatable="false">Blackman (default)</string>
+    <string name="dialog_window_fft_3" translatable="false">Hamming</string>
+    <string name="dialog_window_fft_4" translatable="false">Nuttall</string>
+    <string name="dialog_window_fft_5" translatable="false">Blackman-Nuttall</string>
+
+    <!--
+    translatable: log output to view, options, some UI elements strings below
+    \u0020 == whitespace character at end/start of some strings, for combined strings and readability
+    -->
+
+    <!--
+    MainActivity.java
+    -->
+    <string name="headset_state_1">Headset is unplugged, mute output</string>
+    <string name="headset_state_2">Headset is plugged in.</string>
+    <string name="headset_state_3">Headset state unknown</string>
+
+    <string name="audiofocus_check_1">AudioFocus check...</string>
+    <string name="audiofocus_check_2">AudioFocus request granted.</string>
+    <string name="audiofocus_check_3">AudioFocus request failed.</string>
+    <string name="audiofocus_check_4">AudioFocus unknown.</string>
+    <string name="audiofocus_check_5">AudioFocus interrupt request.</string>
+
+    <string name="audiofocus_1">Audio Focus Listener: LOSS.</string>
+    <string name="audiofocus_2">Audio Focus Listener: LOSS_TRANSIENT.</string>
+    <string name="audiofocus_3">Audio Focus Listener: LOSS_TRANSIENT_DUCK.</string>
+    <string name="audiofocus_4">Audio Focus Listener: REQUEST_FAIL.</string>
+    <string name="audiofocus_5">Audio Focus Listener: GAIN.</string>
+    <string name="audiofocus_6">Audio Focus Listener: GAIN_TRANSIENT.</string>
+    <string name="audiofocus_7">Audio Focus Listener: GAIN_TRANSIENT_DUCK.</string>
+    <string name="audiofocus_8">Audio Focus Listener: UNKNOWN STATE.</string>
+
+    <string name="poll_check_1">DO NOT POLL WHEN MIC CHECKING</string>
+    <string name="poll_check_2">POLLING CHECK</string>
+    <string name="poll_check_3">POLLING...</string>
+
+    <string name="mic_check_1">DO NOT MIC CHECK WHEN POLLING</string>
+    <string name="mic_check_2">MICROPHONE CHECK</string>
+    <string name="mic_check_3">CHECKING...</string>
+
+    <string name="audio_apps_check_1">NO AUDIO BEACON APPS FOUND.</string>
+    <string name="user_apps_check_1">NO USER APPS FOUND FOR OVERRIDE SCAN.</string>
+
+    <string name="main_scanner_1">SCANNING...</string>
+    <string name="main_scanner_2">Running scans on user installed apps...</string>
+    <string name="main_scanner_3">Record audio apps found:\u0020</string>
+    <string name="main_scanner_4">No record audio apps found.</string>
+    <string name="main_scanner_5">\u0020Audio Beacon SDKs detected.</string>
+    <string name="main_scanner_6">No Audio Beacon SDKs detected.</string>
+    <string name="main_scanner_7">Microphone check...</string>
+    <string name="main_scanner_8">Microphone use detected.</string>
+    <string name="main_scanner_9">No microphone use detected.</string>
+    <string name="main_scanner_10">Listening for near-ultra high audio...</string>
+    <string name="main_scanner_11">Run Scanner</string>
+    <string name="main_scanner_12">Stop listening for audio.</string>
+    <string name="main_scanner_13">Detected possible n-uhf audio.</string>
+    <string name="main_scanner_14">Frequency list size:\u0020</string>
+    <string name="main_scanner_15">Original sequence as transmitted:</string>
+    <string name="main_scanner_16">No detected audio beacon signals.</string>
+    <string name="main_scanner_17">[-: end of scan :-]</string>
+
+    <string name="option_dialog_1">Limited storage space found.</string>
+    <string name="option_dialog_2">Log storage size:\u0020</string>
+    <string name="option_dialog_3">Delete empty log files.</string>
+    <string name="option_dialog_4">Delete ALL log files.</string>
+    <string name="option_dialog_5">Free storage space: </string>
+    <string name="option_dialog_6">Write to file enabled.</string>
+    <string name="option_dialog_7">Write to file disabled.</string>
+    <string name="option_dialog_8">Polling speed (ms):\u0020</string>
+    <string name="option_dialog_9">Frequency steps (hz):\u0020</string>
+    <string name="option_dialog_10">Frequency range set 18kHz - 21kHz.</string>
+    <string name="option_dialog_11">Frequency range set 19kHz - 22kHz.</string>
+    <string name="option_dialog_12">Loudness level (dB):\u0020</string>
+    <string name="option_dialog_13">FFT Window set to:\u0020</string>
+
+    <string name="init_state_1">PilferShush scanner version\u0020</string>
+    <string name="init_state_2">Using\u0020</string>
+    <string name="init_state_3">Settings can be changed via the Options menu.</string>
+    <string name="init_state_4">The Detailed View has logging and more information from scans.</string>
+    <string name="init_state_5">It also has a continuous Mic check and intermittent polling check to look for other apps using the microphone.</string>
+    <string name="init_state_6">Init: save log output and audio to files:\u0020</string>
+    <string name="init_state_7_1">Wav audio:\u0020</string>
+    <string name="init_state_7_2">, little-endian.</string>
+    <string name="init_state_8_1">Raw audio:\u0020</string>
+    <string name="init_state_8_2">, big-endian.</string>
+    <string name="init_state_9">Free storage space:\u0020</string>
+    <string name="init_state_10_1">Press\u0020</string>
+    <string name="init_state_10_2">\u0020button to start and stop scanning for audio.</string>
+    <string name="init_state_11">DO NOT RUN SCANNER FOR A LONG TIME.</string>
+    <string name="init_state_12">PilferShush init failed.</string>
+    <string name="init_state_13">Failed to init audio device.</string>
+
+    <string name="usb_state_1">checking usb host for audio device.</string>
+    <string name="usb_state_2">USB:\u0020</string>
+    <string name="usb_state_3">usb audio device not found, using internal.</string>
+    <string name="usb_state_4">\u0020has permission for USB device.</string>
+    <string name="usb_state_5">\u0020no USB device container or device.</string>
+    <string name="usb_state_6">\u0020permission denied for USB device.</string>
+
+    <string name="perms_state_1">Record Audio</string>
+    <string name="perms_state_2">Save audio and text files</string>
+    <string name="perms_state_3">Permissions request:\u0020</string>
+    <string name="perms_state_4">Some permissions denied</string>
+
+    <string name="dialog_button_save">Save</string>
+    <string name="dialog_button_cancel">Cancel</string>
+    <string name="dialog_button_okay">OK</string>
+
+    <!--
+    PilferShushScanner.java
+    -->
+    <string name="usb_state_7">has usb audio type.</string>
+    <string name="usb_state_8">no usb audio type found.</string>
+
+    <string name="option_set_1">Polling speed set to (ms):\u0020</string>
+    <string name="option_set_2">Frequency Step set to (hz):\u0020</string>
+    <string name="option_set_3">Magnitude level set to (sqrt):\u0020</string>
+
+    <string name="main_scanner_18">Audio scanning start...</string>
+    <string name="main_scanner_19">Audio scanning stop.</string>
+    <string name="main_scanner_20">Buffer storage size:\u0020</string>
+    <string name="main_scanner_21">Buffer storage empty</string>
+
+    <string name="background_scan_1">Background scanner fail.</string>
+    <string name="background_scan_2">run background checks...</string>
+    <string name="background_scan_3">User Apps with RECORD AUDIO:\u0020</string>
+    <string name="background_scan_4">Found audio beacon services for\u0020</string>
+    <string name="background_scan_5">Found audio beacon receivers for\u0020</string>
+    <string name="background_scan_6">Found User App services for\u0020</string>
+    <string name="background_scan_7">Found User App receivers for\u0020</string>
+    <string name="background_scan_8">AppEntry list:\u0020</string>
+
+    <string name="audio_scan_1">Found possible binary logic:\u0020</string>
+
+    <!--
+    AudioChecker.java
+    -->
+    <string name="audio_check_1">determine internal audio failure.</string>
+    <string name="audio_check_2">Error: USB device container has no device.</string>
+    <string name="audio_check_3">determine USB audio failure.</string>
+    <string name="audio_check_4">Can start Microphone Check.</string>
+    <string name="audio_check_5">Microphone in use...</string>
+    <string name="audio_check_6">check audioBufferState read error - status id:\u0020</string>
+    <string name="audio_check_7">check audioBufferState init error.</string>
+    <string name="audio_check_8">audioBufferState no error, checking...</string>
+    <string name="audio_check_9">check audioBufferState exception on close.</string>
+    <string name="audio_check_10">Stopping all audio.</string>
+    <string name="audio_check_11">Audio record stopped and released.</string>
+    <string name="audio_check_12">audioRecord is null.</string>
+
+    <!--
+    PollAudioChecker.java
+    -->
+    <string name="polling_check_1">Setup for polling mic ready, id:\u0020</string>
+    <string name="polling_check_2">Polling check: MIC IN USE</string>
+    <string name="polling_check_3">Start mic polling.</string>
+    <string name="polling_check_4">polling mic read error - status id:\u0020</string>
+    <string name="polling_check_5">polling mic exception on start.</string>
+    <string name="polling_check_6_1">polling mic at\u0020</string>
+    <string name="polling_check_6_2">(ms), no error.</string>
+    <string name="polling_check_7">polling mic exception on close.</string>
+    <string name="polling_check_8">stop polling mic.</string>
+    <string name="polling_check_9">Polling mic stop and release.</string>
+    <string name="polling_check_10">audioRecord is null.</string>
+
+    <!--
+    AudioScanner.java
+    -->
+    <string name="audio_scan_2">AudioScanner run failed:\u0020</string>
+    <string name="audio_scan_3">Stop AudioScanner exception on close.</string>
+
+    <!--
+    ProcessAudio.java
+    -->
+    <string name="process_audio_1">Freq:\u0020</string>
+    <string name="process_audio_2">Freq 0:\u0020</string>
+    <string name="process_audio_3">Freq 0: not found</string>
+    <string name="process_audio_4">Freq 1:\u0020</string>
+    <string name="process_audio_5">Freq 1: not found</string>
+    <string name="process_audio_6">frequency list is empty.</string>
+
+
 
 </resources>

@@ -1,12 +1,16 @@
 package pilfershush.cityfreqs.com.pilfershush.scanners;
 
+import android.content.Context;
+
 import java.util.ArrayList;
 
 import pilfershush.cityfreqs.com.pilfershush.MainActivity;
+import pilfershush.cityfreqs.com.pilfershush.R;
 import pilfershush.cityfreqs.com.pilfershush.assist.AudioSettings;
 import pilfershush.cityfreqs.com.pilfershush.scanners.FreqDetector.RecordTaskListener;
 
 public class AudioScanner {
+    private Context context;
     private FreqDetector freqDetector;
     private ProcessAudio processAudio;
     private AudioSettings audioSettings;
@@ -16,13 +20,14 @@ public class AudioScanner {
     private ArrayList<Integer> frequencySequence;
     private ArrayList<Integer[]> bufferStorage;
 
-    public AudioScanner(AudioSettings audioSettings) {
+    public AudioScanner(Context context, AudioSettings audioSettings) {
+        this.context = context;
         this.audioSettings = audioSettings;
         freqStep = AudioSettings.DEFAULT_FREQ_STEP;
 
         freqDetector = new FreqDetector(this.audioSettings);
         freqDetector.init(freqStep, AudioSettings.DEFAULT_MAGNITUDE);
-        processAudio = new ProcessAudio();
+        processAudio = new ProcessAudio(context);
         resetAudioScanner();
     }
 
@@ -46,7 +51,7 @@ public class AudioScanner {
             }
 
             public void onFailure(String paramString) {
-                MainActivity.logger("AudioScanner run failed: " + paramString);
+                MainActivity.logger(context.getString(R.string.audio_scan_2) + paramString);
             }
         });
     }
@@ -61,7 +66,7 @@ public class AudioScanner {
             freqDetector.cleanup();
         }
         catch (Exception ex) {
-            MainActivity.logger("Stop AudioScanner failed.");
+            MainActivity.logger(context.getString(R.string.audio_scan_3));
         }
     }
 
@@ -95,8 +100,7 @@ public class AudioScanner {
     }
 
     public String getFrequencySequenceLogic() {
-        return "Found possible binary logic: \n" + processAudio.getLogicZero()
-                + "\n" + processAudio.getLogicOne() + "\n";
+        return  processAudio.getLogicZero() + "\n" + processAudio.getLogicOne() + "\n";
     }
 
     public String getFreqSeqLogicEntries() {

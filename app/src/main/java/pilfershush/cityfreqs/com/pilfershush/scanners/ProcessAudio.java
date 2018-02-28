@@ -1,6 +1,7 @@
 package pilfershush.cityfreqs.com.pilfershush.scanners;
 
 import android.annotation.SuppressLint;
+import android.content.Context;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -11,12 +12,18 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import pilfershush.cityfreqs.com.pilfershush.MainActivity;
+import pilfershush.cityfreqs.com.pilfershush.R;
 import pilfershush.cityfreqs.com.pilfershush.assist.AudioSettings;
 
 public class ProcessAudio {
+    private Context context;
     private Entry<Integer, Integer> logicZero;
     private Entry<Integer, Integer> logicOne;
     private List<Map.Entry<Integer,Integer>> entries;
+
+    public ProcessAudio(Context context) {
+        this.context = context;
+    }
 
     /********************************************************************/
 
@@ -32,26 +39,26 @@ public class ProcessAudio {
     public String getLogicEntries() {
         String logicEntries = "";
         for (Map.Entry<Integer, Integer> e : entries) {
-            logicEntries += "Freq: " + e.getKey() + " : " + e.getValue() + "\n";
+            logicEntries += context.getString(R.string.process_audio_1) + e.getKey() + " : " + e.getValue() + "\n";
         }
         return logicEntries;
     }
 
     public String getLogicZero() {
         if (logicZero != null) {
-            return "Freq 0: " + logicZero.getKey() + " : " + logicZero.getValue();
+            return context.getString(R.string.process_audio_2) + logicZero.getKey() + " : " + logicZero.getValue();
         }
         else {
-            return "Freq 0: not found";
+            return context.getString(R.string.process_audio_3);
         }
     }
 
     public String getLogicOne() {
         if (logicOne != null) {
-            return "Freq 1: " + logicOne.getKey() + " : " + logicOne.getValue();
+            return context.getString(R.string.process_audio_4) + logicOne.getKey() + " : " + logicOne.getValue();
         }
         else {
-            return "Freq 1: not found";
+            return context.getString(R.string.process_audio_5);
         }
     }
 
@@ -72,7 +79,7 @@ public class ProcessAudio {
 
         // break for no audio:
         if (freqList.isEmpty()) {
-            debugProcessAudio("freqList is empty.");
+            debugProcessAudio(context.getString(R.string.process_audio_6));
             return false;
         }
 
@@ -101,7 +108,7 @@ public class ProcessAudio {
         if (entries != null && !entries.isEmpty()) {
             // this is proving more useful for determining and debug
             for (Map.Entry<Integer, Integer> e : entries) {
-                debugProcessAudio("Freq: " + e.getKey() + " : " + e.getValue());
+                debugProcessAudio(context.getString(R.string.process_audio_1) + e.getKey() + " : " + e.getValue());
             }
 
             // we need at least two entries for this:
