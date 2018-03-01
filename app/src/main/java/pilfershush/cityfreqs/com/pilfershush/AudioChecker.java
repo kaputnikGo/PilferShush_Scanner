@@ -291,8 +291,13 @@ public static final int HOTWORD = 1999; //  always-on software hotword detection
     // currently this will start and then destroy after single use...
     protected boolean pollAudioCheckerInit() {
         //set for default
+        pollAudioChecker = null;
         pollAudioChecker = new PollAudioChecker(context, audioSource, sampleRate, channelConfig, encoding, bufferSize);
         return pollAudioChecker.setupPollAudio();
+    }
+
+    protected boolean audioStateError() {
+        return pollAudioChecker.audioError;
     }
 
     protected void pollAudioCheckerStart() {

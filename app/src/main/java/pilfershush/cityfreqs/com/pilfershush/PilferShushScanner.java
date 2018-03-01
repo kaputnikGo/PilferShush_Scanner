@@ -111,7 +111,10 @@ public class PilferShushScanner {
         writeProcessor.setSessionName(sessionName);
         // attempt to reopen
         if (audioSettings.getWriteFiles()) {
-            writeProcessor.prepareLogToFile();
+            if (!writeProcessor.prepareLogToFile()) {
+                // error in prep
+                entryLogger(context.getString(R.string.init_state_14), true);
+            }
         }
     }
 
@@ -121,8 +124,9 @@ public class PilferShushScanner {
             return;
         }
         else {
-            if (audioSettings.getWriteFiles()) {
-                writeProcessor.prepareLogToFile();
+            if (!writeProcessor.prepareLogToFile()) {
+                // error in prep
+                entryLogger(context.getString(R.string.init_state_14), true);
             }
         }
     }
@@ -188,7 +192,9 @@ public class PilferShushScanner {
         entryLogger(context.getString(R.string.main_scanner_18), false);
         scanBufferSize = 0;
         if (audioSettings.getWriteFiles()) {
-            writeProcessor.prepareWriteAudioFile();
+            if (!writeProcessor.prepareWriteAudioFile()) {
+                entryLogger(context.getString(R.string.init_state_15), true);
+            }
         }
         audioScanner.runAudioScanner();
     }
@@ -242,6 +248,11 @@ public class PilferShushScanner {
 
     protected void listScanDetails(int appNumber) {
         listAppOverrideScanDetails(appNumber);
+    }
+
+    protected boolean audioStateError() {
+        audioChecker.pollAudioCheckerInit();
+        return audioChecker.audioStateError();
     }
 
     protected boolean mainPollingCheck() {

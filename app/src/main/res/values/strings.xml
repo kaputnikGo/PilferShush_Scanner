@@ -164,6 +164,7 @@
     <string name="init_state_11">DO NOT RUN SCANNER FOR A LONG TIME.</string>
     <string name="init_state_12">PilferShush init failed.</string>
     <string name="init_state_13">Failed to init audio device.</string>
+    <string name="init_state_17">Error: no MIC or Audio Record session.</string>
 
     <string name="usb_state_1">checking usb host for audio device.</string>
     <string name="usb_state_2">USB:\u0020</string>
@@ -226,6 +227,8 @@
     <!--
     PollAudioChecker.java
     -->
+    <string name="init_state_16">Error in setting up Audio Record.</string>
+
     <string name="polling_check_1">Setup for polling mic ready, id:\u0020</string>
     <string name="polling_check_2">Polling check: MIC IN USE</string>
     <string name="polling_check_3">Start mic polling.</string>
@@ -257,6 +260,9 @@
     <!--
     WriteProcessor.java
     -->
+    <string name="init_state_14">Error in setting up text log file.</string>
+    <string name="init_state_15">Error in setting up write audio file.</string>
+
     <string name="writer_state_1">Check storage.</string>
     <string name="writer_state_2">external directory location:\u0020</string>
     <string name="writer_state_3">preparing text log file...</string>
@@ -280,5 +286,6 @@
     <string name="writer_state_19">Storage folder now empty.</string>
     <string name="writer_state_20">Storage size:\u0020</string>
     <string name="writer_state_21">temp raw audio file deleted.</string>
+
 
 </resources>

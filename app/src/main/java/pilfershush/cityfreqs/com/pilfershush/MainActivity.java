@@ -55,7 +55,7 @@ public class MainActivity extends AppCompatActivity
     private static final int REQUEST_MULTIPLE_PERMISSIONS = 123;
 
     // dev internal version numbering
-    public static final String VERSION = "2.0.29";
+    public static final String VERSION = "2.0.30";
 
     private ViewSwitcher viewSwitcher;
     private boolean mainView;
@@ -172,7 +172,6 @@ public class MainActivity extends AppCompatActivity
         usbManager = (UsbManager) getSystemService(Context.USB_SERVICE);
         permissionIntent = PendingIntent.getBroadcast(this, 0, new Intent(ACTION_USB_PERMISSION), 0);
         IntentFilter filter = new IntentFilter(ACTION_USB_PERMISSION);
-        registerReceiver(usbReceiver, filter);
 
         // permissions ask:
         // check API version, above 23 permissions are asked at runtime
@@ -748,6 +747,13 @@ public class MainActivity extends AppCompatActivity
  * ACTION SCANS
  */
     private void toggleScanning() {
+        // add check for mic/record ability
+        if (pilferShushScanner.audioStateError()) {
+            // no mic or audio record capabilities
+            mainScanLogger(getResources().getString(R.string.init_state_17), true);
+            return;
+        }
+
         if (wakeLock == null) {
             wakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, TAG);
         }
@@ -777,7 +783,6 @@ public class MainActivity extends AppCompatActivity
         runScansButton.setBackgroundColor(Color.RED);
         mainScanLogger(getResources().getString(R.string.main_scanner_2), false);
 
-        // two diff methods of doing same thing... lols
         int audioNum = pilferShushScanner.getAudioRecordAppsNumber();
         if (audioNum > 0) {
             mainScanLogger(getResources().getString(R.string.main_scanner_3) + audioNum, true);

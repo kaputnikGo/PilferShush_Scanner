@@ -124,13 +124,13 @@ public class WriteProcessor {
     /*
         text logging
      */
-    public void prepareLogToFile() {
+    public boolean prepareLogToFile() {
         // need to build the filename AND path
         log(context.getString(R.string.writer_state_3));
         File location = extDirectory;
         if (location == null) {
             log(context.getString(R.string.writer_state_4));
-            return;
+            return false;
         }
         // add the extension and timestamp
         // eg: 20151218-10:14:32-capture.txt
@@ -140,14 +140,17 @@ public class WriteProcessor {
             LOG_OUTPUT_FILE.createNewFile();
             LOG_OUTPUT_STREAM = new FileOutputStream(LOG_OUTPUT_FILE, true);
             LOG_OUTPUT_WRITER = new OutputStreamWriter(LOG_OUTPUT_STREAM);
+            return true;
         }
         catch (FileNotFoundException ex) {
             ex.printStackTrace();
             log(context.getString(R.string.writer_state_5));
+            return false;
         }
         catch (IOException e) {
             e.printStackTrace();
             log(context.getString(R.string.writer_state_6));
+            return false;
         }
     }
 
@@ -185,12 +188,12 @@ public class WriteProcessor {
         audio logging init
      */
 
-    public void prepareWriteAudioFile() {
+    public boolean prepareWriteAudioFile() {
         // need to build the filename AND path
         File location = extDirectory;
         if (location == null) {
             log(context.getString(R.string.writer_state_4));
-            return;
+            return false;
         }
         // add the extension and timestamp
         // eg: 20151218-10:14:32-capture.pcm(.wav)
@@ -216,14 +219,17 @@ public class WriteProcessor {
                     WAV_OUTPUT_FILE.createNewFile();
                 }
             }
+            return true;
         }
         catch (FileNotFoundException ex) {
             ex.printStackTrace();
             log(context.getString(R.string.writer_state_5));
+            return false;
         }
         catch (IOException e) {
             e.printStackTrace();
             log(context.getString(R.string.writer_state_9));
+            return false;
         }
     }
 
@@ -236,7 +242,7 @@ public class WriteProcessor {
 
     public static void writeAudioFile(final short[] shortBuffer, final int bufferRead) {
 
-            if (shortBuffer != null) {
+            if (shortBuffer != null && AUDIO_RAW_STREAM != null) {
                 try {
                     for (int i = 0; i < bufferRead; i++) {
                         AUDIO_RAW_STREAM.writeShort(shortBuffer[i]);
@@ -463,6 +469,10 @@ public class WriteProcessor {
 
     private static void log(String message) {
         MainActivity.logger(message);
+    }
+
+    private static void entrylogger(String message) {
+
     }
 }
 

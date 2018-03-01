@@ -22,6 +22,7 @@ public class PollAudioChecker {
     private Handler handlerU;
     private boolean polling;
     private boolean detected;
+    protected boolean audioError;
 
 
     public PollAudioChecker(Context context, int audioSource, int sampleRate, int channel, int encoding, int bufferSize) {
@@ -37,6 +38,7 @@ public class PollAudioChecker {
 
         detected = false;
         polling = false;
+        audioError = false;
         handlerU = new Handler();
     }
 
@@ -54,7 +56,15 @@ public class PollAudioChecker {
             try {
                 audioRecord = new AudioRecord(audioSource, sampleRate, channel, encoding, bufferSize);
                 audioSessionId = audioRecord.getAudioSessionId();
-                MainActivity.logger(context.getString(R.string.polling_check_1) + audioSessionId);
+                // if returns a 0 then no new sessionId was generated
+                if (audioSessionId == 0) {
+                    MainActivity.entryLogger(context.getString(R.string.init_state_16), true);
+                    audioError = true;
+                }
+                else {
+                    MainActivity.logger(context.getString(R.string.polling_check_1) + audioSessionId);
+                }
+
                 setup = true;
             }
             catch (Exception ex) {
