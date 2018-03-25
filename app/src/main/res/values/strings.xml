@@ -45,7 +45,7 @@
     <string name="action_storage_admin">Storage admin</string>
     <string name="dialog_storage_size">Print storage size</string>
     <string name="dialog_delete_empty_logs">Delete empty logs</string>
-    <string name="dialog_delete_all_files">Delete all log files</string>
+    <string name="dialog_delete_all_files">Delete all log text audio files</string>
     <string name="dialog_free_storage_size">Free storage space</string>
 
     <string name="dialog_cautioned">Cautioned List</string>

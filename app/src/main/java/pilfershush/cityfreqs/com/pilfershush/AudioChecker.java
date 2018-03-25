@@ -45,6 +45,15 @@ public class AudioChecker {
     }
 
     /********************************************************************/
+    /*
+    AudioRecord.cpp ::
+
+    if (inputSource == AUDIO_SOURCE_DEFAULT) {
+        inputSource = AUDIO_SOURCE_MIC;
+    }
+
+    */
+
 /*
  *      Find audio record format for device.
  *
