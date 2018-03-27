@@ -4,11 +4,28 @@ package pilfershush.cityfreqs.com.pilfershush;
 // concept: to run in background and play constant random noise at 18kHz and above
 // links to checkout: https://github.com/m-abboud/android-tone-player
 
+// passive jammer is for hold mic
+// active jammer is for flood of n-uhf audio output
+
+// need audioFocus listener halt resume, only telephony
+
+// ACTIVE JAMMER
+// user activated and runs for n-time, and/or till user stops it
+// check for mic use first, then ensure PS not using it.
+
+// PASSIVE JAMMER
+// other technique, grab mic, zero the input values (cat/dev/null) and hold until telephony or user interrupt
+// run on timer, ie set alarms hourly/half-hourly for continue?
+
+// TODO all logtext to xml
+
+
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
 import android.media.AudioFormat;
 import android.media.AudioManager;
+import android.media.AudioRecord;
 import android.media.AudioTrack;
 import android.os.Handler;
 import android.os.HandlerThread;
@@ -25,22 +42,98 @@ public class AudioJammer {
     AudioSettings audioSettings;
     AudioTrack audioTrack;
     Intent jammerIntent;
+    AudioRecord audioRecord;
+
+    private boolean RUN_PASSIVE_JAMMER;
 
 
     public AudioJammer(Context context, AudioSettings audioSettings) {
         this.context = context;
         this.audioSettings = audioSettings;
-
+        RUN_PASSIVE_JAMMER = false;
     }
 
-    protected void runJammer() {
-        jammerIntent = new Intent(context, PSJammer.class);
+    protected void runActiveJammer() {
+        jammerIntent = new Intent(context, PSActiveJammer.class);
         context.startService(jammerIntent);
     }
 
-    protected void stopJammer() {
+    protected void stopActiveJammer() {
         stopSound();
         context.stopService(jammerIntent);
+    }
+
+    protected void startPassiveJammer() {
+        // grab mic via AudioRecord object,
+        // zero the input
+        // battery use check, CPU use check
+        if (audioRecord == null) {
+            try {
+                audioRecord = new AudioRecord(audioSettings.getAudioSource(),
+                        audioSettings.getSampleRate(),
+                        audioSettings.getChannelConfig(),
+                        audioSettings.getEncoding(),
+                        audioSettings.getBufferSize());
+
+                MainActivity.entryLogger("Passive Jammer init.", false);
+            }
+            catch (Exception ex) {
+                ex.printStackTrace();
+                MainActivity.entryLogger("Passive Jammer failed to init.", true);
+            }
+        }
+    }
+
+    // TODO determine how little is needed to occupy/hold the microphone without actually recording and saving any audio
+    // assuming that only one api call can be made to the mic at a time
+    private void runPassiveJammer() {
+        if ((audioRecord != null) || (audioRecord.getState() == AudioRecord.STATE_INITIALIZED)) {
+            try {
+                // android source says: Transport Control Method, Starts recording from the AudioRecord instance.
+                audioRecord.startRecording();
+                MainActivity.entryLogger("Passive Jammer start.", false);
+
+                short buffer[] = new short[audioSettings.getBufferSize()];
+                int audioStatus = audioRecord.read(buffer, 0, audioSettings.getBufferSize());
+                // check for error on pre 6.x and 6.x API
+                if (audioStatus == AudioRecord.ERROR_INVALID_OPERATION
+                        || audioStatus == AudioRecord.STATE_UNINITIALIZED) {
+                    MainActivity.entryLogger("Passive Jammer audio status: error.", true);
+                }
+
+                // TODO check is this state enough
+                if (audioStatus == AudioRecord.RECORDSTATE_RECORDING) {
+                    MainActivity.entryLogger("Passive Jammer audio status: running.", true);
+                    RUN_PASSIVE_JAMMER = true;
+                }
+
+                // TODO prefer not to do this below
+                // android source says: Audio data supply, Reads audio data from the audio hardware for recording into a buffer.
+                short[] tempBuffer = new short[audioSettings.getBufferSize()];;
+                do {
+                    audioRecord.read(tempBuffer, 0, audioSettings.getBufferSize());
+                } while (RUN_PASSIVE_JAMMER);
+
+            }
+            catch (IllegalStateException exState) {
+                exState.printStackTrace();
+                MainActivity.entryLogger("Passive Jammer failed to run.", true);
+            }
+        }
+    }
+
+    protected void stopPassiveJammer() {
+        // get AudioRecord object, null it, clean up
+        if (audioRecord != null) {
+            audioRecord.stop();
+            audioRecord.release();
+            audioRecord = null;
+            RUN_PASSIVE_JAMMER = false;
+            MainActivity.entryLogger("Passive Jammer stop and release.", false);
+        }
+        else {
+            MainActivity.entryLogger("Passive Jammer not running.", false);
+        }
     }
 
 
@@ -86,7 +179,7 @@ public class AudioJammer {
     }
 
 
-    private class PSJammer extends Service {
+    private class PSActiveJammer extends Service {
         public static final String TAG = "PSJammer";
         private Looper serviceLooper;
         private ServiceHandler serviceHandler;
@@ -98,8 +191,9 @@ public class AudioJammer {
             }
             @Override
             public void handleMessage(Message msg) {
-                // run the jammer, ie:
+                // TODO run the jammer, ie:
                 playSound(18000, 2048);
+                // function to mod and cover all freqs of interest
 
                 // then, if internal, else stop from outside
 
