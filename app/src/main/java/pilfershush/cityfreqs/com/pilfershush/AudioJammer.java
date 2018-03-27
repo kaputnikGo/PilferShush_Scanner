@@ -90,6 +90,12 @@ public class AudioJammer {
         if ((audioRecord != null) || (audioRecord.getState() == AudioRecord.STATE_INITIALIZED)) {
             try {
                 // android source says: Transport Control Method, Starts recording from the AudioRecord instance.
+                /*
+                After it's created the track is not active. Call start() to make it active. <--
+                AudioRecord.java
+                if (native_start(MediaSyncEvent.SYNC_EVENT_NONE, 0) == SUCCESS)
+                status_t start(int [AudioSystem::sync_event_t] event, int triggerSession)
+                */
                 audioRecord.startRecording();
                 MainActivity.entryLogger("Passive Jammer start.", false);
 
@@ -109,6 +115,13 @@ public class AudioJammer {
 
                 // TODO prefer not to do this below
                 // android source says: Audio data supply, Reads audio data from the audio hardware for recording into a buffer.
+                /*
+                snip AudioRecord.cpp
+                    ssize_t AudioRecord::read(void* buffer, size_t userSize)
+                      memcpy(buffer, audioBuffer.i8, bytesRead);
+                      read += bytesRead;
+                      return read;
+                */
                 short[] tempBuffer = new short[audioSettings.getBufferSize()];;
                 do {
                     audioRecord.read(tempBuffer, 0, audioSettings.getBufferSize());

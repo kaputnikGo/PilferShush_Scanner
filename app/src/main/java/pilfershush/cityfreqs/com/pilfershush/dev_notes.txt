@@ -21,6 +21,37 @@
 
 /*****************/
 
+FOR JAMMER
+
+boldbeast et al : ability to use NDK calls to intercept the mic hardware and re-route
+source:  media/libmedia/AudioSystem.cpp
+
+logcat::
+- D/audio_hw_primary: in_set_parameters: enter: kvpairs=input_source=1;routing=-2147483644
+- D/PermissionCache: checking android.permission.MODIFY_AUDIO_SETTINGS for uid=10286 => granted (432 us)
+- D/audio_hw_primary: in_set_parameters: enter: kvpairs=input_source=4;routing=-2147483584;format=1
+- D/audio_hw_primary: select_devices: out_snd_device(0: ) in_snd_device(283: voice-dmic-ef)
+- D/hardware_info: hw_info_append_hw_type : device_name = voice-dmic-ef
+- D/voice: voice_get_incall_rec_snd_device: in_snd_device(283: voice-dmic-ef) incall_record_device(283: voice-dmic-ef)
+
+AudioSystem.cpp::
+status_t AudioSystem::setParameters(audio_io_handle_t ioHandle, const String8& keyValuePairs) {
+    const sp<IAudioFlinger>& af = AudioSystem::get_audio_flinger();
+    if (af == 0) return PERMISSION_DENIED;
+    return af->setParameters(ioHandle, keyValuePairs);
+}
+
+AudioFlinger.cpp::
+status_t AudioFlinger::setParameters(audio_io_handle_t ioHandle, const String8& keyValuePairs)
+// ioHandle == 0 means the parameters are global to the audio hardware interface
+keyRouting: to change audio routing, value is an int in audio_devices_t
+
+
+
+
+
+----------------------------
+
 - scanner max range of 3000 Hz before cpu hit
 
 - RecordTask reads in short[] only
