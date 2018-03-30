@@ -52,6 +52,15 @@ keyRouting: to change audio routing, value is an int in audio_devices_t
 
 ----------------------------
 
+bluetooth beacons::
+  EDDYSTONE_PREFIX = fromHexString("16aafe");
+  GRAVITY_PREFIX = fromHexString("17ffab01"); // Facebook Beacons
+  IBEACON_PREFIX = fromHexString("ff4c000215");
+
+----------------------------
+
+
+
 - scanner max range of 3000 Hz before cpu hit
 
 - RecordTask reads in short[] only

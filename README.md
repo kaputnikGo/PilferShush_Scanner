@@ -18,6 +18,7 @@ Cleaning for F-Droid fork
  
  TODO:
  - trial n-uhf jamming techniques
+ - logger class (fix diff views and to textfile logs)
  - USB Audio routing test
  - build for API 26, 8.x, 'O' and up features
 

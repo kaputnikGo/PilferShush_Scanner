@@ -35,6 +35,8 @@ import android.os.Message;
 import android.os.Process;
 import android.widget.Toast;
 
+import java.util.Random;
+
 import pilfershush.cityfreqs.com.pilfershush.assist.AudioSettings;
 
 public class AudioJammer {
@@ -44,13 +46,21 @@ public class AudioJammer {
     Intent jammerIntent;
     AudioRecord audioRecord;
 
-    private boolean RUN_PASSIVE_JAMMER;
+    final static public int SAMPLE_SIZE = 2;
+    final static public int PACKET_SIZE = 5000;
 
+    protected static final int BYPASS = 0;
+    protected static final int LOWPASS = 1;
+    protected static final int HIGHPASS = 2;
+
+    private boolean RUN_PASSIVE_JAMMER;
+    private boolean RUN_ACTIVE_JAMMER;
 
     public AudioJammer(Context context, AudioSettings audioSettings) {
         this.context = context;
         this.audioSettings = audioSettings;
         RUN_PASSIVE_JAMMER = false;
+        RUN_ACTIVE_JAMMER = true;
     }
 
     protected void runActiveJammer() {
@@ -191,6 +201,38 @@ public class AudioJammer {
         }
     }
 
+    private void whiteNoiseGen() {
+        short[] noiseBuffer = new short[PACKET_SIZE];
+        Random random = new Random();
+
+        audioTrack = new AudioTrack(AudioManager.STREAM_MUSIC, 44100,
+                AudioFormat.CHANNEL_OUT_MONO, AudioFormat.ENCODING_PCM_16BIT,
+                audioSettings.getBufferSize(), AudioTrack.MODE_STREAM);
+
+        while (RUN_ACTIVE_JAMMER) {
+            //noiseBuffer.clear();
+            // nextGaussian:: random numbers that cluster around an average
+            // TODO constrain to 18kHz - 22kHz otherwise it's audible
+            Filter filter = new Filter(18000, 44100, HIGHPASS, 1);
+
+            for (int i = 0; i < PACKET_SIZE /SAMPLE_SIZE; i++) {
+                noiseBuffer[i] = (short) (random.nextGaussian() * Short.MAX_VALUE); // * Constant Value: 32767
+                // test filtering method
+                filter.Update(noiseBuffer[i]);
+                //TODO this short convert...
+                noiseBuffer[i] = (floatToShort(filter.getValue()));
+            }
+
+            audioTrack.setStereoVolume(AudioTrack.getMaxVolume(), AudioTrack.getMaxVolume());
+            audioTrack.play();
+
+            audioTrack.write(noiseBuffer, 0, PACKET_SIZE);
+        }
+        // need to loop this playback of duration/buffer
+        audioTrack.stop();
+        audioTrack.release();
+    }
+
 
     private class PSActiveJammer extends Service {
         public static final String TAG = "PSJammer";
@@ -250,5 +292,66 @@ public class AudioJammer {
         public void onDestroy() {
             Toast.makeText(this, "PSJammer service done", Toast.LENGTH_SHORT).show();
         }
+    }
+
+    public class Filter {
+        //resonance; // amount, from sqrt(2) to ~ 0.1
+
+        private float c, a1, a2, a3, b1, b2;
+        private float[] inputHistory = new float[2];
+        private float[] outputHistory = new float[3];
+
+        public Filter(float frequency, int sampleRate, int passType, float resonance) {
+            switch (passType) {
+                case LOWPASS:
+                    c = 1.0f / (float) Math.tan(Math.PI * frequency / sampleRate);
+                    a1 = 1.0f / (1.0f + resonance * c + c * c);
+                    a2 = 2f * a1;
+                    a3 = a1;
+                    b1 = 2.0f * (1.0f - c * c) * a1;
+                    b2 = (1.0f - resonance * c + c * c) * a1;
+                    break;
+                case HIGHPASS:
+                    c = (float) Math.tan(Math.PI * frequency / sampleRate);
+                    a1 = 1.0f / (1.0f + resonance * c + c * c);
+                    a2 = -2f * a1;
+                    a3 = a1;
+                    b1 = 2.0f * (c * c - 1.0f) * a1;
+                    b2 = (1.0f - resonance * c + c * c) * a1;
+                    break;
+                case BYPASS:
+                    default:
+                    break;
+            }
+        }
+
+        public void Update(float newInput) {
+            float newOutput = a1 * newInput + a2 * this.inputHistory[0] + a3
+                    * this.inputHistory[1] - b1 * this.outputHistory[0] - b2
+                    * this.outputHistory[1];
+
+            this.inputHistory[1] = this.inputHistory[0];
+            this.inputHistory[0] = newInput;
+
+            this.outputHistory[2] = this.outputHistory[1];
+            this.outputHistory[1] = this.outputHistory[0];
+            this.outputHistory[0] = newOutput;
+        }
+
+        public float getValue() {
+            return this.outputHistory[0];
+        }
+    }
+
+    private static short floatToShort(float x) {
+        // Constant Value: -32767
+        if (x < Short.MIN_VALUE) {
+            return Short.MIN_VALUE;
+        }
+        // Constant Value: 32767
+        if (x > Short.MAX_VALUE) {
+            return Short.MAX_VALUE;
+        }
+        return (short) Math.round(x);
     }
 }
