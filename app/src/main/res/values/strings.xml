@@ -65,6 +65,9 @@
 
     <string name="action_sensitivity_settings">Sensitivity</string>
     <string name="dialog_sensitivity_text">Beacon loudness level</string>
+    <string name="magnitude_50_text">50 dB (rainfall)</string>
+    <string name="magnitude_60_text">60 dB (talking)</string>
+    <string name="magnitude_70_text">70 dB (busy traffic)</string>
     <string name="magnitude_80_text">80 dB (heavy traffic)</string>
     <string name="magnitude_90_text">90 dB (trucks, shouting)</string>
     <string name="magnitude_93_text">93 dB (food mixer)</string>

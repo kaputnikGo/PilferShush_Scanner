@@ -55,7 +55,7 @@ public class MainActivity extends AppCompatActivity
     private static final int REQUEST_MULTIPLE_PERMISSIONS = 123;
 
     // dev internal version numbering
-    public static final String VERSION = "2.0.31";
+    public static final String VERSION = "2.0.32";
 
     private ViewSwitcher viewSwitcher;
     private boolean mainView;
@@ -533,11 +533,14 @@ public class MainActivity extends AppCompatActivity
         windowTypes[3] = getResources().getString(R.string.dialog_window_fft_4);
         windowTypes[4] = getResources().getString(R.string.dialog_window_fft_5);
 
-        dbLevel = new String[4];
-        dbLevel[0] = getResources().getString(R.string.magnitude_80_text);
-        dbLevel[1] = getResources().getString(R.string.magnitude_90_text);
-        dbLevel[2] = getResources().getString(R.string.magnitude_93_text);
-        dbLevel[3] = getResources().getString(R.string.magnitude_100_text);
+        dbLevel = new String[7];
+        dbLevel[0] = getResources().getString(R.string.magnitude_50_text);
+        dbLevel[1] = getResources().getString(R.string.magnitude_60_text);
+        dbLevel[2] = getResources().getString(R.string.magnitude_70_text);
+        dbLevel[3] = getResources().getString(R.string.magnitude_80_text);
+        dbLevel[4] = getResources().getString(R.string.magnitude_90_text);
+        dbLevel[5] = getResources().getString(R.string.magnitude_93_text);
+        dbLevel[6] = getResources().getString(R.string.magnitude_100_text);
 
         storageAdmins = new String[4];
         storageAdmins[0] = getResources().getString(R.string.dialog_storage_size);

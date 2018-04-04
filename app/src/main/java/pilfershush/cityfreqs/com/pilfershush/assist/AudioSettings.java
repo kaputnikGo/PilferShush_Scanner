@@ -26,20 +26,21 @@ public class AudioSettings {
     public static final int SECOND_FREQUENCY_MIN = 19000;
     public static final int SECOND_FREQUENCY_MAX = 22000;
 
-    // below, rem'd, are way too sensitive = false positives
+    // below are added but are very sensitive
     // public static final double MAGNITUDE_50 = 500; // ~= 53.9794 dB
+    // public static final double MAGNITUDE_60 = 1200; // ~= 61.5836 dB
     // public static final double MAGNITUDE_70 = 3000; // ~= 69.5425 dB
 
     public static final double[] MAGNITUDES = new double[] {
-            10000, 30000, 50000, 80000
+            500, 1200, 3000, 10000, 30000, 50000, 80000
     };
-    public static final int DEFAULT_MAGNITUDE = 80000; // was 50000
+    public static final int DEFAULT_MAGNITUDE = 50000; // was 80000
     // using dB SPL (sound pressure level) without distance
     // db = 20 log10(goertzel_magnitude).
     // 50000 ~= 93.9794
     // 80000 ~= 98.0618
     public static final int[] DECIBELS = new int[] {
-            80, 89, 93, 98
+            50, 60, 70, 80, 89, 93, 98
     };
 
     // steps in the frequencies to consider as a coded signal and not noise
