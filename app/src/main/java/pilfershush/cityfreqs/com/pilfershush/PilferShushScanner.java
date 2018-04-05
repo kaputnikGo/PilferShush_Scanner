@@ -13,6 +13,7 @@ public class PilferShushScanner {
     private AudioChecker audioChecker;
     private AudioScanner audioScanner;
     private WriteProcessor writeProcessor;
+    private AudioJammer audioJammer;
     private int scanBufferSize;
 
     protected void onDestroy() {
@@ -42,6 +43,8 @@ public class PilferShushScanner {
             audioScanner = new AudioScanner(context, audioChecker.getAudioSettings());
             // get internalAudio settings here.
             initBackgroundChecks();
+            // setup Jammer
+            audioJammer = new AudioJammer(context, audioSettings);
             return true;
         }
 
@@ -150,16 +153,23 @@ public class PilferShushScanner {
         entryLogger(context.getString(R.string.option_set_1) + delayMS, false);
     }
 
-    protected void micChecking(boolean checking) {
+    protected boolean micChecking(boolean checking) {
         if (checking) {
-            audioChecker.checkAudioBufferState();
-
-            //TODO
-            // this function is of concern as it may not work, uses logcat
-            backgroundChecker.auditLogAsync();
+            if (audioChecker.checkAudioBufferState()) {
+                //TODO
+                // this function is of concern as it may not work, uses logcat
+                backgroundChecker.auditLogAsync();
+                return true;
+            }
+            else {
+                // audioChecker found an error, possible uninitialized error, not an exception however
+                entryLogger("AUDIO ERROR FOUND, possible microphone in use.", true);
+                return false;
+            }
         }
         else {
             audioChecker.stopAllAudio();
+            return false;
         }
     }
 
@@ -219,6 +229,38 @@ public class PilferShushScanner {
     protected void resetAudioScanner() {
         audioScanner.resetAudioScanner();
     }
+
+    /********************************************************************/
+
+    protected void runActiveJammer() {
+        // background service runnable, emits white noise within n-uhf ranges
+        if (audioJammer != null) {
+            audioJammer.runActiveJammer();
+        }
+    }
+    protected void stopActiveJammer() {
+        if (audioJammer != null) {
+            audioJammer.stopActiveJammer();
+        }
+    }
+    protected boolean startPassiveJammer() {
+        // holds mic and if needed records to zero values to dev/null
+        if (audioJammer != null) {
+            return audioJammer.startPassiveJammer();
+        }
+        return false;
+    }
+    protected void runPassiveJammer() {
+        if (audioJammer != null) {
+            audioJammer.runPassiveJammer();
+        }
+    }
+    protected void stopPassiveJammer() {
+        if (audioJammer != null) {
+            audioJammer.stopPassiveJammer();
+        }
+    }
+
 
     /********************************************************************/
 

@@ -21,11 +21,32 @@
 
             <Button
                 android:id="@+id/run_scans_button"
-                android:layout_width="fill_parent"
+                android:layout_width="wrap_content"
+                android:layout_weight=".30"
                 android:layout_height="wrap_content"
                 android:layout_alignParentTop="true"
+                android:layout_alignParentLeft="true"
                 android:layout_marginBottom ="@dimen/activity_vertical_margin"
                 android:text="@string/main_scanner_11" />
+            <Button
+                android:id="@+id/run_active_button"
+                android:layout_width="wrap_content"
+                android:layout_weight=".30"
+                android:layout_height="wrap_content"
+                android:layout_alignParentTop="true"
+                android:layout_centerHorizontal="true"
+                android:layout_marginBottom ="@dimen/activity_vertical_margin"
+                android:text="@string/main_scanner_22" />
+            <Button
+                android:id="@+id/run_passive_button"
+                android:layout_width="wrap_content"
+                android:layout_weight=".30"
+                android:layout_height="wrap_content"
+                android:layout_alignParentTop="true"
+                android:layout_alignParentRight="true"
+                android:layout_marginBottom ="@dimen/activity_vertical_margin"
+                android:text="@string/main_scanner_23" />
+
             <Button
                 android:id="@+id/debug_view_button"
                 android:layout_width="fill_parent"

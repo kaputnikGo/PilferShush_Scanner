@@ -9,11 +9,11 @@ package pilfershush.cityfreqs.com.pilfershush;
 
 // need audioFocus listener halt resume, only telephony
 
-// ACTIVE JAMMER
+// ACTIVE JAMMER = audio output
 // user activated and runs for n-time, and/or till user stops it
 // check for mic use first, then ensure PS not using it.
 
-// PASSIVE JAMMER
+// PASSIVE JAMMER = record mic to zero values
 // other technique, grab mic, zero the input values (cat/dev/null) and hold until telephony or user interrupt
 // run on timer, ie set alarms hourly/half-hourly for continue?
 
@@ -64,16 +64,17 @@ public class AudioJammer {
     }
 
     protected void runActiveJammer() {
-        jammerIntent = new Intent(context, PSActiveJammer.class);
-        context.startService(jammerIntent);
+        //jammerIntent = new Intent(context, PSActiveJammer.class);
+        //context.startService(jammerIntent);
+        playSound(4000, 2048);
     }
 
     protected void stopActiveJammer() {
         stopSound();
-        context.stopService(jammerIntent);
+        //context.stopService(jammerIntent);
     }
 
-    protected void startPassiveJammer() {
+    protected boolean startPassiveJammer() {
         // grab mic via AudioRecord object,
         // zero the input
         // battery use check, CPU use check
@@ -86,17 +87,19 @@ public class AudioJammer {
                         audioSettings.getBufferSize());
 
                 MainActivity.entryLogger("Passive Jammer init.", false);
+                return true;
             }
             catch (Exception ex) {
                 ex.printStackTrace();
                 MainActivity.entryLogger("Passive Jammer failed to init.", true);
             }
         }
+        return false;
     }
 
     // TODO determine how little is needed to occupy/hold the microphone without actually recording and saving any audio
     // assuming that only one api call can be made to the mic at a time
-    private void runPassiveJammer() {
+    protected void runPassiveJammer() {
         if ((audioRecord != null) || (audioRecord.getState() == AudioRecord.STATE_INITIALIZED)) {
             try {
                 // android source says: Transport Control Method, Starts recording from the AudioRecord instance.
@@ -118,9 +121,12 @@ public class AudioJammer {
                 }
 
                 // TODO check is this state enough
-                if (audioStatus == AudioRecord.RECORDSTATE_RECORDING) {
+                if (audioRecord.getRecordingState() == AudioRecord.RECORDSTATE_RECORDING) {
                     MainActivity.entryLogger("Passive Jammer audio status: running.", true);
                     RUN_PASSIVE_JAMMER = true;
+                }
+                else {
+                    MainActivity.entryLogger("Passive Jammer audio status: NOT running, status: " + audioStatus, true);
                 }
 
                 // TODO prefer not to do this below
@@ -132,11 +138,13 @@ public class AudioJammer {
                       read += bytesRead;
                       return read;
                 */
+
+                /*
                 short[] tempBuffer = new short[audioSettings.getBufferSize()];;
                 do {
                     audioRecord.read(tempBuffer, 0, audioSettings.getBufferSize());
                 } while (RUN_PASSIVE_JAMMER);
-
+                */
             }
             catch (IllegalStateException exState) {
                 exState.printStackTrace();
@@ -148,10 +156,10 @@ public class AudioJammer {
     protected void stopPassiveJammer() {
         // get AudioRecord object, null it, clean up
         if (audioRecord != null) {
+            RUN_PASSIVE_JAMMER = false;
             audioRecord.stop();
             audioRecord.release();
             audioRecord = null;
-            RUN_PASSIVE_JAMMER = false;
             MainActivity.entryLogger("Passive Jammer stop and release.", false);
         }
         else {
@@ -165,14 +173,14 @@ public class AudioJammer {
         // AudioTrack definition - get settings from audioSettings.class
         int mBufferSize = AudioTrack.getMinBufferSize(44100,
                 AudioFormat.CHANNEL_OUT_MONO,
-                AudioFormat.ENCODING_PCM_8BIT);
+                AudioFormat.ENCODING_PCM_16BIT);
 
         audioTrack = new AudioTrack(AudioManager.STREAM_MUSIC, 44100,
                 AudioFormat.CHANNEL_OUT_MONO, AudioFormat.ENCODING_PCM_16BIT,
-                mBufferSize, AudioTrack.MODE_STREAM);
+                mBufferSize, AudioTrack.MODE_STATIC);
 
         // Sine wave
-        double[] mSound = new double[4410];
+        double[] mSound = new double[duration]; //4410
         short[] mBuffer = new short[duration];
         for (int i = 0; i < mSound.length; i++) {
             mSound[i] = Math.sin((2.0 * Math.PI * i / (44100 / frequency)));
@@ -180,14 +188,15 @@ public class AudioJammer {
         }
 
         audioTrack.setStereoVolume(AudioTrack.getMaxVolume(), AudioTrack.getMaxVolume());
+
+        audioTrack.write(mBuffer, 0, mBuffer.length);
+
+        audioTrack.setLoopPoints(0, mBuffer.length,-1);
+
         audioTrack.play();
 
-        audioTrack.write(mBuffer, 0, mSound.length);
-
-        // need to loop this playback of duration/buffer
-
-        audioTrack.stop();
-        audioTrack.release();
+        //audioTrack.stop();
+        //audioTrack.release();
 
     }
 
@@ -247,7 +256,8 @@ public class AudioJammer {
             @Override
             public void handleMessage(Message msg) {
                 // TODO run the jammer, ie:
-                playSound(18000, 2048);
+                // testing
+                playSound(8000, 2048);
                 // function to mod and cover all freqs of interest
 
                 // then, if internal, else stop from outside

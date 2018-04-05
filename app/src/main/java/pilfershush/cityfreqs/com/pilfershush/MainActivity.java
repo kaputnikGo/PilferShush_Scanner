@@ -55,7 +55,7 @@ public class MainActivity extends AppCompatActivity
     private static final int REQUEST_MULTIPLE_PERMISSIONS = 123;
 
     // dev internal version numbering
-    public static final String VERSION = "2.0.32";
+    public static final String VERSION = "2.1.01";
 
     private ViewSwitcher viewSwitcher;
     private boolean mainView;
@@ -69,6 +69,8 @@ public class MainActivity extends AppCompatActivity
     private Button micCheckButton;
     private Button micPollingButton;
     private Button runScansButton;
+    private Button passiveJammerButton;
+    private Button activeJammerButton;
     private Button debugViewButton;
     private Button mainViewButton;
     private TextView mainScanText;
@@ -89,6 +91,8 @@ public class MainActivity extends AppCompatActivity
     private boolean MIC_CHECKING;
     private boolean POLLING;
     private boolean SCANNING;
+    private boolean PASSIVE;
+    private boolean ACTIVE;
 
     private PowerManager powerManager;
     private PowerManager.WakeLock wakeLock;
@@ -114,6 +118,8 @@ public class MainActivity extends AppCompatActivity
 
         pilferShushScanner = new PilferShushScanner();
         SCANNING = false;
+        PASSIVE = false;
+        ACTIVE = false;
 
         //MAIN VIEW
         runScansButton = (Button) findViewById(R.id.run_scans_button);
@@ -122,6 +128,19 @@ public class MainActivity extends AppCompatActivity
                 toggleScanning();
             }
         });
+        passiveJammerButton = (Button) findViewById(R.id.run_passive_button);
+        passiveJammerButton.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                togglePassiveJamming();
+            }
+        });
+        activeJammerButton = (Button) findViewById(R.id.run_active_button);
+        activeJammerButton.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                toggleActiveJamming();
+            }
+        });
+
         mainScanText = (TextView) findViewById(R.id.main_scan_text);
         mainScanText.setTextColor(Color.parseColor("#00ff00"));
         mainScanText.setMovementMethod(new ScrollingMovementMethod());
@@ -750,6 +769,16 @@ public class MainActivity extends AppCompatActivity
  * ACTION SCANS
  */
     private void toggleScanning() {
+        // check for jamming
+        if (ACTIVE) {
+            mainScanLogger(getResources().getString(R.string.main_scanner_25), true);
+            toggleActiveJamming();
+        }
+        if (PASSIVE) {
+            mainScanLogger(getResources().getString(R.string.main_scanner_25), true);
+            togglePassiveJamming();
+        }
+
         // add check for mic/record ability
         if (pilferShushScanner.audioStateError()) {
             // no mic or audio record capabilities
@@ -780,6 +809,61 @@ public class MainActivity extends AppCompatActivity
             wakeLock.acquire();
         }
     }
+
+    private void togglePassiveJamming() {
+        // cannot run normal scanner at same time as jamming
+        if (SCANNING) {
+            mainScanLogger(getResources().getString(R.string.main_scanner_24), true);
+            toggleScanning();
+        }
+
+        // add check for mic/record ability
+        if (pilferShushScanner.audioStateError()) {
+            // no mic or audio record capabilities
+            mainScanLogger(getResources().getString(R.string.init_state_17), true);
+            return;
+        }
+
+        if (PASSIVE) {
+            PASSIVE = false;
+            pilferShushScanner.stopPassiveJammer();
+            passiveJammerButton.setBackgroundColor(Color.LTGRAY);
+            mainScanLogger(getResources().getString(R.string.main_scanner_29), false);
+        }
+        else {
+            PASSIVE = true;
+            if (pilferShushScanner.startPassiveJammer()) {
+                pilferShushScanner.runPassiveJammer();
+                passiveJammerButton.setBackgroundColor(Color.RED);
+                mainScanLogger(getResources().getString(R.string.main_scanner_26), false);
+            }
+        }
+    }
+    private void toggleActiveJamming() {
+        // cannot run normal scanner at same time as jamming
+        if (SCANNING) {
+            mainScanLogger(getResources().getString(R.string.main_scanner_24), true);
+            toggleScanning();
+        }
+
+        // TODO need some audioTrack checks here
+
+        if (ACTIVE) {
+            ACTIVE = false;
+            pilferShushScanner.stopActiveJammer();
+            activeJammerButton.setBackgroundColor(Color.LTGRAY);
+            mainScanLogger(getResources().getString(R.string.main_scanner_28), false);
+        }
+        else {
+            ACTIVE = true;
+            pilferShushScanner.runActiveJammer();
+            activeJammerButton.setBackgroundColor(Color.RED);
+            mainScanLogger(getResources().getString(R.string.main_scanner_27), false);
+        }
+        // TODO check reset stream volume, fudge for headset checker
+        toggleHeadset(ACTIVE);
+    }
+
 
     private void runScanner() {
         runScansButton.setText(getResources().getString(R.string.main_scanner_1));
@@ -946,7 +1030,9 @@ public class MainActivity extends AppCompatActivity
             if (pilferShushScanner.checkScanner()) {
                 micCheckButton.setText(getResources().getString(R.string.mic_check_3));
                 micCheckButton.setBackgroundColor(Color.RED);
-                pilferShushScanner.micChecking(MIC_CHECKING = true);
+                if (pilferShushScanner.micChecking(MIC_CHECKING = true) == false) {
+                    toggleMicCheck();
+                }
             }
         }
     }

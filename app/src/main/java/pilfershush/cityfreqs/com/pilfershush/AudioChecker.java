@@ -270,7 +270,7 @@ public static final int HOTWORD = 1999; //  always-on software hotword detection
 /*
  *
  */
-    protected void checkAudioBufferState() {
+    protected boolean checkAudioBufferState() {
         try {
             audioRecord = new AudioRecord(audioSource, sampleRate, channelConfig, encoding, bufferSize );
             // need to start reading buffer to trigger an exception
@@ -282,19 +282,18 @@ public static final int HOTWORD = 1999; //  always-on software hotword detection
             if(audioStatus == AudioRecord.ERROR_INVALID_OPERATION
                     || audioStatus == AudioRecord.STATE_UNINITIALIZED) {
                 MainActivity.logger(context.getString(R.string.audio_check_6) + audioStatus);
+                // audioStatus == 0(uninitialized) is an error, does not throw exception
+                return false;
             }
         }
         catch(Exception e) {
             MainActivity.logger(context.getString(R.string.audio_check_7));
+            MainActivity.logger(context.getString(R.string.audio_check_9));
+            return false;
         }
-        finally {
-            try {
-                MainActivity.logger(context.getString(R.string.audio_check_8));
-            }
-            catch(Exception e){
-                MainActivity.logger(context.getString(R.string.audio_check_9));
-            }
-        }
+        // no errors
+        MainActivity.logger(context.getString(R.string.audio_check_8));
+        return true;
     }
 
     // currently this will start and then destroy after single use...

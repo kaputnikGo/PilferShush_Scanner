@@ -136,6 +136,14 @@
     <string name="main_scanner_15">Original sequence as transmitted:</string>
     <string name="main_scanner_16">No detected audio beacon signals.</string>
     <string name="main_scanner_17">[-: end of scan :-]</string>
+    <string name="main_scanner_22">Active</string>
+    <string name="main_scanner_23">Passive</string>
+    <string name="main_scanner_24">Stopping scanner when jamming.</string>
+    <string name="main_scanner_25">Stopping jamming when scanning.</string>
+    <string name="main_scanner_26">Running passive jamming...</string>
+    <string name="main_scanner_27">Running active jamming...</string>
+    <string name="main_scanner_28">Stop active jamming.</string>
+    <string name="main_scanner_29">Stop passive jamming.</string>
 
     <string name="option_dialog_1">Limited storage space found.</string>
     <string name="option_dialog_2">Log storage size:\u0020</string>
