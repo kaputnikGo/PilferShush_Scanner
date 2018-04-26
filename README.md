@@ -2,10 +2,9 @@
 Android near-ultra high frequency listener with microphone polling and audio beacon SDK detector  
 
 Test application for researching methods of discovering use of audio beacons.  
-Proper for Android Studio build/release  
-Cleaning for F-Droid fork
+Proper for Android Studio build/release
 
-   vers. 2.1.01
+   vers. 2.1.02
    - min API 18 (4.3)
    - target API 23 (6.x)
    - compiled API 26 (8.x)

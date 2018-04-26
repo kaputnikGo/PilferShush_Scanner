@@ -1,13 +1,13 @@
-package pilfershush.cityfreqs.com.pilfershush.scanners;
+package cityfreqs.com.pilfershush.scanners;
 
 import android.content.Context;
 
 import java.util.ArrayList;
 
-import pilfershush.cityfreqs.com.pilfershush.MainActivity;
-import pilfershush.cityfreqs.com.pilfershush.R;
-import pilfershush.cityfreqs.com.pilfershush.assist.AudioSettings;
-import pilfershush.cityfreqs.com.pilfershush.scanners.FreqDetector.RecordTaskListener;
+import cityfreqs.com.pilfershush.MainActivity;
+import cityfreqs.com.pilfershush.R;
+import cityfreqs.com.pilfershush.assist.AudioSettings;
+import cityfreqs.com.pilfershush.scanners.FreqDetector.RecordTaskListener;
 
 public class AudioScanner {
     private Context context;

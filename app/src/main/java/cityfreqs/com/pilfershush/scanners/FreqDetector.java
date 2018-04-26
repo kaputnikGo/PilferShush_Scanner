@@ -1,10 +1,10 @@
-package pilfershush.cityfreqs.com.pilfershush.scanners;
+package cityfreqs.com.pilfershush.scanners;
 
 import android.os.AsyncTask;
 
 import java.util.ArrayList;
 
-import pilfershush.cityfreqs.com.pilfershush.assist.AudioSettings;
+import cityfreqs.com.pilfershush.assist.AudioSettings;
 
 public class FreqDetector {
     private RecordTask recordTask;

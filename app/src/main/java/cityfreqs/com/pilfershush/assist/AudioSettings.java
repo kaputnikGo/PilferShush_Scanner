@@ -1,4 +1,4 @@
-package pilfershush.cityfreqs.com.pilfershush.assist;
+package cityfreqs.com.pilfershush.assist;
 
 import android.media.AudioFormat;
 

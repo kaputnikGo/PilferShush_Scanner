@@ -1,11 +1,11 @@
-package pilfershush.cityfreqs.com.pilfershush.assist;
+package cityfreqs.com.pilfershush.assist;
 
 import android.content.pm.ActivityInfo;
 import android.content.pm.ServiceInfo;
 
 import java.util.Arrays;
 
-import pilfershush.cityfreqs.com.pilfershush.BackgroundChecker;
+import cityfreqs.com.pilfershush.BackgroundChecker;
 
 public class AppEntry {
     private String activityName;

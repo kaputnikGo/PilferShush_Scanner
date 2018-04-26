@@ -1,10 +1,10 @@
-package pilfershush.cityfreqs.com.pilfershush;
+package cityfreqs.com.pilfershush;
 
 import android.content.Context;
 
-import pilfershush.cityfreqs.com.pilfershush.assist.AudioSettings;
-import pilfershush.cityfreqs.com.pilfershush.assist.WriteProcessor;
-import pilfershush.cityfreqs.com.pilfershush.scanners.AudioScanner;
+import cityfreqs.com.pilfershush.assist.AudioSettings;
+import cityfreqs.com.pilfershush.assist.WriteProcessor;
+import cityfreqs.com.pilfershush.scanners.AudioScanner;
 
 public class PilferShushScanner {
     private Context context;

@@ -1,11 +1,11 @@
-package pilfershush.cityfreqs.com.pilfershush.assist;
+package cityfreqs.com.pilfershush.assist;
 
 import android.hardware.usb.UsbDevice;
 import android.hardware.usb.UsbDeviceConnection;
 import android.hardware.usb.UsbEndpoint;
 import android.hardware.usb.UsbInterface;
 
-import pilfershush.cityfreqs.com.pilfershush.MainActivity;
+import cityfreqs.com.pilfershush.MainActivity;
 
 import static android.hardware.usb.UsbConstants.USB_CLASS_AUDIO;
 import static android.hardware.usb.UsbConstants.USB_DIR_IN;

@@ -1,4 +1,4 @@
-package pilfershush.cityfreqs.com.pilfershush;
+package cityfreqs.com.pilfershush;
 
 // test class for determining methods of jamming inbound nuhf
 // concept: to run in background and play constant random noise at 18kHz and above
@@ -37,7 +37,7 @@ import android.widget.Toast;
 
 import java.util.Random;
 
-import pilfershush.cityfreqs.com.pilfershush.assist.AudioSettings;
+import cityfreqs.com.pilfershush.assist.AudioSettings;
 
 public class AudioJammer {
     Context context;

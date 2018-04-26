@@ -1,11 +1,12 @@
-package pilfershush.cityfreqs.com.pilfershush;
+package cityfreqs.com.pilfershush;
 
 import android.content.Context;
 import android.media.AudioFormat;
 import android.media.AudioRecord;
 import android.media.MediaRecorder.AudioSource;
 
-import pilfershush.cityfreqs.com.pilfershush.assist.AudioSettings;
+import cityfreqs.com.pilfershush.assist.AudioSettings;
+import pilfershush.cityfreqs.com.pilfershush.R;
 
 public class AudioChecker {
     private int sampleRate;

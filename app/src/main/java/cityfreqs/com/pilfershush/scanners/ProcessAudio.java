@@ -1,4 +1,4 @@
-package pilfershush.cityfreqs.com.pilfershush.scanners;
+package cityfreqs.com.pilfershush.scanners;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
@@ -11,9 +11,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import pilfershush.cityfreqs.com.pilfershush.MainActivity;
-import pilfershush.cityfreqs.com.pilfershush.R;
-import pilfershush.cityfreqs.com.pilfershush.assist.AudioSettings;
+import cityfreqs.com.pilfershush.MainActivity;
+import cityfreqs.com.pilfershush.R;
+import cityfreqs.com.pilfershush.assist.AudioSettings;
 
 public class ProcessAudio {
     private Context context;

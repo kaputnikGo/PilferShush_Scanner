@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="pilfershush.cityfreqs.com.pilfershush">
+    package="cityfreqs.com.pilfershush">
 
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
@@ -15,7 +15,7 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
 
-        <activity android:name="pilfershush.cityfreqs.com.pilfershush.MainActivity">
+        <activity android:name="cityfreqs.com.pilfershush.MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 

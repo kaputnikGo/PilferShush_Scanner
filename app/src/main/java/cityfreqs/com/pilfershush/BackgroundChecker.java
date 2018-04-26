@@ -1,4 +1,4 @@
-package pilfershush.cityfreqs.com.pilfershush;
+package cityfreqs.com.pilfershush;
 
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
@@ -13,7 +13,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import pilfershush.cityfreqs.com.pilfershush.assist.AppEntry;
+import cityfreqs.com.pilfershush.assist.AppEntry;
 
 public class BackgroundChecker {
     private PackageManager packageManager;

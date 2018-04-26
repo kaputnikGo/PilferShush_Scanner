@@ -1,4 +1,4 @@
-package pilfershush.cityfreqs.com.pilfershush.scanners;
+package cityfreqs.com.pilfershush.scanners;
 /*
 
 test for quicker/efficient AudioRecord methods,
@@ -14,8 +14,8 @@ Bill Farmer	 william j farmer [at] yahoo [dot] co [dot] uk.
 import java.util.ArrayList;
 import java.util.HashMap;
 
-import pilfershush.cityfreqs.com.pilfershush.MainActivity;
-import pilfershush.cityfreqs.com.pilfershush.assist.AudioSettings;
+import cityfreqs.com.pilfershush.MainActivity;
+import cityfreqs.com.pilfershush.assist.AudioSettings;
 
 public class SpectrumAudio {
     private static final String TAG = "SpecAudio";

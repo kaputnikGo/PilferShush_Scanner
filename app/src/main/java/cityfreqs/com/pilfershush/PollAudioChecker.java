@@ -1,4 +1,4 @@
-package pilfershush.cityfreqs.com.pilfershush;
+package cityfreqs.com.pilfershush;
 
 import android.content.Context;
 import android.media.AudioRecord;

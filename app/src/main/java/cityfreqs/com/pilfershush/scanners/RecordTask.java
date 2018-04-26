@@ -1,4 +1,4 @@
-package pilfershush.cityfreqs.com.pilfershush.scanners;
+package cityfreqs.com.pilfershush.scanners;
 
 import android.media.AudioRecord;
 import android.os.AsyncTask;
@@ -7,10 +7,10 @@ import android.util.Log;
 import java.io.IOException;
 import java.util.ArrayList;
 
-import pilfershush.cityfreqs.com.pilfershush.MainActivity;
-import pilfershush.cityfreqs.com.pilfershush.assist.AudioSettings;
-import pilfershush.cityfreqs.com.pilfershush.assist.WriteProcessor;
-import pilfershush.cityfreqs.com.pilfershush.scanners.FreqDetector.RecordTaskListener;
+import cityfreqs.com.pilfershush.MainActivity;
+import cityfreqs.com.pilfershush.assist.AudioSettings;
+import cityfreqs.com.pilfershush.assist.WriteProcessor;
+import cityfreqs.com.pilfershush.scanners.FreqDetector.RecordTaskListener;
 
 import static android.os.Process.THREAD_PRIORITY_AUDIO;
 

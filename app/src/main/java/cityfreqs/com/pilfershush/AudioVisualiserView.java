@@ -1,4 +1,4 @@
-package pilfershush.cityfreqs.com.pilfershush;
+package cityfreqs.com.pilfershush;
 
 import android.content.Context;
 import android.graphics.Canvas;
@@ -12,7 +12,7 @@ import android.view.View;
 
 import java.util.LinkedList;
 
-import pilfershush.cityfreqs.com.pilfershush.assist.AudioSettings;
+import cityfreqs.com.pilfershush.assist.AudioSettings;
 
 public class AudioVisualiserView extends View {
     private Rect mRect = new Rect();

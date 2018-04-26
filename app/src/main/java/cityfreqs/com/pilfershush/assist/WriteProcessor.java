@@ -1,4 +1,4 @@
-package pilfershush.cityfreqs.com.pilfershush.assist;
+package cityfreqs.com.pilfershush.assist;
 
 
 import android.content.Context;
@@ -21,7 +21,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
 
-import pilfershush.cityfreqs.com.pilfershush.MainActivity;
+import cityfreqs.com.pilfershush.MainActivity;
 import pilfershush.cityfreqs.com.pilfershush.R;
 
 public class WriteProcessor {

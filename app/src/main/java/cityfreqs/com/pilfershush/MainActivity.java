@@ -1,4 +1,4 @@
-package pilfershush.cityfreqs.com.pilfershush;
+package cityfreqs.com.pilfershush;
 
 import android.Manifest;
 import android.app.AlertDialog;
@@ -39,9 +39,9 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import pilfershush.cityfreqs.com.pilfershush.assist.AudioSettings;
-import pilfershush.cityfreqs.com.pilfershush.assist.DeviceContainer;
-import pilfershush.cityfreqs.com.pilfershush.assist.WriteProcessor;
+import cityfreqs.com.pilfershush.assist.AudioSettings;
+import cityfreqs.com.pilfershush.assist.DeviceContainer;
+import cityfreqs.com.pilfershush.assist.WriteProcessor;
 
 public class MainActivity extends AppCompatActivity
         implements ActivityCompat.OnRequestPermissionsResultCallback {
@@ -55,7 +55,7 @@ public class MainActivity extends AppCompatActivity
     private static final int REQUEST_MULTIPLE_PERMISSIONS = 123;
 
     // dev internal version numbering
-    public static final String VERSION = "2.1.01";
+    public static final String VERSION = "2.1.02";
 
     private ViewSwitcher viewSwitcher;
     private boolean mainView;
