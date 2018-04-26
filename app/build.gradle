@@ -3,7 +3,7 @@ apply plugin: 'com.android.application'
 android {
     compileSdkVersion 26
     defaultConfig {
-        applicationId "pilfershush.cityfreqs.com.pilfershush_prod"
+        applicationId "cityfreqs.com.pilfershush_prod"
         minSdkVersion 18
         targetSdkVersion 23
         versionCode 2

@@ -6,7 +6,6 @@ import android.media.AudioRecord;
 import android.media.MediaRecorder.AudioSource;
 
 import cityfreqs.com.pilfershush.assist.AudioSettings;
-import pilfershush.cityfreqs.com.pilfershush.R;
 
 public class AudioChecker {
     private int sampleRate;

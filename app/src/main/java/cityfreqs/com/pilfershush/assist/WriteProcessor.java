@@ -22,7 +22,7 @@ import java.util.Date;
 import java.util.Locale;
 
 import cityfreqs.com.pilfershush.MainActivity;
-import pilfershush.cityfreqs.com.pilfershush.R;
+import cityfreqs.com.pilfershush.R;
 
 public class WriteProcessor {
     // pcm savefile for raw import into Audacity as 48 kHz, signed 16 bit, big-endian, mono
