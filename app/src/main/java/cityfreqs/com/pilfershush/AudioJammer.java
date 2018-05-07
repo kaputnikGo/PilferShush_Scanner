@@ -115,9 +115,12 @@ public class AudioJammer {
                 short buffer[] = new short[audioSettings.getBufferSize()];
                 int audioStatus = audioRecord.read(buffer, 0, audioSettings.getBufferSize());
                 // check for error on pre 6.x and 6.x API
-                if (audioStatus == AudioRecord.ERROR_INVALID_OPERATION
-                        || audioStatus == AudioRecord.STATE_UNINITIALIZED) {
-                    MainActivity.entryLogger("Passive Jammer audio status: error.", true);
+                if (audioStatus == AudioRecord.ERROR_INVALID_OPERATION) {
+                    MainActivity.entryLogger("Passive Jammer status error: invalid operation.", true);
+                }
+                else if (audioStatus == AudioRecord.STATE_UNINITIALIZED) {
+                    MainActivity.entryLogger("Passive Jammer status error: uninitialized.", true);
+                    MainActivity.entryLogger("Possible cause: microphone already in use..", true);
                 }
 
                 // TODO check is this state enough
@@ -150,6 +153,10 @@ public class AudioJammer {
                 exState.printStackTrace();
                 MainActivity.entryLogger("Passive Jammer failed to run.", true);
             }
+        }
+        else {
+            // uninitialised state
+            MainActivity.entryLogger("Passive Jammer audio record failed to init.", true);
         }
     }
 

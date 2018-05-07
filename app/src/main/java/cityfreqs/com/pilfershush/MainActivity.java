@@ -2,13 +2,17 @@ package cityfreqs.com.pilfershush;
 
 import android.Manifest;
 import android.app.AlertDialog;
+import android.app.Notification;
+import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.hardware.usb.UsbDevice;
 import android.hardware.usb.UsbManager;
@@ -28,9 +32,11 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
+import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.widget.ToggleButton;
 import android.widget.ViewSwitcher;
 
 import java.util.ArrayList;
@@ -53,9 +59,10 @@ public class MainActivity extends AppCompatActivity
     private static final boolean WRITE_WAV = true;
 
     private static final int REQUEST_MULTIPLE_PERMISSIONS = 123;
+    private static final int NOTIFY_ID = 123;
 
     // dev internal version numbering
-    public static final String VERSION = "2.1.02";
+    public static final String VERSION = "2.1.03";
 
     private ViewSwitcher viewSwitcher;
     private boolean mainView;
@@ -69,8 +76,8 @@ public class MainActivity extends AppCompatActivity
     private Button micCheckButton;
     private Button micPollingButton;
     private Button runScansButton;
-    private Button passiveJammerButton;
-    private Button activeJammerButton;
+    private ToggleButton passiveJammerButton;
+    //private Button activeJammerButton;
     private Button debugViewButton;
     private Button mainViewButton;
     private TextView mainScanText;
@@ -91,8 +98,7 @@ public class MainActivity extends AppCompatActivity
     private boolean MIC_CHECKING;
     private boolean POLLING;
     private boolean SCANNING;
-    private boolean PASSIVE;
-    private boolean ACTIVE;
+    //private boolean ACTIVE;
 
     private PowerManager powerManager;
     private PowerManager.WakeLock wakeLock;
@@ -104,6 +110,13 @@ public class MainActivity extends AppCompatActivity
 
     private AlertDialog.Builder dialogBuilder;
     private AlertDialog alertDialog;
+
+    private SharedPreferences sharedPrefs;
+    private SharedPreferences.Editor sharedPrefsEditor;
+    private NotificationManager notifyManager;
+    private Notification.Builder notifyBuilder;
+    private boolean PASSIVE_RUNNING;
+    private boolean IRQ_TELEPHONY;
 
 
     @Override
@@ -118,8 +131,6 @@ public class MainActivity extends AppCompatActivity
 
         pilferShushScanner = new PilferShushScanner();
         SCANNING = false;
-        PASSIVE = false;
-        ACTIVE = false;
 
         //MAIN VIEW
         runScansButton = (Button) findViewById(R.id.run_scans_button);
@@ -128,18 +139,28 @@ public class MainActivity extends AppCompatActivity
                 toggleScanning();
             }
         });
-        passiveJammerButton = (Button) findViewById(R.id.run_passive_button);
-        passiveJammerButton.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View v) {
-                togglePassiveJamming();
+        passiveJammerButton = (ToggleButton) findViewById(R.id.run_passive_button);
+        passiveJammerButton.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                if (isChecked) {
+                    // change methods
+                    togglePassiveJamming();
+                }
+                else {
+                    // change methods
+                    togglePassiveJamming();
+                }
             }
         });
+
+        /*
         activeJammerButton = (Button) findViewById(R.id.run_active_button);
         activeJammerButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 toggleActiveJamming();
             }
         });
+        */
 
         mainScanText = (TextView) findViewById(R.id.main_scan_text);
         mainScanText.setTextColor(Color.parseColor("#00ff00"));
@@ -243,13 +264,45 @@ public class MainActivity extends AppCompatActivity
     @Override
     protected void onResume() {
         super.onResume();
+        sharedPrefs = getPreferences(Context.MODE_PRIVATE);
+        // work out if need to restart jamming
+        PASSIVE_RUNNING = sharedPrefs.getBoolean("passive_running", false);
+        IRQ_TELEPHONY = sharedPrefs.getBoolean("irq_telephony", false);
+
         IntentFilter filter = new IntentFilter(Intent.ACTION_HEADSET_PLUG);
         registerReceiver(headsetReceiver, filter);
         audioManager = (AudioManager)getSystemService(Context.AUDIO_SERVICE);
         // refocus app, ready for fresh scanner run
         toggleHeadset(false); // default state at init
-        audioFocusCheck();
+        int status = audioFocusCheck();
         pilferShushScanner.resumeLogWrite();
+
+        if (IRQ_TELEPHONY && PASSIVE_RUNNING) {
+            // return from background with state irq_telephony and passive_running
+            // check audio focus status
+            if (status == AudioManager.AUDIOFOCUS_REQUEST_GRANTED) {
+                // reset booleans to init state
+                PASSIVE_RUNNING = false;
+                IRQ_TELEPHONY = false;
+                togglePassiveJamming();
+            }
+            else if (status == AudioManager.AUDIOFOCUS_LOSS) {
+                // possible music player etc that has speaker focus but no need of microphone,
+                // can end up fighting for focus with music player,
+                // TODO may get an error from VOIP here.
+                // reset booleans to init state
+                PASSIVE_RUNNING = false;
+                IRQ_TELEPHONY = false;
+                togglePassiveJamming();
+            }
+            else if (PASSIVE_RUNNING) {
+                // return from background without irq_telephony
+                entryLogger("status: passive jammer running.", true);
+            }
+            else {
+                entryLogger("status: passive jammer not running.", true);
+            }
+        }
     }
 
     @Override
@@ -257,8 +310,20 @@ public class MainActivity extends AppCompatActivity
         super.onPause();
         // backgrounded, stop recording, possible audio_focus loss due to telephony...
         unregisterReceiver(headsetReceiver);
-        interruptRequestAudio();
         pilferShushScanner.closeLogWrite();
+
+        // save state first
+        sharedPrefs = getPreferences(Context.MODE_PRIVATE);
+        sharedPrefsEditor = sharedPrefs.edit();
+        sharedPrefsEditor.putBoolean("passive_running", PASSIVE_RUNNING);
+        sharedPrefsEditor.putBoolean("irq_telephony", IRQ_TELEPHONY);
+        sharedPrefsEditor.commit();
+        // then work out if need to toggle jammer off (UI) due to irq_telephony
+        if (PASSIVE_RUNNING && IRQ_TELEPHONY) {
+            // make UI conform to jammer override by system telephony
+            //stopPassive();
+            togglePassiveJamming();
+        }
     }
 
     @Override
@@ -487,6 +552,34 @@ public class MainActivity extends AppCompatActivity
             mainScanLogger(getResources().getString(R.string.init_state_12), true);
             logger(getResources().getString(R.string.init_state_13));
         }
+        PASSIVE_RUNNING = false;
+        IRQ_TELEPHONY = false;
+
+        sharedPrefs = getPreferences(Context.MODE_PRIVATE);
+        sharedPrefsEditor = sharedPrefs.edit();
+        sharedPrefsEditor.putBoolean("passive_running", PASSIVE_RUNNING);
+        sharedPrefsEditor.putBoolean("irq_telephony", IRQ_TELEPHONY);
+        sharedPrefsEditor.commit();
+        createNotification();
+    }
+
+    private void createNotification() {
+        Intent notificationIntent = new Intent(this, MainActivity.class);
+
+        PendingIntent pendingIntent = PendingIntent.getActivity(this,
+                0, notificationIntent,0);
+
+        notifyManager = (NotificationManager) this.getSystemService(Context.NOTIFICATION_SERVICE);
+
+        notifyBuilder = new Notification.Builder(this);
+
+        notifyBuilder.setSmallIcon(R.mipmap.ic_stat_logo_notify_jammer)
+                .setLargeIcon(BitmapFactory.decodeResource(this.getResources(), R.mipmap.ic_launcher))
+                .setContentTitle("passive jammer running")
+                .setContentText("Tap to return to app")
+                .setContentIntent(pendingIntent)
+                .setWhen(System.currentTimeMillis())
+                .setAutoCancel(false);
     }
 
     private void reportInitialState() {
@@ -755,11 +848,18 @@ public class MainActivity extends AppCompatActivity
         return android.text.format.Formatter.formatShortFileSize(this, pilferShushScanner.getFreeStorageSize());
     }
 
-    private void interruptRequestAudio() {
+    private void interruptRequestAudio(int focusChange) {
         // system app requests audio focus, respond here
         mainScanLogger(getResources().getString(R.string.audiofocus_check_5), true);
         if (SCANNING) {
             toggleScanning();
+        }
+        if (focusChange == AudioManager.AUDIOFOCUS_LOSS) {
+            // total loss, focus abandoned
+        }
+        if (focusChange == AudioManager.AUDIOFOCUS_LOSS_TRANSIENT) {
+            // system forced loss, assuming telephony
+            IRQ_TELEPHONY = true;
         }
     }
 
@@ -770,11 +870,13 @@ public class MainActivity extends AppCompatActivity
  */
     private void toggleScanning() {
         // check for jamming
+        /*
         if (ACTIVE) {
             mainScanLogger(getResources().getString(R.string.main_scanner_25), true);
             toggleActiveJamming();
         }
-        if (PASSIVE) {
+        */
+        if (PASSIVE_RUNNING) {
             mainScanLogger(getResources().getString(R.string.main_scanner_25), true);
             togglePassiveJamming();
         }
@@ -824,21 +926,28 @@ public class MainActivity extends AppCompatActivity
             return;
         }
 
-        if (PASSIVE) {
-            PASSIVE = false;
+        if (PASSIVE_RUNNING) {
             pilferShushScanner.stopPassiveJammer();
-            passiveJammerButton.setBackgroundColor(Color.LTGRAY);
             mainScanLogger(getResources().getString(R.string.main_scanner_29), false);
+            PASSIVE_RUNNING = false;
+            notifyManager.cancel(NOTIFY_ID);
         }
         else {
-            PASSIVE = true;
             if (pilferShushScanner.startPassiveJammer()) {
                 pilferShushScanner.runPassiveJammer();
-                passiveJammerButton.setBackgroundColor(Color.RED);
                 mainScanLogger(getResources().getString(R.string.main_scanner_26), false);
+                PASSIVE_RUNNING = true;
+                notifyManager.notify(NOTIFY_ID, notifyBuilder.build());
+            }
+            else {
+                // check for errors in running
+                PASSIVE_RUNNING = false;
+                passiveJammerButton.toggle();
             }
         }
     }
+
+    /*
     private void toggleActiveJamming() {
         // cannot run normal scanner at same time as jamming
         if (SCANNING) {
@@ -851,18 +960,17 @@ public class MainActivity extends AppCompatActivity
         if (ACTIVE) {
             ACTIVE = false;
             pilferShushScanner.stopActiveJammer();
-            activeJammerButton.setBackgroundColor(Color.LTGRAY);
             mainScanLogger(getResources().getString(R.string.main_scanner_28), false);
         }
         else {
             ACTIVE = true;
             pilferShushScanner.runActiveJammer();
-            activeJammerButton.setBackgroundColor(Color.RED);
             mainScanLogger(getResources().getString(R.string.main_scanner_27), false);
         }
         // TODO check reset stream volume, fudge for headset checker
         toggleHeadset(ACTIVE);
     }
+    */
 
 
     private void runScanner() {
@@ -977,7 +1085,7 @@ public class MainActivity extends AppCompatActivity
 /*
  * 	AUDIO
  */
-    private void audioFocusCheck() {
+    private int audioFocusCheck() {
         // this may not work as SDKs requesting focus may not get it cos we already have it?
         // also: getting MIC access does not require getting AUDIO_FOCUS
         entryLogger(getResources().getString(R.string.audiofocus_check_1), false);
@@ -994,6 +1102,7 @@ public class MainActivity extends AppCompatActivity
         else {
             entryLogger(getResources().getString(R.string.audiofocus_check_4), false);
         }
+        return result;
     }
 
     private void toggleHeadset(boolean hasHeadset) {
@@ -1064,19 +1173,19 @@ public class MainActivity extends AppCompatActivity
                         // loss for unknown duration
                         focusText.setText(getResources().getString(R.string.audiofocus_1));
                         audioManager.abandonAudioFocus(audioFocusListener);
-                        interruptRequestAudio();
+                        interruptRequestAudio(focusChange);
                         break;
                     case AudioManager.AUDIOFOCUS_LOSS_TRANSIENT:
                         // -2
                         // temporary loss ? API docs says a "transient loss"!
                         focusText.setText(getResources().getString(R.string.audiofocus_2));
-                        interruptRequestAudio();
+                        interruptRequestAudio(focusChange);
                         break;
                     case AudioManager.AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK:
                         // -3
                         // loss to other audio source, this can duck for the short duration if it wants
                         focusText.setText(getResources().getString(R.string.audiofocus_3));
-                        interruptRequestAudio();
+                        interruptRequestAudio(focusChange);
                         break;
                     case AudioManager.AUDIOFOCUS_REQUEST_FAILED:
                         // 0
