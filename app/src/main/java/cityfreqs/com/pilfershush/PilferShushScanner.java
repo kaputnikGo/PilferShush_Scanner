@@ -31,12 +31,6 @@ public class PilferShushScanner {
         audioSettings = new AudioSettings(writeFiles);
         audioChecker = new AudioChecker(context, audioSettings);
         writeProcessor = new WriteProcessor(context, sessionName, audioSettings, writeWav);
-        // writes txt file to same location as audio records.
-        // write init checks then close the file.
-        // called again at runScanner.
-        if (writeFiles) {
-            writeProcessor.prepareLogToFile();
-        }
 
         if (audioChecker.determineInternalAudioType()) {
             entryLogger(audioChecker.getAudioSettings().toString(), false);
@@ -96,10 +90,6 @@ public class PilferShushScanner {
         return writeProcessor.cautionFreeSpace();
     }
 
-    protected void clearEmptyLogFiles() {
-        writeProcessor.deleteEmptyLogFiles();
-    }
-
     protected void clearLogStorageFolder() {
         writeProcessor.deleteStorageFiles();
     }
@@ -109,40 +99,13 @@ public class PilferShushScanner {
     }
 
     protected void renameSessionWrites(String sessionName) {
-        writeProcessor.closeLogFile();
         writeProcessor.closeWriteFile();
         writeProcessor.setSessionName(sessionName);
         // attempt to reopen
-        if (audioSettings.getWriteFiles()) {
-            if (!writeProcessor.prepareLogToFile()) {
-                // error in prep
-                entryLogger(context.getString(R.string.init_state_14), true);
-            }
+        if (!audioSettings.getWriteFiles()) {
+            entryLogger(context.getString(R.string.init_state_14), true);
         }
     }
-
-    protected void resumeLogWrite() {
-        if (audioSettings == null) {
-            //skip as a resume call
-            return;
-        }
-        else {
-            if (!writeProcessor.prepareLogToFile()) {
-                // error in prep
-                entryLogger(context.getString(R.string.init_state_14), true);
-            }
-        }
-    }
-
-    protected void closeLogWrite() {
-        // handle onPause from perms requests
-        if (audioSettings == null) {
-            //skip as a resume call
-            return;
-        }
-        writeProcessor.closeLogFile();
-    }
-
 
     protected boolean checkScanner() {
         return audioChecker.checkAudioRecord();

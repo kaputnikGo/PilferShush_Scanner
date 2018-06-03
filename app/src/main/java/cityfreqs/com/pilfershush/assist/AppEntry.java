@@ -121,27 +121,45 @@ public class AppEntry {
     }
 
     public boolean checkBeaconServiceNames() {
-        return beaconServices.length > 0;
+        if (beaconServices != null)
+            return beaconServices.length > 0;
+        else
+            return false;
     }
 
     public int getBeaconServiceNamesNum() {
-        return beaconServices.length;
+        if (beaconReceivers != null)
+            return beaconServices.length;
+        else
+            return 0;
     }
 
     public String[] getBeaconServiceNames() {
-        return beaconServices;
+        if (beaconReceivers != null)
+            return beaconServices;
+        else
+            return null;
     }
 
     public boolean checkBeaconReceiverNames() {
-        return beaconReceivers.length > 0;
+        if (beaconReceivers != null)
+            return beaconReceivers.length > 0;
+        else
+            return false;
     }
 
     public int getBeaconReceiverNamesNum() {
-        return beaconReceivers.length;
+        if (beaconReceivers != null)
+            return beaconReceivers.length;
+        else
+            return 0;
     }
 
     public String[] getBeaconReceiverNames() {
-        return beaconReceivers;
+        if (beaconReceivers != null)
+            return beaconReceivers;
+        else
+            return null;
     }
 
     /********************************************************************/

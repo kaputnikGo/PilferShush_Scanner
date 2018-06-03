@@ -47,7 +47,6 @@ import java.util.Map;
 
 import cityfreqs.com.pilfershush.assist.AudioSettings;
 import cityfreqs.com.pilfershush.assist.DeviceContainer;
-import cityfreqs.com.pilfershush.assist.WriteProcessor;
 
 public class MainActivity extends AppCompatActivity
         implements ActivityCompat.OnRequestPermissionsResultCallback {
@@ -62,7 +61,7 @@ public class MainActivity extends AppCompatActivity
     private static final int NOTIFY_ID = 123;
 
     // dev internal version numbering
-    public static final String VERSION = "2.1.03";
+    public static final String VERSION = "2.1.04";
 
     private ViewSwitcher viewSwitcher;
     private boolean mainView;
@@ -275,7 +274,6 @@ public class MainActivity extends AppCompatActivity
         // refocus app, ready for fresh scanner run
         toggleHeadset(false); // default state at init
         int status = audioFocusCheck();
-        pilferShushScanner.resumeLogWrite();
 
         if (IRQ_TELEPHONY && PASSIVE_RUNNING) {
             // return from background with state irq_telephony and passive_running
@@ -310,7 +308,6 @@ public class MainActivity extends AppCompatActivity
         super.onPause();
         // backgrounded, stop recording, possible audio_focus loss due to telephony...
         unregisterReceiver(headsetReceiver);
-        pilferShushScanner.closeLogWrite();
 
         // save state first
         sharedPrefs = getPreferences(Context.MODE_PRIVATE);
@@ -329,7 +326,6 @@ public class MainActivity extends AppCompatActivity
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        pilferShushScanner.closeLogWrite();
         pilferShushScanner.onDestroy();
     }
 
@@ -654,11 +650,10 @@ public class MainActivity extends AppCompatActivity
         dbLevel[5] = getResources().getString(R.string.magnitude_93_text);
         dbLevel[6] = getResources().getString(R.string.magnitude_100_text);
 
-        storageAdmins = new String[4];
+        storageAdmins = new String[3];
         storageAdmins[0] = getResources().getString(R.string.dialog_storage_size);
-        storageAdmins[1] = getResources().getString(R.string.dialog_delete_empty_logs);
-        storageAdmins[2] = getResources().getString(R.string.dialog_delete_all_files);
-        storageAdmins[3] = getResources().getString(R.string.dialog_free_storage_size);
+        storageAdmins[1] = getResources().getString(R.string.dialog_delete_all_files);
+        storageAdmins[2] = getResources().getString(R.string.dialog_free_storage_size);
     }
 
     private void cautionStorageSize() {
@@ -713,14 +708,10 @@ public class MainActivity extends AppCompatActivity
                         mainScanLogger(getResources().getString(R.string.option_dialog_2) + printUsedSize(), false);
                         break;
                     case 1:
-                        mainScanLogger(getResources().getString(R.string.option_dialog_3), false);
-                        pilferShushScanner.clearEmptyLogFiles();
-                        break;
-                    case 2:
                         mainScanLogger(getResources().getString(R.string.option_dialog_4), true);
                         pilferShushScanner.clearLogStorageFolder();
                         break;
-                    case 3:
+                    case 2:
                         mainScanLogger(getResources().getString(R.string.option_dialog_5) + printFreeSize(), false);
                         break;
                     default:
@@ -1024,10 +1015,6 @@ public class MainActivity extends AppCompatActivity
 
             // simple report to main logger
             mainScanLogger(getResources().getString(R.string.main_scanner_14) + pilferShushScanner.getFrequencySequenceSize(), true);
-
-            // output in order of capture sent to log file:
-            writeLogger(getResources().getString(R.string.main_scanner_15));
-            writeLogger(pilferShushScanner.getFrequencySequence());
         }
         else {
             mainScanLogger(getResources().getString(R.string.main_scanner_16), false);
@@ -1238,15 +1225,8 @@ public class MainActivity extends AppCompatActivity
 
     /********************************************************************/
 /*
- * 	LOGGER
+ * 	LOGGERS
  */
-
-    private void writeLogger(String text) {
-        // can create empty text files as no n-uhf data to save.
-        if (pilferShushScanner.getWriteFiles()) {
-            WriteProcessor.writeLogFile(text);
-        }
-    }
 
     private void mainScanLogger(String entry, boolean caution) {
         // this prints to MainView.log
@@ -1263,7 +1243,7 @@ public class MainActivity extends AppCompatActivity
     }
 
     protected static void entryLogger(String entry, boolean caution) {
-        // this prints to console.log and DetailedView.log, and save to text file
+        // this prints to console.log and DetailedView.log
         int start = debugText.getText().length();
         debugText.append("\n" + entry);
         int end = debugText.getText().length();

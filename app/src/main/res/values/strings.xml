@@ -45,7 +45,7 @@
     <string name="action_storage_admin">Storage admin</string>
     <string name="dialog_storage_size">Print storage size</string>
     <string name="dialog_delete_empty_logs">Delete empty logs</string>
-    <string name="dialog_delete_all_files">Delete all log text audio files</string>
+    <string name="dialog_delete_all_files">Delete all audio files</string>
     <string name="dialog_free_storage_size">Free storage space</string>
 
     <string name="dialog_cautioned">Cautioned List</string>
@@ -147,7 +147,6 @@
 
     <string name="option_dialog_1">Limited storage space found.</string>
     <string name="option_dialog_2">Log storage size:\u0020</string>
-    <string name="option_dialog_3">Delete empty log files.</string>
     <string name="option_dialog_4">Delete ALL log files.</string>
     <string name="option_dialog_5">Free storage space: </string>
     <string name="option_dialog_6">Write to file enabled.</string>
@@ -271,7 +270,7 @@
     <!--
     WriteProcessor.java
     -->
-    <string name="init_state_14">Error in setting up text log file.</string>
+    <string name="init_state_14">Error in setting up write file.</string>
     <string name="init_state_15">Error in setting up write audio file.</string>
 
     <string name="writer_state_1">Check storage.</string>

@@ -12,7 +12,6 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.OutputStreamWriter;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.channels.FileChannel;
@@ -39,7 +38,6 @@ public class WriteProcessor {
 
     private String audioFilename;
     private String waveFilename;
-    private String logFilename;
     private String sessionFilename;
     private static boolean writeWav;
 
@@ -49,15 +47,10 @@ public class WriteProcessor {
     public static BufferedOutputStream AUDIO_OUTPUT_STREAM;
     public static DataOutputStream AUDIO_RAW_STREAM;
 
-    public static File LOG_OUTPUT_FILE;
-    public static FileOutputStream LOG_OUTPUT_STREAM;
-    public static OutputStreamWriter LOG_OUTPUT_WRITER;
-
     private static final String APP_DIRECTORY_NAME = "PilferShush";
     private static final String DEFAULT_SESSION_NAME = "capture";
     private static final String AUDIO_FILE_EXTENSION_RAW = ".pcm";
     private static final String AUDIO_FILE_EXTENSION_WAV = ".wav";
-    private static final String LOG_FILE_EXTENSION = ".txt";
 
     private static final long MINIMUM_STORAGE_SIZE_BYTES = 2048; // approx 2 mins pcm audio
     private static final int INT_BYTES = Integer.SIZE / Byte.SIZE;
@@ -102,11 +95,6 @@ public class WriteProcessor {
         return calculateFreeStorageSpace();
     }
 
-    public void deleteEmptyLogFiles() {
-        // storage could have only 0kb log files
-        deleteZeroSizeLogFiles();
-    }
-
     public void deleteStorageFiles() {
         if (calculateStorageSize() > 0) {
             deleteAllStorageFiles();
@@ -118,69 +106,6 @@ public class WriteProcessor {
             return true;
         }
         return false;
-    }
-
-    /**************************************************************/
-    /*
-        text logging
-     */
-    public boolean prepareLogToFile() {
-        // need to build the filename AND path
-        log(context.getString(R.string.writer_state_3));
-        File location = extDirectory;
-        if (location == null) {
-            log(context.getString(R.string.writer_state_4));
-            return false;
-        }
-        // add the extension and timestamp
-        // eg: 20151218-10:14:32-capture.txt
-        logFilename = getTimestamp() + "-" + sessionFilename + LOG_FILE_EXTENSION;
-        try {
-            LOG_OUTPUT_FILE = new File(location, logFilename);
-            LOG_OUTPUT_FILE.createNewFile();
-            LOG_OUTPUT_STREAM = new FileOutputStream(LOG_OUTPUT_FILE, true);
-            LOG_OUTPUT_WRITER = new OutputStreamWriter(LOG_OUTPUT_STREAM);
-            return true;
-        }
-        catch (FileNotFoundException ex) {
-            ex.printStackTrace();
-            log(context.getString(R.string.writer_state_5));
-            return false;
-        }
-        catch (IOException e) {
-            e.printStackTrace();
-            log(context.getString(R.string.writer_state_6));
-            return false;
-        }
-    }
-
-    public static void writeLogFile(String textline) {
-        if (LOG_OUTPUT_WRITER != null) {
-            try {
-                LOG_OUTPUT_WRITER.append((new StringBuilder()).append(textline).append("\n"));
-            }
-            catch (IOException e) {
-                //
-            }
-        }
-    }
-
-    public void closeLogFile() {
-        // final act, no more writes possible.
-        log(context.getString(R.string.writer_state_7));
-        try {
-            if (LOG_OUTPUT_WRITER != null) {
-                LOG_OUTPUT_WRITER.flush();
-                LOG_OUTPUT_WRITER.close();
-            }
-            if (LOG_OUTPUT_STREAM != null) {
-                LOG_OUTPUT_STREAM.flush();
-                LOG_OUTPUT_STREAM.close();
-            }
-        }
-        catch (IOException e) {
-            log(context.getString(R.string.writer_state_8));
-        }
     }
 
     /**************************************************************/
@@ -266,8 +191,6 @@ public class WriteProcessor {
             e.printStackTrace();
             log(context.getString(R.string.writer_state_10));
         }
-        // then close text logging
-        closeLogFile();
     }
 
     public void audioFileConvert() {
@@ -400,27 +323,6 @@ public class WriteProcessor {
         }
     }
 
-    private void deleteZeroSizeLogFiles() {
-        // assume MainActivity has cautioned first.
-        if (!extDirectory.exists()) {
-            log(context.getString(R.string.writer_state_16));
-            return;
-        }
-
-        log(context.getString(R.string.writer_state_17));
-        int counter = 0;
-        for (File file : extDirectory.listFiles()) {
-            if (file.isFile()) {
-                if (file.length() == 0) {
-                    file.delete();
-                    counter++;
-                }
-            }
-        }
-        log(context.getString(R.string.writer_state_18_1) + counter + context.getString(R.string.writer_state_18_2));
-
-    }
-
     private void deleteAllStorageFiles() {
         // assume MainActivity has cautioned first.
         if (!extDirectory.exists()) {
@@ -469,10 +371,6 @@ public class WriteProcessor {
 
     private static void log(String message) {
         MainActivity.logger(message);
-    }
-
-    private static void entrylogger(String message) {
-
     }
 }
 
