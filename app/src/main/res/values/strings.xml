@@ -165,7 +165,7 @@
     <string name="init_state_3">Settings can be changed via the Options menu.</string>
     <string name="init_state_4">The Detailed View has logging and more information from scans.</string>
     <string name="init_state_5">It also has a continuous Mic check and intermittent polling check to look for other apps using the microphone.</string>
-    <string name="init_state_6">Init: save log output and audio to files:\u0020</string>
+    <string name="init_state_6">Init: save scan audio to file:\u0020</string>
     <string name="init_state_7_1">Wav audio:\u0020</string>
     <string name="init_state_7_2">, little-endian.</string>
     <string name="init_state_8_1">Raw audio:\u0020</string>

@@ -24,7 +24,10 @@ Proper for Android Studio build/release
 # 2018 Kaputnik Go
 
 
-Screenshots (as of 2.0.26)
+Screenshots
+
+- Update UI
+<img src="https://github.com/kaputnikGo/PilferShush_prod/blob/master/images/updateUI.jpg" height="612px" />
 
 - App open
 <img src="https://github.com/kaputnikGo/PilferShush_prod/blob/master/images/app-open.jpg" height="612px" />
