@@ -26,7 +26,7 @@ Add full passive and active jammers.
 Screenshots
 
 - Update UI
-<img src="https://github.com/kaputnikGo/PilferShush_prod/blob/master/images/updateUI-jammmers.jpg" height="612px" />
+<img src="https://github.com/kaputnikGo/PilferShush_prod/blob/master/images/updateUI-jammers.jpg" height="612px" />
 
 - App open
 <img src="https://github.com/kaputnikGo/PilferShush_prod/blob/master/images/app-open.jpg" height="612px" />
