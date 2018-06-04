@@ -34,16 +34,16 @@ public class RecordTask extends AsyncTask<Void, Integer, String> {
         this.audioSettings = audioSettings;
         this.freqStepper = freqStepper;
         minMagnitude = magnitude;
-        bufferArray = new short[audioSettings.getBufferSize()];
+        bufferArray = new short[audioSettings.getBufferInSize()];
         bufferStorage = new ArrayList<Integer[]>();
 
         if (audioRecord == null) {
             try {
                 audioRecord = new AudioRecord(audioSettings.getAudioSource(),
                         audioSettings.getSampleRate(),
-                        audioSettings.getChannelConfig(),
+                        audioSettings.getChannelInConfig(),
                         audioSettings.getEncoding(),
-                        audioSettings.getBufferSize());
+                        audioSettings.getBufferInSize());
 
                 logger("RecordTask ready.");
             }
@@ -110,7 +110,7 @@ public class RecordTask extends AsyncTask<Void, Integer, String> {
             try {
                 audioRecord.startRecording();
                 logger("audioRecord started...");
-                audioRecord.setPositionNotificationPeriod(audioSettings.getBufferSize());// / 2);
+                audioRecord.setPositionNotificationPeriod(audioSettings.getBufferInSize());// / 2);
                 audioRecord.setRecordPositionUpdateListener(new AudioRecord.OnRecordPositionUpdateListener() {
                     public void onMarkerReached(AudioRecord audioRecord) {
                         logger("marker reached");
@@ -123,7 +123,7 @@ public class RecordTask extends AsyncTask<Void, Integer, String> {
                 });
 
                 do {
-                    bufferRead = audioRecord.read(bufferArray, 0, audioSettings.getBufferSize());
+                    bufferRead = audioRecord.read(bufferArray, 0, audioSettings.getBufferInSize());
                     // not proper wav yet
                     if (audioSettings.getWriteFiles()) {
                         WriteProcessor.writeAudioFile(bufferArray, bufferRead);
@@ -174,7 +174,7 @@ public class RecordTask extends AsyncTask<Void, Integer, String> {
         // need to add diff version of scanning, not freqStepper version
         int bufferSize;
         if (bufferRead > 0) {
-            bufferSize = audioSettings.getBufferSize();
+            bufferSize = audioSettings.getBufferInSize();
 
             recordScan = new double[bufferSize]; // working array
             tempBuffer = new Integer[bufferSize]; // for bufferStorage scans

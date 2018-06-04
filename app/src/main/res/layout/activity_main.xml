@@ -9,7 +9,9 @@
     <ViewSwitcher xmlns:android="http://schemas.android.com/apk/res/android"
         android:id="@+id/main_view_switcher"
         android:layout_width="fill_parent"
-        android:layout_height="fill_parent">
+        android:layout_height="fill_parent"
+        tools:layout_editor_absoluteX="34dp"
+        tools:layout_editor_absoluteY="16dp">
 
         <RelativeLayout
             android:layout_width="match_parent"
@@ -22,60 +24,83 @@
             <ToggleButton
                 android:id="@+id/run_scans_button"
                 android:layout_width="wrap_content"
-                android:layout_weight=".30"
                 android:layout_height="wrap_content"
-                android:layout_alignParentTop="true"
                 android:layout_alignParentLeft="true"
-                android:layout_marginBottom ="@dimen/activity_vertical_margin"
+                android:layout_alignParentTop="true"
+                android:layout_marginBottom="@dimen/activity_vertical_margin"
+                android:layout_weight=".30"
                 android:text="@string/main_scanner_11"
                 android:textAllCaps="false"
-                android:textOn="@string/main_scanner_1"
-                android:textOff="@string/main_scanner_11" />
-<!--
-            <Button
+                android:textOff="@string/main_scanner_11"
+                android:textOn="@string/main_scanner_1" />
+
+            <ToggleButton
                 android:id="@+id/run_active_button"
                 android:layout_width="wrap_content"
-                android:layout_weight=".30"
                 android:layout_height="wrap_content"
                 android:layout_alignParentTop="true"
                 android:layout_centerHorizontal="true"
-                android:layout_marginBottom ="@dimen/activity_vertical_margin"
-                android:text="@string/main_scanner_22" />
--->
+                android:layout_marginBottom="@dimen/activity_vertical_margin"
+                android:layout_weight=".30"
+                android:text="@string/main_scanner_22"
+                android:textAllCaps="false"
+                android:textOff="@string/main_scanner_22"
+                android:textOn="@string/main_scanner_31" />
+
             <ToggleButton
                 android:id="@+id/run_passive_button"
                 android:layout_width="wrap_content"
-                android:layout_weight=".30"
                 android:layout_height="wrap_content"
-                android:layout_alignParentTop="true"
                 android:layout_alignParentRight="true"
-                android:layout_marginBottom ="@dimen/activity_vertical_margin"
+                android:layout_alignParentTop="true"
+                android:layout_marginBottom="@dimen/activity_vertical_margin"
+                android:layout_weight=".30"
                 android:text="@string/main_scanner_23"
                 android:textAllCaps="false"
-                android:textOn="@string/main_scanner_30"
-                android:textOff="@string/main_scanner_23" />
+                android:textOff="@string/main_scanner_23"
+                android:textOn="@string/main_scanner_30" />
 
             <Button
                 android:id="@+id/debug_view_button"
-                android:layout_width="fill_parent"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_alignParentLeft="true"
                 android:layout_below="@+id/run_scans_button"
-                android:layout_marginBottom ="@dimen/activity_vertical_margin"
+                android:layout_marginBottom="@dimen/activity_vertical_margin"
                 android:text="@string/debug_view_button_text" />
+
+            <Switch
+                android:id="@+id/eq_switch"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/run_passive_button"
+                android:layout_alignEnd="@+id/active_type_switch"
+                android:checked="false"
+                android:text="EQ" />
+
+            <Switch
+                android:id="@+id/active_type_switch"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentRight="true"
+                android:layout_below="@+id/eq_switch"
+                android:checked="false"
+                android:text="Noise" />
+
 
             <cityfreqs.com.pilfershush.AudioVisualiserView
                 android:id="@+id/audio_visualiser_view"
                 android:layout_width="match_parent"
-                android:background="@layout/border"
                 android:layout_height="100dp"
-                android:layout_below="@+id/debug_view_button" />
+                android:layout_below="@+id/debug_view_button"
+                android:background="@layout/border" />
 
             <TextView
                 android:id="@+id/timer_text"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_below="@+id/audio_visualiser_view"
                 android:layout_alignParentEnd="true"
+                android:layout_below="@+id/audio_visualiser_view"
                 android:text="@string/timer_text" />
 
             <TextView
@@ -88,51 +113,55 @@
                 android:text="@string/main_scan_text" />
         </RelativeLayout>
 
-            <RelativeLayout
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:paddingBottom="@dimen/activity_vertical_margin"
-                android:paddingLeft="@dimen/activity_horizontal_margin"
-                android:paddingRight="@dimen/activity_horizontal_margin"
-                android:paddingTop="@dimen/activity_vertical_margin">
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:paddingBottom="@dimen/activity_vertical_margin"
+            android:paddingLeft="@dimen/activity_horizontal_margin"
+            android:paddingRight="@dimen/activity_horizontal_margin"
+            android:paddingTop="@dimen/activity_vertical_margin">
 
-                <Button
-                    android:id="@+id/mic_check_button"
-                    android:layout_width="fill_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginBottom ="@dimen/activity_vertical_margin"
-                    android:text="@string/mic_check_2" />
-                <Button
-                    android:id="@+id/mic_polling_button"
-                    android:layout_width="fill_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_below="@+id/mic_check_button"
-                    android:layout_marginBottom ="@dimen/activity_vertical_margin"
-                    android:text="@string/poll_check_2" />
-                <Button
-                    android:id="@+id/main_view_button"
-                    android:layout_width="fill_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_below="@+id/mic_polling_button"
-                    android:layout_marginBottom ="@dimen/activity_vertical_margin"
-                    android:text="@string/main_view_button_text" />
-                <TextView
-                    android:id="@+id/focus_text"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_below="@+id/main_view_button"
-                    android:background="#404040"
-                    android:text="@string/focus_text" />
-                <TextView
-                    android:id="@+id/debug_text"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_below="@+id/focus_text"
-                    android:background="#000000"
-                    android:gravity="bottom"
-                    android:scrollbars="vertical"
-                    android:text="@string/debug_text" />
-            </RelativeLayout>
+            <Button
+                android:id="@+id/mic_check_button"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="@dimen/activity_vertical_margin"
+                android:text="@string/mic_check_2" />
+
+            <Button
+                android:id="@+id/mic_polling_button"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/mic_check_button"
+                android:layout_marginBottom="@dimen/activity_vertical_margin"
+                android:text="@string/poll_check_2" />
+
+            <Button
+                android:id="@+id/main_view_button"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/mic_polling_button"
+                android:layout_marginBottom="@dimen/activity_vertical_margin"
+                android:text="@string/main_view_button_text" />
+
+            <TextView
+                android:id="@+id/focus_text"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/main_view_button"
+                android:background="#404040"
+                android:text="@string/focus_text" />
+
+            <TextView
+                android:id="@+id/debug_text"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/focus_text"
+                android:background="#000000"
+                android:gravity="bottom"
+                android:scrollbars="vertical"
+                android:text="@string/debug_text" />
+        </RelativeLayout>
 
     </ViewSwitcher>
 

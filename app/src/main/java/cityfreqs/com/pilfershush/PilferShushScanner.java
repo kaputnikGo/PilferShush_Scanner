@@ -13,7 +13,7 @@ public class PilferShushScanner {
     private AudioChecker audioChecker;
     private AudioScanner audioScanner;
     private WriteProcessor writeProcessor;
-    private AudioJammer audioJammer;
+
     private int scanBufferSize;
 
     protected void onDestroy() {
@@ -25,26 +25,31 @@ public class PilferShushScanner {
 /*
 *
 */
-    protected boolean initScanner(Context context, boolean hasUSB, String sessionName, boolean writeFiles, boolean writeWav) {
+    protected boolean initScanner(Context context, AudioSettings audioSettings, boolean hasUSB, String sessionName) {
         this.context = context;
         scanBufferSize = 0;
-        audioSettings = new AudioSettings(writeFiles);
+        this.audioSettings = audioSettings;
         audioChecker = new AudioChecker(context, audioSettings);
-        writeProcessor = new WriteProcessor(context, sessionName, audioSettings, writeWav);
+        writeProcessor = new WriteProcessor(context, sessionName, audioSettings, audioSettings.getWriteFiles());
 
-        if (audioChecker.determineInternalAudioType()) {
+        entryLogger(context.getString(R.string.audio_check_pre_1), false);
+        if (audioChecker.determineRecordAudioType()) {
             entryLogger(audioChecker.getAudioSettings().toString(), false);
             audioScanner = new AudioScanner(context, audioChecker.getAudioSettings());
-            // get internalAudio settings here.
+            // get output settings here.
+            entryLogger(context.getString(R.string.audio_check_pre_2), false);
+            if (!audioChecker.determineOutputAudioType()) {
+                // have a setup error getting the audio for output
+            }
+
             initBackgroundChecks();
-            // setup Jammer
-            audioJammer = new AudioJammer(context, audioSettings);
             return true;
         }
 
+
         // TODO wont yet run usb audio, no return true, background checks...
         if(hasUSB) {
-            if (audioChecker.determineUsbAudioType(hasUSB)) {
+            if (audioChecker.determineUsbRecordAudioType(hasUSB)) {
                 MainActivity.logger(context.getString(R.string.usb_state_7));
             }
             else {
@@ -191,37 +196,6 @@ public class PilferShushScanner {
 
     protected void resetAudioScanner() {
         audioScanner.resetAudioScanner();
-    }
-
-    /********************************************************************/
-
-    protected void runActiveJammer() {
-        // background service runnable, emits white noise within n-uhf ranges
-        if (audioJammer != null) {
-            audioJammer.runActiveJammer();
-        }
-    }
-    protected void stopActiveJammer() {
-        if (audioJammer != null) {
-            audioJammer.stopActiveJammer();
-        }
-    }
-    protected boolean startPassiveJammer() {
-        // holds mic and if needed records to zero values to dev/null
-        if (audioJammer != null) {
-            return audioJammer.startPassiveJammer();
-        }
-        return false;
-    }
-    protected void runPassiveJammer() {
-        if (audioJammer != null) {
-            audioJammer.runPassiveJammer();
-        }
-    }
-    protected void stopPassiveJammer() {
-        if (audioJammer != null) {
-            audioJammer.stopPassiveJammer();
-        }
     }
 
 

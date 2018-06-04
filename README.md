@@ -2,9 +2,10 @@
 Android near-ultra high frequency listener with microphone polling and audio beacon SDK detector  
 
 Test application for researching methods of discovering use of audio beacons.  
-Proper for Android Studio build/release
+Proper for Android Studio build/release.
+Add full passive and active jammers.
 
-   vers. 2.1.05
+   vers. 2.2.01
    - min API 18 (4.3)
    - target API 23 (6.x)
    - compiled API 26 (8.x)
@@ -16,9 +17,7 @@ Proper for Android Studio build/release
    - HIGH : s5 G900P (user) 7.1.2 (25)(LineageOS 14.1, F-Droid)
  
  TODO:
- - trial n-uhf jamming techniques
- - logger class (fix diff views and to textfile logs)
- - USB Audio routing test
+ - conform jammers to stand-alone version app
  - build for API 26, 8.x, 'O' and up features
 
 # 2018 Kaputnik Go

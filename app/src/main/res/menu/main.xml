@@ -44,8 +44,20 @@
         android:title="@string/action_override_scan"/>
 
     <item
-        android:id="@+id/action_write_file"
+        android:id="@+id/action_jammer"
         android:orderInCategory="50"
+        android:title="@string/action_jammer"
+        app:showAsAction="never" />
+
+    <item
+        android:id="@+id/action_drift_speed"
+        android:orderInCategory="30"
+        android:title="@string/action_drift_speed"
+        app:showAsAction="never" />
+
+    <item
+        android:id="@+id/action_write_file"
+        android:orderInCategory="55"
         app:showAsAction="never"
         android:title="@string/action_write_file"/>
 

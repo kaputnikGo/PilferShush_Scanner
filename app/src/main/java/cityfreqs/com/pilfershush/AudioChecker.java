@@ -2,8 +2,11 @@ package cityfreqs.com.pilfershush;
 
 import android.content.Context;
 import android.media.AudioFormat;
+import android.media.AudioManager;
 import android.media.AudioRecord;
+import android.media.AudioTrack;
 import android.media.MediaRecorder.AudioSource;
+import android.media.audiofx.Equalizer;
 
 import cityfreqs.com.pilfershush.assist.AudioSettings;
 
@@ -121,7 +124,7 @@ public static final int HOTWORD = 1999; //  always-on software hotword detection
 
  *
  */
-    protected boolean determineInternalAudioType() {
+    protected boolean determineRecordAudioType() {
         // guaranteed default for Android is 44.1kHz, PCM_16BIT, CHANNEL_IN_DEFAULT
         int buffSize = 0;
         for (int rate : AudioSettings.SAMPLE_RATES) {
@@ -172,7 +175,7 @@ public static final int HOTWORD = 1999; //  always-on software hotword detection
         return false;
     }
 
-    protected boolean determineUsbAudioType(boolean hasUSB_audio) {
+    protected boolean determineUsbRecordAudioType(boolean hasUSB_audio) {
         // android should auto switch to using USB audio device as default...
         int buffSize = 0;
         if (hasUSB_audio) {
@@ -227,6 +230,115 @@ public static final int HOTWORD = 1999; //  always-on software hotword detection
         }
         MainActivity.logger(context.getString(R.string.audio_check_3));
         return false;
+    }
+
+    protected boolean determineOutputAudioType() {
+        // guaranteed default for Android is 44.1kHz, PCM_16BIT, CHANNEL_IN_DEFAULT
+        int buffSize;
+        for (int rate : AudioSettings.SAMPLE_RATES) {
+            for (short audioFormat : new short[] {
+                    AudioFormat.ENCODING_PCM_16BIT,
+                    AudioFormat.ENCODING_PCM_8BIT}) {
+
+                for (short channelOutConfig : new short[] {
+                        AudioFormat.CHANNEL_OUT_DEFAULT, // 1 - switched by OS, not native?
+                        AudioFormat.CHANNEL_OUT_MONO,    // 4
+                        AudioFormat.CHANNEL_OUT_STEREO }) {  // 12
+                    try {
+                        MainActivity.entryLogger("Try rate " + rate + "Hz, bits: " + audioFormat + ", channelOutConfig: "+ channelOutConfig, false);
+
+                        buffSize = AudioTrack.getMinBufferSize(rate, channelOutConfig, audioFormat);
+                        // dont need to force buffSize to powersOfTwo if it isnt (ie.S5) as no FFT
+
+                        AudioTrack audioTrack = new AudioTrack(
+                                AudioManager.STREAM_MUSIC,
+                                rate,
+                                channelOutConfig,
+                                audioFormat,
+                                buffSize,
+                                AudioTrack.MODE_STREAM);
+
+                        //if (audioTrack != null) {
+                        if (audioTrack.getState() == AudioTrack.STATE_INITIALIZED) {
+
+                            MainActivity.entryLogger("found: " + rate + ", buffer: " + buffSize + ", channelOutConfig: " + channelOutConfig, true);
+                            // set output values
+                            // buffOutSize may not be same as buffInSize conformed to powersOfTwo
+                            audioSettings.setChannelOutConfig(channelOutConfig);
+                            audioSettings.setBufferOutSize(buffSize);
+
+                            // test onboardEQ
+                            MainActivity.entryLogger("\nTesting for device audiofx equalizer.", false);
+                            if (testOnboardEQ(audioTrack.getAudioSessionId())) {
+                                MainActivity.entryLogger("Device audiofx equalizer test passed.\n", false);
+                                // set a thing somewhere so that active jammer can use it
+                                // add settings to AudioSettings
+                            } else {
+                                MainActivity.entryLogger("Device audiofx equalizer test failed.\n", true);
+                            }
+
+                            audioTrack.pause();
+                            audioTrack.flush();
+                            audioTrack.release();
+                            return true;
+                        }
+                        //}
+                    }
+                    catch (Exception e) {
+                        MainActivity.entryLogger("Error, keep trying.", false);
+                    }
+                }
+            }
+        }
+        MainActivity.entryLogger(context.getString(R.string.audio_check_2), true);
+        return false;
+    }
+
+    // testing android/media/audiofx/Equalizer
+    // idea is to make the whitenoise less annoying
+    private boolean testOnboardEQ(int audioSessionId) {
+        try {
+            Equalizer equalizer = new Equalizer(0, audioSessionId);
+            equalizer.setEnabled(true);
+            audioSettings.setHasEQ(true);
+            // get some info
+            short bands = equalizer.getNumberOfBands();
+            final short minEQ = equalizer.getBandLevelRange()[0]; // returns milliBel
+            final short maxEQ = equalizer.getBandLevelRange()[1];
+
+            MainActivity.entryLogger("Number EQ bands: " + bands, false);
+            MainActivity.entryLogger("EQ min mB: " + minEQ, false);
+            MainActivity.entryLogger("EQ max mB: " + maxEQ, false);
+
+            for (short band = 0; band < bands; band++) {
+                // divide by 1000 to get numbers into recognisable ranges
+                MainActivity.entryLogger("\nband freq range min: " + (equalizer.getBandFreqRange(band)[0] / 1000), false);
+                MainActivity.entryLogger("Band " + band + " center freq Hz: " + (equalizer.getCenterFreq(band) / 1000), true);
+                MainActivity.entryLogger("band freq range max: " + (equalizer.getBandFreqRange(band)[1] / 1000), false);
+                // band 5 reports center freq: 14kHz, minrange: 7000 and maxrange: 0  <- is this infinity? uppermost limit?
+                // could be 21kHz if report standard of same min to max applies.
+            }
+
+
+            // only active test is to squash all freqs in bands 0-3, leaving last band (4) free...
+            MainActivity.entryLogger("\nHPF test reduce EQ bands 2x loop by minEQ value: " + minEQ, false);
+
+            for (int i = 0; i < 2; i++) {
+                for (short j = 0; j < bands; j++) {
+                    equalizer.setBandLevel(j, minEQ);
+                }
+            }
+            // not a filter... reduced amplitude seems the best description when using eq.
+            // repeat calls to -15 dB improves sound reduction
+            // band4 to maxEQ will prob not do anything useful?
+
+            return true;
+        }
+        catch (Exception ex) {
+            MainActivity.entryLogger("testEQ Exception.", true);
+            ex.printStackTrace();
+            return false;
+        }
     }
 
     protected AudioSettings getAudioSettings() {

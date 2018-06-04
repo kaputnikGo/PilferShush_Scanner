@@ -34,6 +34,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.CompoundButton;
 import android.widget.EditText;
+import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ToggleButton;
@@ -58,10 +59,12 @@ public class MainActivity extends AppCompatActivity
     private static final boolean WRITE_WAV = true;
 
     private static final int REQUEST_MULTIPLE_PERMISSIONS = 123;
-    private static final int NOTIFY_ID = 123;
+    private static final int NOTIFY_PASSIVE_ID = 112;
+    private static final int NOTIFY_ACTIVE_ID = 113;
 
     // dev internal version numbering
-    public static final String VERSION = "2.1.05";
+    public static final String VERSION = "2.2.01";
+    //TODO more logger info re jammers
 
     private ViewSwitcher viewSwitcher;
     private boolean mainView;
@@ -76,7 +79,7 @@ public class MainActivity extends AppCompatActivity
     private Button micPollingButton;
     private ToggleButton runScansButton;
     private ToggleButton passiveJammerButton;
-    //private Button activeJammerButton;
+    private ToggleButton activeJammerButton;
     private Button debugViewButton;
     private Button mainViewButton;
     private TextView mainScanText;
@@ -97,12 +100,13 @@ public class MainActivity extends AppCompatActivity
     private boolean MIC_CHECKING;
     private boolean POLLING;
     private boolean SCANNING;
-    //private boolean ACTIVE;
 
+    private AudioSettings audioSettings;
     private PowerManager powerManager;
     private PowerManager.WakeLock wakeLock;
     private HeadsetIntentReceiver headsetReceiver;
     private PilferShushScanner pilferShushScanner;
+    private PilferShushJammer pilferShushJammer;
     private AudioManager audioManager;
     private AudioManager.OnAudioFocusChangeListener audioFocusListener;
     public static AudioVisualiserView visualiserView;
@@ -113,9 +117,15 @@ public class MainActivity extends AppCompatActivity
     private SharedPreferences sharedPrefs;
     private SharedPreferences.Editor sharedPrefsEditor;
     private NotificationManager notifyManager;
-    private Notification.Builder notifyBuilder;
+    private Notification.Builder notifyPassiveBuilder;
+    private Notification.Builder notifyActiveBuilder;
     private boolean PASSIVE_RUNNING;
+    private boolean ACTIVE_RUNNING;
     private boolean IRQ_TELEPHONY;
+    private boolean HAS_HEADSET;
+
+    private boolean activeTypeValue;
+    private String[] jammerTypes;
 
 
     @Override
@@ -128,8 +138,12 @@ public class MainActivity extends AppCompatActivity
         headsetReceiver = new HeadsetIntentReceiver();
         powerManager = (PowerManager) this.getSystemService(Context.POWER_SERVICE);
 
+        audioSettings = new AudioSettings(WRITE_WAV);
+
         pilferShushScanner = new PilferShushScanner();
         SCANNING = false;
+
+        pilferShushJammer = new PilferShushJammer();
 
         //MAIN VIEW
         runScansButton = findViewById(R.id.run_scans_button);
@@ -150,24 +164,40 @@ public class MainActivity extends AppCompatActivity
         passiveJammerButton.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                 if (isChecked) {
-                    // change methods
-                    togglePassiveJamming();
+                    runPassive();
                 }
                 else {
-                    // change methods
-                    togglePassiveJamming();
+                   stopPassive();
                 }
             }
         });
 
-        /*
-        activeJammerButton = (Button) findViewById(R.id.run_active_button);
-        activeJammerButton.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View v) {
-                toggleActiveJamming();
+
+        activeJammerButton = findViewById(R.id.run_active_button);
+        activeJammerButton.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                if (isChecked) {
+                    runActive();
+                }
+                else {
+                    stopActive();
+                }
             }
         });
-        */
+
+        Switch activeTypeSwitch = findViewById(R.id.active_type_switch);
+        activeTypeSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                activeTypeValue = isChecked;
+            }
+        });
+
+        Switch eqSwitch = findViewById(R.id.eq_switch);
+        eqSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                toggleEq(isChecked);
+            }
+        });
 
         mainScanText = findViewById(R.id.main_scan_text);
         mainScanText.setTextColor(Color.parseColor("#00ff00"));
@@ -274,6 +304,7 @@ public class MainActivity extends AppCompatActivity
         sharedPrefs = getPreferences(Context.MODE_PRIVATE);
         // work out if need to restart jamming
         PASSIVE_RUNNING = sharedPrefs.getBoolean("passive_running", false);
+        ACTIVE_RUNNING = sharedPrefs.getBoolean("active_running", false);
         IRQ_TELEPHONY = sharedPrefs.getBoolean("irq_telephony", false);
 
         IntentFilter filter = new IntentFilter(Intent.ACTION_HEADSET_PLUG);
@@ -290,7 +321,7 @@ public class MainActivity extends AppCompatActivity
                 // reset booleans to init state
                 PASSIVE_RUNNING = false;
                 IRQ_TELEPHONY = false;
-                togglePassiveJamming();
+                stopPassive();
             }
             else if (status == AudioManager.AUDIOFOCUS_LOSS) {
                 // possible music player etc that has speaker focus but no need of microphone,
@@ -299,7 +330,7 @@ public class MainActivity extends AppCompatActivity
                 // reset booleans to init state
                 PASSIVE_RUNNING = false;
                 IRQ_TELEPHONY = false;
-                togglePassiveJamming();
+                stopPassive();
             }
             else if (PASSIVE_RUNNING) {
                 // return from background without irq_telephony
@@ -307,6 +338,13 @@ public class MainActivity extends AppCompatActivity
             }
             else {
                 entryLogger("status: passive jammer not running.", true);
+            }
+            if (ACTIVE_RUNNING) {
+                // return from background without irq_telephony
+                entryLogger(getResources().getString(R.string.app_status_3), true);
+            }
+            else {
+                entryLogger(getResources().getString(R.string.app_status_4), true);
             }
         }
     }
@@ -321,13 +359,18 @@ public class MainActivity extends AppCompatActivity
         sharedPrefs = getPreferences(Context.MODE_PRIVATE);
         sharedPrefsEditor = sharedPrefs.edit();
         sharedPrefsEditor.putBoolean("passive_running", PASSIVE_RUNNING);
+        sharedPrefsEditor.putBoolean("active_running", ACTIVE_RUNNING);
         sharedPrefsEditor.putBoolean("irq_telephony", IRQ_TELEPHONY);
         sharedPrefsEditor.commit();
         // then work out if need to toggle jammer off (UI) due to irq_telephony
         if (PASSIVE_RUNNING && IRQ_TELEPHONY) {
             // make UI conform to jammer override by system telephony
-            //stopPassive();
-            togglePassiveJamming();
+            stopPassive();
+
+        }
+        if (ACTIVE_RUNNING && IRQ_TELEPHONY) {
+            // make UI conform
+            stopActive();
         }
     }
 
@@ -387,6 +430,12 @@ public class MainActivity extends AppCompatActivity
                 return true;
             case R.id.action_override_scan:
                 hasUserAppsList();
+                return true;
+            case R.id.action_jammer:
+                jammerDialog();
+                return true;
+            case R.id.action_drift_speed:
+                speedDriftDialog();
                 return true;
             case R.id.action_write_file:
                 changeWriteFile();
@@ -543,7 +592,7 @@ public class MainActivity extends AppCompatActivity
             }
         };
 
-        if (pilferShushScanner.initScanner(this, scanUsbDevices(), getResources().getString(R.string.session_default_name), INIT_WRITE_FILES, WRITE_WAV)) {
+        if (pilferShushScanner.initScanner(this, audioSettings, scanUsbDevices(), getResources().getString(R.string.session_default_name))) {
             pilferShushScanner.checkScanner();
             MIC_CHECKING = false;
             toggleHeadset(false); // default state at init
@@ -551,6 +600,8 @@ public class MainActivity extends AppCompatActivity
             initAudioFocusListener();
             populateMenuItems();
             reportInitialState();
+            pilferShushJammer.initJammer(this, audioSettings);
+            mainScanLogger("Active jammer set to: " + jammerTypes[pilferShushJammer.getJammerTypeSwitch()], true);
         }
         else {
             mainScanLogger(getResources().getString(R.string.init_state_12), true);
@@ -564,10 +615,10 @@ public class MainActivity extends AppCompatActivity
         sharedPrefsEditor.putBoolean("passive_running", PASSIVE_RUNNING);
         sharedPrefsEditor.putBoolean("irq_telephony", IRQ_TELEPHONY);
         sharedPrefsEditor.commit();
-        createNotification();
+        createNotifications();
     }
 
-    private void createNotification() {
+    private void createNotifications() {
         Intent notificationIntent = new Intent(this, MainActivity.class);
 
         PendingIntent pendingIntent = PendingIntent.getActivity(this,
@@ -575,11 +626,20 @@ public class MainActivity extends AppCompatActivity
 
         notifyManager = (NotificationManager) this.getSystemService(Context.NOTIFICATION_SERVICE);
 
-        notifyBuilder = new Notification.Builder(this);
+        notifyPassiveBuilder = new Notification.Builder(this);
+        notifyActiveBuilder = new Notification.Builder(this);
 
-        notifyBuilder.setSmallIcon(R.mipmap.ic_stat_logo_notify_jammer)
+        notifyPassiveBuilder.setSmallIcon(R.mipmap.ic_stat_logo_notify_jammer)
                 .setLargeIcon(BitmapFactory.decodeResource(this.getResources(), R.mipmap.ic_launcher))
                 .setContentTitle("passive jammer running")
+                .setContentText("Tap to return to app")
+                .setContentIntent(pendingIntent)
+                .setWhen(System.currentTimeMillis())
+                .setAutoCancel(false);
+
+        notifyActiveBuilder.setSmallIcon(R.mipmap.ic_stat_logo_notify_jammer)
+                .setLargeIcon(BitmapFactory.decodeResource(this.getResources(), R.mipmap.ic_launcher))
+                .setContentTitle("active jammer running")
                 .setContentText("Tap to return to app")
                 .setContentIntent(pendingIntent)
                 .setWhen(System.currentTimeMillis())
@@ -657,6 +717,12 @@ public class MainActivity extends AppCompatActivity
         dbLevel[4] = getResources().getString(R.string.magnitude_90_text);
         dbLevel[5] = getResources().getString(R.string.magnitude_93_text);
         dbLevel[6] = getResources().getString(R.string.magnitude_100_text);
+
+        jammerTypes = new String[4];
+        jammerTypes[0] = getResources().getString(R.string.jammer_dialog_2);
+        jammerTypes[1] = getResources().getString(R.string.jammer_dialog_3);
+        jammerTypes[2] = getResources().getString(R.string.jammer_dialog_4);
+        jammerTypes[3] = getResources().getString(R.string.jammer_dialog_5);
 
         storageAdmins = new String[3];
         storageAdmins[0] = getResources().getString(R.string.dialog_storage_size);
@@ -838,6 +904,139 @@ public class MainActivity extends AppCompatActivity
         alertDialog.show();
     }
 
+    private void jammerDialog() {
+        dialogBuilder = new AlertDialog.Builder(this);
+        dialogBuilder.setItems(jammerTypes, new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialogInterface, int which) {
+                // types listing as above
+                // other user input needed for the below options
+                switch(which) {
+                    case 0:
+                        pilferShushJammer.setJammerTypeSwitch(AudioSettings.JAMMER_TYPE_TEST);
+                        entryLogger("Jammer type changed to " + jammerTypes[which], false);
+                        break;
+                    case 1:
+                        pilferShushJammer.setJammerTypeSwitch(AudioSettings.JAMMER_TYPE_NUHF);
+                        entryLogger("Jammer type changed to " + jammerTypes[which], false);
+                        break;
+                    case 2:
+                        defaultRangedDialog();
+                        break;
+                    case 3:
+                        userRangedDialog();
+                        break;
+                    default:
+                        break;
+
+                }
+            }
+        });
+        dialogBuilder.setTitle(R.string.jammer_dialog_1);
+        alertDialog = dialogBuilder.create();
+        alertDialog.show();
+    }
+    private void defaultRangedDialog() {
+        // open dialog with field for carrierfrequency
+        dialogBuilder = new AlertDialog.Builder(this);
+
+        LayoutInflater inflater = this.getLayoutInflater();
+        View inputView = inflater.inflate(R.layout.default_ranged_form, null);
+        dialogBuilder.setView(inputView);
+        final EditText userCarrierInput = (EditText) inputView.findViewById(R.id.carrier_input);
+
+        dialogBuilder.setTitle(R.string.jammer_dialog_4);
+
+        dialogBuilder
+                .setPositiveButton(R.string.dialog_button_okay, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int id) {
+                        int userInputCarrier = Integer.parseInt(userCarrierInput.getText().toString());
+                        pilferShushJammer.setUserCarrier(userInputCarrier);
+                        pilferShushJammer.setJammerTypeSwitch(AudioSettings.JAMMER_TYPE_DEFAULT_RANGED);
+                        entryLogger("Jammer type changed to 1000Hz drift with carrier at " + userInputCarrier, false);
+                    }
+                })
+                .setNegativeButton(R.string.dialog_button_cancel, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int id) {
+                        // dismissed
+                        alertDialog.cancel();
+                    }
+                });
+
+        alertDialog = dialogBuilder.create();
+        alertDialog.show();
+    }
+    private void userRangedDialog() {
+        // open dialog with 2 fields - carrier and limit
+        dialogBuilder = new AlertDialog.Builder(this);
+
+        LayoutInflater inflater = this.getLayoutInflater();
+        View inputView = inflater.inflate(R.layout.user_ranged_form, null);
+        dialogBuilder.setView(inputView);
+
+        final EditText userCarrierInput = (EditText) inputView.findViewById(R.id.carrier_input);
+        final EditText userLimitInput = (EditText) inputView.findViewById(R.id.limit_input);
+
+        dialogBuilder.setTitle(R.string.jammer_dialog_5);
+
+        dialogBuilder
+                .setPositiveButton(R.string.dialog_button_okay, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int id) {
+                        int userInputCarrier = Integer.parseInt(userCarrierInput.getText().toString());
+                        int userInputLimit = Integer.parseInt(userLimitInput.getText().toString());
+
+                        pilferShushJammer.setUserCarrier(userInputCarrier);
+                        pilferShushJammer.setUserLimit(userInputLimit);
+                        pilferShushJammer.setJammerTypeSwitch(AudioSettings.JAMMER_TYPE_USER_RANGED);
+                        entryLogger("Jammer type changed to " + userInputLimit + " Hz drift with carrier at " + userInputCarrier, false);
+
+                    }
+                })
+                .setNegativeButton(R.string.dialog_button_cancel, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int id) {
+                        // dismissed
+                        alertDialog.cancel();
+                    }
+                });
+
+        alertDialog = dialogBuilder.create();
+        alertDialog.show();
+    }
+
+    private void speedDriftDialog() {
+        dialogBuilder = new AlertDialog.Builder(this);
+
+        LayoutInflater inflater = this.getLayoutInflater();
+        View inputView = inflater.inflate(R.layout.drift_speed_form, null);
+        dialogBuilder.setView(inputView);
+
+        final EditText userDriftInput = (EditText) inputView.findViewById(R.id.drift_input);
+
+        dialogBuilder.setTitle(R.string.drift_dialog_1);
+        dialogBuilder.setMessage("");
+        dialogBuilder
+                .setPositiveButton(R.string.dialog_button_okay, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int id) {
+                        int userInputDrift = Integer.parseInt(userDriftInput.getText().toString());
+                        pilferShushJammer.setDriftSpeed(userInputDrift);
+                        entryLogger("Jammer drift speed changed to " + userInputDrift, false);
+                    }
+                })
+                .setNegativeButton(R.string.dialog_button_cancel, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int id) {
+                        // dismissed
+                        alertDialog.cancel();
+                    }
+                });
+        alertDialog = dialogBuilder.create();
+        alertDialog.show();
+    }
+
 
     private String printUsedSize() {
         return android.text.format.Formatter.formatShortFileSize(this, pilferShushScanner.getLogStorageSize());
@@ -869,15 +1068,17 @@ public class MainActivity extends AppCompatActivity
  */
     private void toggleScanning() {
         // check for jamming
-        /*
-        if (ACTIVE) {
+
+        if (ACTIVE_RUNNING) {
             mainScanLogger(getResources().getString(R.string.main_scanner_25), true);
-            toggleActiveJamming();
+            stopActive();
+            activeJammerButton.toggle();
         }
-        */
+
         if (PASSIVE_RUNNING) {
             mainScanLogger(getResources().getString(R.string.main_scanner_25), true);
-            togglePassiveJamming();
+            stopPassive();
+            passiveJammerButton.toggle();
         }
 
         // add check for mic/record ability
@@ -911,66 +1112,61 @@ public class MainActivity extends AppCompatActivity
         }
     }
 
-    private void togglePassiveJamming() {
-        // cannot run normal scanner at same time as jamming
+    private void runPassive() {
         if (SCANNING) {
             mainScanLogger(getResources().getString(R.string.main_scanner_24), true);
             toggleScanning();
         }
 
-        // add check for mic/record ability
-        if (pilferShushScanner.audioStateError()) {
-            // no mic or audio record capabilities
-            mainScanLogger(getResources().getString(R.string.init_state_17), true);
-            return;
+        if (pilferShushJammer.hasPassiveJammer() && !PASSIVE_RUNNING) {
+            if (pilferShushJammer.startPassiveJammer()) {
+                if (!pilferShushJammer.runPassiveJammer()) {
+                    // check for errors in running
+                    passiveJammerButton.toggle();
+                    stopPassive();
+                }
+                else {
+                    entryLogger(getResources().getString(R.string.main_scanner_3), false);
+                    PASSIVE_RUNNING = true;
+                    notifyManager.notify(NOTIFY_PASSIVE_ID, notifyPassiveBuilder.build());
+                }
+            }
         }
-
-        if (PASSIVE_RUNNING) {
-            pilferShushScanner.stopPassiveJammer();
-            mainScanLogger(getResources().getString(R.string.main_scanner_29), false);
+    }
+    private void stopPassive() {
+        if (pilferShushJammer.hasPassiveJammer() && PASSIVE_RUNNING) {
+            pilferShushJammer.stopPassiveJammer();
             PASSIVE_RUNNING = false;
-            notifyManager.cancel(NOTIFY_ID);
-        }
-        else {
-            if (pilferShushScanner.startPassiveJammer()) {
-                pilferShushScanner.runPassiveJammer();
-                mainScanLogger(getResources().getString(R.string.main_scanner_26), false);
-                PASSIVE_RUNNING = true;
-                notifyManager.notify(NOTIFY_ID, notifyBuilder.build());
-            }
-            else {
-                // check for errors in running
-                PASSIVE_RUNNING = false;
-                passiveJammerButton.toggle();
-            }
+            entryLogger(getResources().getString(R.string.main_scanner_4), false);
+            notifyManager.cancel(NOTIFY_PASSIVE_ID);
         }
     }
 
-    /*
-    private void toggleActiveJamming() {
-        // cannot run normal scanner at same time as jamming
+    private void runActive() {
         if (SCANNING) {
             mainScanLogger(getResources().getString(R.string.main_scanner_24), true);
             toggleScanning();
         }
 
-        // TODO need some audioTrack checks here
-
-        if (ACTIVE) {
-            ACTIVE = false;
-            pilferShushScanner.stopActiveJammer();
-            mainScanLogger(getResources().getString(R.string.main_scanner_28), false);
+        if (pilferShushJammer.hasActiveJammer() && !ACTIVE_RUNNING) {
+            // run it
+            ACTIVE_RUNNING = true;
+            notifyManager.notify(NOTIFY_ACTIVE_ID, notifyActiveBuilder.build());
+            entryLogger(getResources().getString(R.string.main_scanner_5), false);
+            pilferShushJammer.runActiveJammer(activeTypeValue ? 1 : 0); // to change to proper int
+            toggleHeadset(ACTIVE_RUNNING);
         }
-        else {
-            ACTIVE = true;
-            pilferShushScanner.runActiveJammer();
-            mainScanLogger(getResources().getString(R.string.main_scanner_27), false);
-        }
-        // TODO check reset stream volume, fudge for headset checker
-        toggleHeadset(ACTIVE);
     }
-    */
 
+    private void stopActive() {
+        if (pilferShushJammer.hasActiveJammer() && ACTIVE_RUNNING) {
+            // stop it
+            ACTIVE_RUNNING = false;
+            notifyManager.cancel(NOTIFY_ACTIVE_ID);
+            entryLogger(getResources().getString(R.string.main_scanner_6), false);
+            pilferShushJammer.stopActiveJammer();
+        }
+    }
 
     private void runScanner() {
         //runScansButton.setText(getResources().getString(R.string.main_scanner_1));
@@ -1158,6 +1354,21 @@ public class MainActivity extends AppCompatActivity
         }
     }
 
+    private void toggleEq(boolean eqOn) {
+        if (pilferShushJammer.hasActiveJammer()) {
+            // need to stop so eq change can take effect
+            if (ACTIVE_RUNNING) {
+                stopActive();
+                activeJammerButton.toggle();
+            }
+            pilferShushJammer.setEqOn(eqOn);
+        }
+
+        if (eqOn) entryLogger(getResources().getString(R.string.app_status_6), false);
+        else entryLogger(getResources().getString(R.string.app_status_5), false);
+
+    }
+
     private void initAudioFocusListener() {
         audioFocusListener = new AudioManager.OnAudioFocusChangeListener() {
             @Override
@@ -1250,7 +1461,7 @@ public class MainActivity extends AppCompatActivity
         }
     }
 
-    protected static void entryLogger(String entry, boolean caution) {
+    public static void entryLogger(String entry, boolean caution) {
         // this prints to console.log and DetailedView.log
         int start = debugText.getText().length();
         debugText.append("\n" + entry);

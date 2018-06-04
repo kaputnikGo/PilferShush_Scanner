@@ -3,6 +3,7 @@ package cityfreqs.com.pilfershush.assist;
 import android.media.AudioFormat;
 
 import java.nio.ByteBuffer;
+import java.util.Random;
 
 public class AudioSettings {
     // helper vars and defaults
@@ -65,13 +66,36 @@ public class AudioSettings {
             1000, 2000, 3000, 4000, 5000, 6000
     };
 
+    public static final int CARRIER_NUHF_FREQUENCY = 21000;
+    public static final int MAXIMUM_NUHF_FREQUENCY = 24000;
+    public static final int MINIMUM_NUHF_FREQUENCY = 18000;
+
+    private static final int CARRIER_TEST_FREQUENCY = 440;
+    private static final int MAXIMUM_TEST_FREQUENCY = CARRIER_TEST_FREQUENCY + (int)(CARRIER_TEST_FREQUENCY * 0.5);
+    private static final int MINIMUM_TEST_FREQUENCY = CARRIER_TEST_FREQUENCY - (int)(CARRIER_TEST_FREQUENCY * 0.5);
+
+    public static final int DEFAULT_RANGE_DRIFT_LIMIT = 1000;
+    public static final int DEFAULT_DRIFT_SPEED = 1000;
+    public static final int DRIFT_SPEED_MULTIPLIER = 1000;
+
+    public static final int JAMMER_TONE = 0;
+    public static final int JAMMER_WHITE = 1;
+
+    public static final int JAMMER_TYPE_TEST = 0; // only test tone drift
+    public static final int JAMMER_TYPE_NUHF = 1;
+    public static final int JAMMER_TYPE_DEFAULT_RANGED = 2;
+    public static final int JAMMER_TYPE_USER_RANGED = 3;
+
     // vars for AudioRecord creation and use
     private int sampleRate;
-    private int bufferSize; // in bytes
+    private int bufferOutSize; // in bytes
+    private int bufferInSize; // in bytes
     private int encoding;
-    private int channelConfig;
-    private int channelCount;
+    private int channelInConfig;
+    private int channelOutConfig;
+    private int channelInCount;
     private int audioSource;
+    private boolean hasEQ;
 
     private int minFreq;
     private int maxFreq;
@@ -89,12 +113,12 @@ public class AudioSettings {
         freqStep = DEFAULT_FREQ_STEP;
     }
 
-    public void setBasicAudioSettings(int sampleRate, int bufferSize, int encoding, int channelConfig, int channelCount) {
+    public void setBasicAudioSettings(int sampleRate, int bufferInSize, int encoding, int channelInConfig, int channelInCount) {
         this.sampleRate = sampleRate;
-        this.bufferSize = bufferSize;
+        this.bufferInSize = bufferInSize;
         this.encoding = encoding;
-        this.channelConfig = channelConfig;
-        this.channelCount = channelCount;
+        this.channelInConfig = channelInConfig;
+        this.channelInCount = channelInCount;
     }
 
     public void setEncoding(int encoding) {
@@ -104,25 +128,47 @@ public class AudioSettings {
         this.audioSource = audioSource;
     }
 
+    public void setChannelOutConfig(int channelOutConfig) {
+        this.channelOutConfig = channelOutConfig;
+    }
+
+    public void setBufferOutSize(int bufferOutSize) {
+        this.bufferOutSize = bufferOutSize;
+    }
+
     public int getSampleRate() {
         return sampleRate;
     }
-    public int getBufferSize() {
-        return bufferSize;
+    public int getBufferInSize() {
+        return bufferInSize;
+    }
+    public int getBufferOutSize() {
+        return bufferOutSize;
     }
     public int getEncoding() {
         return encoding;
     }
 
-    public int getChannelConfig() {
-        return channelConfig;
+    public int getChannelInConfig() {
+        return channelInConfig;
     }
 
-    public int getChannelCount() {
-        return channelCount;
+    public int getChannelOutConfig() {
+        return channelOutConfig;
+    }
+
+    public int getChannelInCount() {
+        return channelInCount;
     }
     public int getAudioSource() {
         return audioSource;
+    }
+
+    public void setHasEQ(boolean hasEQ) {
+        this.hasEQ = hasEQ;
+    }
+    public boolean getHasEQ() {
+        return hasEQ;
     }
 
     public void setMinFreq(int minFreq) {
@@ -162,14 +208,58 @@ public class AudioSettings {
 
     public String toString() {
         return new String("audio record format: "
-                + sampleRate + ", " + bufferSize + ", "
-                + encoding + ", " + channelConfig + ", " + audioSource);
+                + sampleRate + ", " + bufferInSize + ", "
+                + encoding + ", " + channelInConfig + ", " + audioSource);
     }
 
     public String saveFormatToString() {
         return new String(sampleRate + " Hz, "
                 + getBitDepth() + " bits, "
-                + channelCount + " channel");
+                + channelInCount + " channel");
+    }
+
+    public static int getTestDrift() {
+        return new Random().nextInt(MAXIMUM_TEST_FREQUENCY
+                - MINIMUM_TEST_FREQUENCY)
+                + MINIMUM_TEST_FREQUENCY;
+    }
+
+    public static int getNuhfDrift() {
+        return new Random().nextInt(MAXIMUM_NUHF_FREQUENCY
+                - MINIMUM_NUHF_FREQUENCY)
+                + MINIMUM_NUHF_FREQUENCY;
+    }
+
+    public static int getDefaultRangedDrift(int carrierFrequency) {
+        int min = conformMinimumRangedValue(carrierFrequency - DEFAULT_RANGE_DRIFT_LIMIT);
+        int max = conformMaximumRangedValue(carrierFrequency + DEFAULT_RANGE_DRIFT_LIMIT);
+
+        return new Random().nextInt(max - min) + min;
+    }
+
+    // carrier should be between 18k - 24k
+    public static int getUserRangedDrift(int carrierFrequency, int limit) {
+        carrierFrequency = conformCarrierFrequency(carrierFrequency);
+        int min = conformMinimumRangedValue(carrierFrequency - limit);
+        int max = conformMaximumRangedValue(carrierFrequency + limit);
+
+        return new Random().nextInt(max - min) + min;
+    }
+
+    private static int conformCarrierFrequency(int carrier) {
+        if (carrier < MINIMUM_NUHF_FREQUENCY) carrier = MINIMUM_NUHF_FREQUENCY;
+        if (carrier > MAXIMUM_NUHF_FREQUENCY) carrier = MAXIMUM_NUHF_FREQUENCY;
+        return carrier;
+    }
+
+    private static int conformMinimumRangedValue(int minValue) {
+        if (minValue >= MINIMUM_NUHF_FREQUENCY) return minValue;
+        else return MINIMUM_NUHF_FREQUENCY;
+    }
+
+    private static int conformMaximumRangedValue(int maxValue) {
+        if (maxValue <= MAXIMUM_NUHF_FREQUENCY) return maxValue;
+        else return MAXIMUM_NUHF_FREQUENCY;
     }
 
     public int getBitDepth() {
@@ -183,11 +273,6 @@ public class AudioSettings {
         }
     }
 
-    /********************************************************************/
-/*
- * Utilities, that may be useful...
- *
- */
     public static int getClosestPowersHigh(int reported) {
         // return the next highest power from the minimum reported
         // 512, 1024, 2048, 4096, 8192, 16384
@@ -199,6 +284,12 @@ public class AudioSettings {
         // didn't find power, return reported
         return reported;
     }
+
+    /********************************************************************/
+/*
+ * Utilities, that may be useful...
+ *
+ */
 
     public static int getClosestPowersLow(int reported) {
         // return the next highest power from the minimum reported

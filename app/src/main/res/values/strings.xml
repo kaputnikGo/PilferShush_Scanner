@@ -36,6 +36,9 @@
     <string name="action_override_scan">Scan User App</string>
     <string name="dialog_override_scan_apps">Scan Apps List</string>
 
+    <string name="action_jammer">Active Jammer Settings</string>
+    <string name="action_drift_speed">Drift Speed Settings</string>
+
     <string name="action_write_file">Write to file option</string>
     <string name="dialog_write_file">Allow write to file?</string>
     <string name="dialog_write_message">saved to Download(s)/PilferShush/</string>
@@ -194,9 +197,34 @@
     <string name="dialog_button_cancel">Cancel</string>
     <string name="dialog_button_okay">OK</string>
 
+    <string name="app_status_3">active jammer running.</string>
+    <string name="app_status_4">active jammer not running.</string>
+    <string name="app_status_5">EQ is turned off.</string>
+    <string name="app_status_6">EQ is turned on.</string>
+
+    <string name="jammer_dialog_1">Change active jammer signal type.</string>
+    <string name="jammer_dialog_2">Audible tone drift (~440Hz)</string>
+    <string name="jammer_dialog_3">Full NUHF drift (18kHz-24kHz)</string>
+    <string name="jammer_dialog_4">1000Hz NUHF drift with user carrier</string>
+    <string name="jammer_dialog_5">User NUHF drift with user carrier</string>
+
+    <string name="jammer_dialog_6">Carrier frequency (18kHz - 24kHz):</string>
+    <string name="jammer_dialog_7">Jammer output within 1000 Hz either side of carrier.</string>
+    <string name="jammer_dialog_8">19000</string>
+    <string name="jammer_dialog_9">Range limit (Hz) either side of the carrier.</string>
+    <string name="jammer_dialog_10">1000</string>
+    <string name="jammer_dialog_11">(All frequencies constrained to NUHF)</string>
+
+    <string name="drift_dialog_1">Drift speed (1-10)</string>
+    <string name="drift_dialog_2">1</string>
+    <string name="drift_dialog_3">(1 = fast, 10 = slow)</string>
+
     <!--
     PilferShushScanner.java
     -->
+    <string name="audio_check_pre_1">Checking for best audio record type.</string>
+    <string name="audio_check_pre_2">\nChecking for best audio output type.</string>
+
     <string name="usb_state_7">has usb audio type.</string>
     <string name="usb_state_8">no usb audio type found.</string>
 
@@ -299,5 +327,26 @@
     <string name="writer_state_20">Storage size:\u0020</string>
     <string name="writer_state_21">temp raw audio file deleted.</string>
 
+    <!--
+PassiveJammer.java
+-->
+    <string name="passive_state_1">Passive Jammer init.</string>
+    <string name="passive_state_2">Passive Jammer failed to init.</string>
+    <string name="passive_state_3">Passive Jammer start.</string>
+    <string name="passive_state_4">Passive Jammer audio status error: invalid operation.</string>
+    <string name="passive_state_5_1">Passive Jammer audio status error: uninitialized.</string>
+    <string name="passive_state_5_2">Possible cause: microphone already in use.</string>
+    <string name="passive_state_6">Passive Jammer get recording state = false.</string>
+    <string name="passive_state_7">Passive Jammer exception, failed to run.</string>
+    <string name="passive_state_8">Passive Jammer audio record failed to init.</string>
+    <string name="passive_state_9">Passive Jammer stop and release.</string>
+    <string name="passive_state_10">Passive Jammer not running.</string>
+
+    <!--
+    ActiveJammer.java
+    -->
+    <string name="active_state_1">threadPlay run exception.</string>
+    <string name="active_state_2">stopPlayer thread exception.</string>
+    <string name="active_state_3">stopPlayer audioTrack exception.</string>
 
 </resources>
