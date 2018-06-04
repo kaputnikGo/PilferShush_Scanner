@@ -19,7 +19,7 @@
             android:paddingRight="@dimen/activity_horizontal_margin"
             android:paddingTop="@dimen/activity_vertical_margin">
 
-            <Button
+            <ToggleButton
                 android:id="@+id/run_scans_button"
                 android:layout_width="wrap_content"
                 android:layout_weight=".30"
@@ -27,7 +27,10 @@
                 android:layout_alignParentTop="true"
                 android:layout_alignParentLeft="true"
                 android:layout_marginBottom ="@dimen/activity_vertical_margin"
-                android:text="@string/main_scanner_11" />
+                android:text="@string/main_scanner_11"
+                android:textAllCaps="false"
+                android:textOn="@string/main_scanner_1"
+                android:textOff="@string/main_scanner_11" />
 <!--
             <Button
                 android:id="@+id/run_active_button"
@@ -49,6 +52,7 @@
                 android:layout_marginBottom ="@dimen/activity_vertical_margin"
                 android:text="@string/main_scanner_23"
                 android:textAllCaps="false"
+                android:textOn="@string/main_scanner_30"
                 android:textOff="@string/main_scanner_23" />
 
             <Button

@@ -61,7 +61,7 @@ public class MainActivity extends AppCompatActivity
     private static final int NOTIFY_ID = 123;
 
     // dev internal version numbering
-    public static final String VERSION = "2.1.04";
+    public static final String VERSION = "2.1.05";
 
     private ViewSwitcher viewSwitcher;
     private boolean mainView;
@@ -74,7 +74,7 @@ public class MainActivity extends AppCompatActivity
     private TextView focusText;
     private Button micCheckButton;
     private Button micPollingButton;
-    private Button runScansButton;
+    private ToggleButton runScansButton;
     private ToggleButton passiveJammerButton;
     //private Button activeJammerButton;
     private Button debugViewButton;
@@ -132,13 +132,21 @@ public class MainActivity extends AppCompatActivity
         SCANNING = false;
 
         //MAIN VIEW
-        runScansButton = (Button) findViewById(R.id.run_scans_button);
-        runScansButton.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View v) {
-                toggleScanning();
+        runScansButton = findViewById(R.id.run_scans_button);
+        runScansButton.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                if (isChecked) {
+                    // change methods
+                    toggleScanning();
+                }
+                else {
+                    // change methods
+                    toggleScanning();
+                }
             }
         });
-        passiveJammerButton = (ToggleButton) findViewById(R.id.run_passive_button);
+
+        passiveJammerButton = findViewById(R.id.run_passive_button);
         passiveJammerButton.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                 if (isChecked) {
@@ -161,14 +169,14 @@ public class MainActivity extends AppCompatActivity
         });
         */
 
-        mainScanText = (TextView) findViewById(R.id.main_scan_text);
+        mainScanText = findViewById(R.id.main_scan_text);
         mainScanText.setTextColor(Color.parseColor("#00ff00"));
         mainScanText.setMovementMethod(new ScrollingMovementMethod());
         mainScanText.setGravity(Gravity.BOTTOM);
 
-        visualiserView = (AudioVisualiserView) findViewById(R.id.audio_visualiser_view);
+        visualiserView = findViewById(R.id.audio_visualiser_view);
 
-        debugViewButton = (Button) findViewById(R.id.debug_view_button);
+        debugViewButton = findViewById(R.id.debug_view_button);
         debugViewButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 switchViews();
@@ -176,19 +184,19 @@ public class MainActivity extends AppCompatActivity
         });
 
         // DEBUG VIEW
-        micCheckButton = (Button) findViewById(R.id.mic_check_button);
+        micCheckButton = findViewById(R.id.mic_check_button);
         micCheckButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 toggleMicCheck();
             }
         });
-        micPollingButton = (Button) findViewById(R.id.mic_polling_button);
+        micPollingButton = findViewById(R.id.mic_polling_button);
         micPollingButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 togglePollingCheck();
             }
         });
-        debugText = (TextView) findViewById(R.id.debug_text);
+        debugText = findViewById(R.id.debug_text);
         debugText.setTextColor(Color.parseColor("#00ff00"));
         debugText.setMovementMethod(new ScrollingMovementMethod());
         debugText.setOnClickListener(new TextView.OnClickListener() {
@@ -198,10 +206,10 @@ public class MainActivity extends AppCompatActivity
                 debugText.setSoundEffectsEnabled(false); // no further click sounds
             }
         });
-        focusText = (TextView) findViewById(R.id.focus_text);
+        focusText = findViewById(R.id.focus_text);
         focusText.setTextColor(Color.parseColor("#ffff00")); // yellow
 
-        mainViewButton = (Button) findViewById(R.id.main_view_button);
+        mainViewButton = findViewById(R.id.main_view_button);
         mainViewButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 switchViews();
@@ -965,8 +973,8 @@ public class MainActivity extends AppCompatActivity
 
 
     private void runScanner() {
-        runScansButton.setText(getResources().getString(R.string.main_scanner_1));
-        runScansButton.setBackgroundColor(Color.RED);
+        //runScansButton.setText(getResources().getString(R.string.main_scanner_1));
+        //runScansButton.setBackgroundColor(Color.RED);
         mainScanLogger(getResources().getString(R.string.main_scanner_2), false);
 
         int audioNum = pilferShushScanner.getAudioRecordAppsNumber();
@@ -1000,8 +1008,8 @@ public class MainActivity extends AppCompatActivity
     private void stopScanner() {
         // FINISHED, determine type of signal
         pilferShushScanner.stopAudioScanner();
-        runScansButton.setText(getResources().getString(R.string.main_scanner_11));
-        runScansButton.setBackgroundColor(Color.LTGRAY);
+        //runScansButton.setText(getResources().getString(R.string.main_scanner_11));
+        //runScansButton.setBackgroundColor(Color.LTGRAY);
         mainScanLogger(getResources().getString(R.string.main_scanner_12), false);
 
         if (pilferShushScanner.hasAudioScanSequence()) {

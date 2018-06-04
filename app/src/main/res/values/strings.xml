@@ -58,7 +58,7 @@
     <string name="focus_text">Detailed View (scrollable): </string>
     <string name="debug_text">loading PilferShush.</string>
 
-    <string name="debug_view_button_text">Detailed View</string>
+    <string name="debug_view_button_text">detailed view</string>
     <string name="main_view_button_text">Simple View</string>
     <string name="main_scan_text">PilferShush scanner initialising.</string>
     <string name="timer_text">timer - 00:00</string>
@@ -119,7 +119,7 @@
     <string name="audio_apps_check_1">NO AUDIO BEACON APPS FOUND.</string>
     <string name="user_apps_check_1">NO USER APPS FOUND FOR OVERRIDE SCAN.</string>
 
-    <string name="main_scanner_1">SCANNING...</string>
+    <string name="main_scanner_1">SCANNING</string>
     <string name="main_scanner_2">Running scans on user installed apps...</string>
     <string name="main_scanner_3">Record audio apps found:\u0020</string>
     <string name="main_scanner_4">No record audio apps found.</string>
@@ -129,21 +129,23 @@
     <string name="main_scanner_8">Microphone use detected.</string>
     <string name="main_scanner_9">No microphone use detected.</string>
     <string name="main_scanner_10">Listening for near-ultra high audio...</string>
-    <string name="main_scanner_11">Run Scanner</string>
+    <string name="main_scanner_11">scanner</string>
     <string name="main_scanner_12">Stop listening for audio.</string>
     <string name="main_scanner_13">Detected possible n-uhf audio.</string>
     <string name="main_scanner_14">Frequency list size:\u0020</string>
     <string name="main_scanner_15">Original sequence as transmitted:</string>
     <string name="main_scanner_16">No detected audio beacon signals.</string>
     <string name="main_scanner_17">[-: end of scan :-]</string>
-    <string name="main_scanner_22">Active</string>
-    <string name="main_scanner_23">Passive</string>
+    <string name="main_scanner_22">active</string>
+    <string name="main_scanner_23">passive</string>
     <string name="main_scanner_24">Stopping scanner when jamming.</string>
     <string name="main_scanner_25">Stopping jamming when scanning.</string>
     <string name="main_scanner_26">Running passive jamming...</string>
     <string name="main_scanner_27">Running active jamming...</string>
     <string name="main_scanner_28">Stop active jamming.</string>
     <string name="main_scanner_29">Stop passive jamming.</string>
+    <string name="main_scanner_30">PASSIVE</string>
+    <string name="main_scanner_31">ACTIVE</string>
 
     <string name="option_dialog_1">Limited storage space found.</string>
     <string name="option_dialog_2">Log storage size:\u0020</string>
