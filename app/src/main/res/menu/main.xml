@@ -4,11 +4,6 @@
     tools:context="com.cityfreqs.pilfershush.MainActivity">
 
     <item
-        android:id="@+id/action_settings"
-        android:orderInCategory="10"
-        app:showAsAction="never"
-        android:title="@string/action_settings"/>
-    <item
         android:id="@+id/action_audio_scan_settings"
         android:orderInCategory="20"
         app:showAsAction="never"
@@ -27,21 +22,9 @@
 
     <item
         android:id="@+id/action_fft_window_settings"
-        android:orderInCategory="35"
-        app:showAsAction="never"
-        android:title="@string/action_window_settings"/>
-
-    <item
-        android:id="@+id/action_audio_beacons"
         android:orderInCategory="40"
         app:showAsAction="never"
-        android:title="@string/action_audio_beacons"/>
-
-    <item
-        android:id="@+id/action_override_scan"
-        android:orderInCategory="45"
-        app:showAsAction="never"
-        android:title="@string/action_override_scan"/>
+        android:title="@string/action_window_settings"/>
 
     <item
         android:id="@+id/action_jammer"
@@ -51,13 +34,13 @@
 
     <item
         android:id="@+id/action_drift_speed"
-        android:orderInCategory="30"
+        android:orderInCategory="60"
         android:title="@string/action_drift_speed"
         app:showAsAction="never" />
 
     <item
         android:id="@+id/action_write_file"
-        android:orderInCategory="55"
+        android:orderInCategory="70"
         app:showAsAction="never"
         android:title="@string/action_write_file"/>
 

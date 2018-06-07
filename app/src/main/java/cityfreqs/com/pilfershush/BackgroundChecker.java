@@ -4,13 +4,8 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
-import android.os.AsyncTask;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import cityfreqs.com.pilfershush.assist.AppEntry;
@@ -262,6 +257,7 @@ public class BackgroundChecker {
         }
     }
 
+    /*
     protected void auditLogAsync() {
         //TODO
         // this may not work for logic reasons, and
@@ -303,5 +299,6 @@ public class BackgroundChecker {
             }
         }.execute();
     }
+    */
 }
 

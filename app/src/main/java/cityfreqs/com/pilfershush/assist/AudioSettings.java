@@ -101,6 +101,8 @@ public class AudioSettings {
     private int maxFreq;
     private int freqStep;
 
+    private double magnitude;
+
     private boolean writeFiles;
     private int USER_WINDOW_TYPE = DEFAULT_WINDOW_TYPE;
 
@@ -111,6 +113,7 @@ public class AudioSettings {
         minFreq = DEFAULT_FREQUENCY_MIN;
         maxFreq = DEFAULT_FREQUENCY_MAX;
         freqStep = DEFAULT_FREQ_STEP;
+        magnitude = DEFAULT_MAGNITUDE;
     }
 
     public void setBasicAudioSettings(int sampleRate, int bufferInSize, int encoding, int channelInConfig, int channelInCount) {
@@ -190,6 +193,13 @@ public class AudioSettings {
     }
     public int getFreqStep() {
         return freqStep;
+    }
+
+    public void setMagnitude(double magnitude) {
+        this.magnitude = magnitude;
+    }
+    public double getMagnitude() {
+        return magnitude;
     }
 
     public void setWriteFiles(boolean writeFiles) {

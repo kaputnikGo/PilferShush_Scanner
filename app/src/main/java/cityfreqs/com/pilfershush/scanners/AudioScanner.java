@@ -15,7 +15,6 @@ public class AudioScanner {
     private ProcessAudio processAudio;
     private AudioSettings audioSettings;
     public boolean audioDetected;
-    private int freqStep;
 
     private ArrayList<Integer> frequencySequence;
     private ArrayList<Integer[]> bufferStorage;
@@ -23,22 +22,21 @@ public class AudioScanner {
     public AudioScanner(Context context, AudioSettings audioSettings) {
         this.context = context;
         this.audioSettings = audioSettings;
-        freqStep = AudioSettings.DEFAULT_FREQ_STEP;
 
         freqDetector = new FreqDetector(this.audioSettings);
-        freqDetector.init(freqStep, AudioSettings.DEFAULT_MAGNITUDE);
+        freqDetector.init();
         processAudio = new ProcessAudio(context);
         resetAudioScanner();
     }
 
     public void resetAudioScanner() {
-        frequencySequence = new ArrayList<Integer>();
-        bufferStorage = new ArrayList<Integer[]>();
+        frequencySequence = new ArrayList<>();
+        bufferStorage = new ArrayList<>();
         audioDetected = false;
     }
 
-    public void setMinMagnitude(double magnitude) {
-        freqDetector.setMagnitude(magnitude);
+    public void setMagnitude(double magnitude) {
+        audioSettings.setMagnitude(magnitude);
     }
 
     public void runAudioScanner() {

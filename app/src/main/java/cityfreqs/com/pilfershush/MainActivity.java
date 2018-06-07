@@ -63,7 +63,7 @@ public class MainActivity extends AppCompatActivity
     private static final int NOTIFY_ACTIVE_ID = 113;
 
     // dev internal version numbering
-    public static final String VERSION = "2.2.01";
+    public static final String VERSION = "2.2.03";
     //TODO more logger info re jammers
 
     private ViewSwitcher viewSwitcher;
@@ -75,8 +75,9 @@ public class MainActivity extends AppCompatActivity
     private Runnable timerRunnable;
 
     private TextView focusText;
-    private Button micCheckButton;
-    private Button micPollingButton;
+    private Button beaconCheckButton;
+    private Button userAppCheckButton;
+
     private ToggleButton runScansButton;
     private ToggleButton passiveJammerButton;
     private ToggleButton activeJammerButton;
@@ -84,7 +85,6 @@ public class MainActivity extends AppCompatActivity
     private Button mainViewButton;
     private TextView mainScanText;
 
-    private String[] pollSpeedList;
     private String[] freqSteps;
     private String[] freqRanges;
     private String[] windowTypes;
@@ -97,8 +97,6 @@ public class MainActivity extends AppCompatActivity
     private DeviceContainer deviceContainer;
     private UsbManager usbManager;
 
-    private boolean MIC_CHECKING;
-    private boolean POLLING;
     private boolean SCANNING;
 
     private AudioSettings audioSettings;
@@ -122,7 +120,7 @@ public class MainActivity extends AppCompatActivity
     private boolean PASSIVE_RUNNING;
     private boolean ACTIVE_RUNNING;
     private boolean IRQ_TELEPHONY;
-    private boolean HAS_HEADSET;
+    //private boolean HAS_HEADSET;
 
     private boolean activeTypeValue;
     private String[] jammerTypes;
@@ -146,23 +144,43 @@ public class MainActivity extends AppCompatActivity
         pilferShushJammer = new PilferShushJammer();
 
         //MAIN VIEW
+        //TODO
         runScansButton = findViewById(R.id.run_scans_button);
         runScansButton.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                // first check for jammers running
+                if (ACTIVE_RUNNING) {
+                    mainScanLogger(getResources().getString(R.string.main_scanner_25), true);
+                    stopActive();
+                    activeJammerButton.toggle();
+                }
+                if (PASSIVE_RUNNING) {
+                    mainScanLogger(getResources().getString(R.string.main_scanner_25), true);
+                    stopPassive();
+                    passiveJammerButton.toggle();
+                }
+
                 if (isChecked) {
-                    // change methods
-                    toggleScanning();
+                    runScanner();
                 }
                 else {
-                    // change methods
-                    toggleScanning();
+                    stopScanner();
                 }
             }
         });
 
+        //TODO
         passiveJammerButton = findViewById(R.id.run_passive_button);
         passiveJammerButton.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                if (SCANNING) {
+                    // stopScanner first to allow mic to free up
+                    stopScanner();
+                    runScansButton.toggle();
+                    passiveJammerButton.toggle(); // fudge to re-toggle to off...
+                    mainScanLogger(getResources().getString(R.string.main_scanner_32), true);
+                    return;
+                }
                 if (isChecked) {
                     runPassive();
                 }
@@ -177,6 +195,11 @@ public class MainActivity extends AppCompatActivity
         activeJammerButton.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                 if (isChecked) {
+                    if (SCANNING) {
+                        mainScanLogger(getResources().getString(R.string.main_scanner_24), true);
+                        stopScanner();
+                        runScansButton.toggle();
+                    }
                     runActive();
                 }
                 else {
@@ -214,18 +237,22 @@ public class MainActivity extends AppCompatActivity
         });
 
         // DEBUG VIEW
-        micCheckButton = findViewById(R.id.mic_check_button);
-        micCheckButton.setOnClickListener(new View.OnClickListener() {
+
+        beaconCheckButton = findViewById(R.id.beacon_check_button);
+        beaconCheckButton.setOnClickListener(new View.OnClickListener() {
+             public void onClick(View v) {
+                 hasAudioBeaconAppsList();
+             }
+         });
+
+
+        userAppCheckButton = findViewById(R.id.userapp_check_button);
+        userAppCheckButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                toggleMicCheck();
+                hasUserAppsList();
             }
         });
-        micPollingButton = findViewById(R.id.mic_polling_button);
-        micPollingButton.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View v) {
-                togglePollingCheck();
-            }
-        });
+
         debugText = findViewById(R.id.debug_text);
         debugText.setTextColor(Color.parseColor("#00ff00"));
         debugText.setMovementMethod(new ScrollingMovementMethod());
@@ -410,9 +437,6 @@ public class MainActivity extends AppCompatActivity
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch(item.getItemId()) {
-            case R.id.action_settings:
-                changePollingSpeed();
-                return true;
             case R.id.action_audio_scan_settings:
                 changeAudioScanSettings();
                 return true;
@@ -424,12 +448,6 @@ public class MainActivity extends AppCompatActivity
                 return true;
             case R.id.action_fft_window_settings:
                 changeFFTWindowSettings();
-                return true;
-            case R.id.action_audio_beacons:
-                hasAudioBeaconAppsList();
-                return true;
-            case R.id.action_override_scan:
-                hasUserAppsList();
                 return true;
             case R.id.action_jammer:
                 jammerDialog();
@@ -594,7 +612,6 @@ public class MainActivity extends AppCompatActivity
 
         if (pilferShushScanner.initScanner(this, audioSettings, scanUsbDevices(), getResources().getString(R.string.session_default_name))) {
             pilferShushScanner.checkScanner();
-            MIC_CHECKING = false;
             toggleHeadset(false); // default state at init
             audioFocusCheck();
             initAudioFocusListener();
@@ -648,13 +665,9 @@ public class MainActivity extends AppCompatActivity
 
     private void reportInitialState() {
         mainScanText.setText(getResources().getString(R.string.init_state_1) + VERSION);
-
         mainScanLogger("\n" + getResources().getString(R.string.init_state_2) + pilferShushScanner.getAudioCheckerReport(), false);
-
         mainScanLogger("\n" + getResources().getString(R.string.init_state_3), true);
-
         mainScanLogger("\n" + getResources().getString(R.string.init_state_4) + getResources().getString(R.string.init_state_5), false);
-
         mainScanLogger("\n" + getResources().getString(R.string.init_state_6) + Boolean.toString(INIT_WRITE_FILES), true);
 
         if (WRITE_WAV) {
@@ -683,14 +696,6 @@ public class MainActivity extends AppCompatActivity
     }
 
     private void populateMenuItems() {
-        pollSpeedList = new String[6];
-        pollSpeedList[0] = getResources().getString(R.string.polling_1_text);
-        pollSpeedList[1] = getResources().getString(R.string.polling_2_text);
-        pollSpeedList[2] = getResources().getString(R.string.polling_3_text);
-        pollSpeedList[3] = getResources().getString(R.string.polling_4_text);
-        pollSpeedList[4] = getResources().getString(R.string.polling_5_text);
-        pollSpeedList[5] = getResources().getString(R.string.polling_default_text);
-
         freqSteps = new String[5];
         freqSteps[0] = getResources().getString(R.string.freq_step_10_text);
         freqSteps[1] = getResources().getString(R.string.freq_step_25_text);
@@ -822,26 +827,6 @@ public class MainActivity extends AppCompatActivity
         alertDialog.show();
     }
 
-    private void changePollingSpeed() {
-        // set the interval delay for polling,
-        if (POLLING) {
-            // stop it
-            togglePollingCheck();
-        }
-
-        dialogBuilder = new AlertDialog.Builder(this);
-        dialogBuilder.setItems(pollSpeedList, new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialogInterface, int which) {
-                // 1000, 2000, 3000, 4000, 5000, 6000 (default) ms
-                pilferShushScanner.setPollingSpeed(AudioSettings.POLLING_DELAY[which]);
-                mainScanLogger(getResources().getString(R.string.option_dialog_8) + AudioSettings.POLLING_DELAY[which], false);
-            }
-        });
-        dialogBuilder.setTitle(R.string.dialog_polling);
-        alertDialog = dialogBuilder.create();
-        alertDialog.show();
-    }
-
     private void changeAudioScanSettings() {
         dialogBuilder = new AlertDialog.Builder(this);
         dialogBuilder.setItems(freqSteps, new DialogInterface.OnClickListener() {
@@ -881,7 +866,7 @@ public class MainActivity extends AppCompatActivity
         dialogBuilder = new AlertDialog.Builder(this);
         dialogBuilder.setItems(dbLevel, new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialogInterface, int which) {
-                pilferShushScanner.setMinMagnitude(AudioSettings.MAGNITUDES[which]);
+                pilferShushScanner.setMagnitude(AudioSettings.MAGNITUDES[which]);
                 mainScanLogger(getResources().getString(R.string.option_dialog_12) + AudioSettings.DECIBELS[which], false);
             }
         });
@@ -1050,7 +1035,8 @@ public class MainActivity extends AppCompatActivity
         // system app requests audio focus, respond here
         mainScanLogger(getResources().getString(R.string.audiofocus_check_5), true);
         if (SCANNING) {
-            toggleScanning();
+            stopScanner();
+            runScansButton.toggle();
         }
         if (focusChange == AudioManager.AUDIOFOCUS_LOSS) {
             // total loss, focus abandoned
@@ -1064,69 +1050,18 @@ public class MainActivity extends AppCompatActivity
 
     /********************************************************************/
 /*
- * ACTION SCANS
+ *
  */
-    private void toggleScanning() {
-        // check for jamming
-
-        if (ACTIVE_RUNNING) {
-            mainScanLogger(getResources().getString(R.string.main_scanner_25), true);
-            stopActive();
-            activeJammerButton.toggle();
-        }
-
-        if (PASSIVE_RUNNING) {
-            mainScanLogger(getResources().getString(R.string.main_scanner_25), true);
-            stopPassive();
-            passiveJammerButton.toggle();
-        }
-
-        // add check for mic/record ability
-        if (pilferShushScanner.audioStateError()) {
-            // no mic or audio record capabilities
-            mainScanLogger(getResources().getString(R.string.init_state_17), true);
-            return;
-        }
-
-        if (wakeLock == null) {
-            wakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, TAG);
-        }
-        if (SCANNING) {
-            SCANNING = false;
-            timerHandler.removeCallbacks(timerRunnable);
-            timerText.setText("timer - 00:00");
-            stopScanner();
-            if (wakeLock.isHeld()) {
-                wakeLock.release(); // this
-                wakeLock = null;
-            }
-        }
-        else {
-            SCANNING = true;
-            startTime = System.currentTimeMillis();
-            timerHandler.postDelayed(timerRunnable, 0);
-            // clear any caution lines from previous session
-            visualiserView.clearFrequencyCaution();
-            runScanner();
-            wakeLock.acquire();
-        }
-    }
-
     private void runPassive() {
-        if (SCANNING) {
-            mainScanLogger(getResources().getString(R.string.main_scanner_24), true);
-            toggleScanning();
-        }
-
         if (pilferShushJammer.hasPassiveJammer() && !PASSIVE_RUNNING) {
-            if (pilferShushJammer.startPassiveJammer()) {
+            if (pilferShushJammer.initPassiveJammer()) {
                 if (!pilferShushJammer.runPassiveJammer()) {
                     // check for errors in running
                     passiveJammerButton.toggle();
                     stopPassive();
                 }
                 else {
-                    entryLogger(getResources().getString(R.string.main_scanner_3), false);
+                    mainScanLogger(getResources().getString(R.string.main_scanner_26), false);
                     PASSIVE_RUNNING = true;
                     notifyManager.notify(NOTIFY_PASSIVE_ID, notifyPassiveBuilder.build());
                 }
@@ -1137,22 +1072,17 @@ public class MainActivity extends AppCompatActivity
         if (pilferShushJammer.hasPassiveJammer() && PASSIVE_RUNNING) {
             pilferShushJammer.stopPassiveJammer();
             PASSIVE_RUNNING = false;
-            entryLogger(getResources().getString(R.string.main_scanner_4), false);
+            mainScanLogger(getResources().getString(R.string.main_scanner_29), false);
             notifyManager.cancel(NOTIFY_PASSIVE_ID);
         }
     }
 
     private void runActive() {
-        if (SCANNING) {
-            mainScanLogger(getResources().getString(R.string.main_scanner_24), true);
-            toggleScanning();
-        }
-
         if (pilferShushJammer.hasActiveJammer() && !ACTIVE_RUNNING) {
             // run it
             ACTIVE_RUNNING = true;
             notifyManager.notify(NOTIFY_ACTIVE_ID, notifyActiveBuilder.build());
-            entryLogger(getResources().getString(R.string.main_scanner_5), false);
+            mainScanLogger(getResources().getString(R.string.main_scanner_27), false);
             pilferShushJammer.runActiveJammer(activeTypeValue ? 1 : 0); // to change to proper int
             toggleHeadset(ACTIVE_RUNNING);
         }
@@ -1163,14 +1093,28 @@ public class MainActivity extends AppCompatActivity
             // stop it
             ACTIVE_RUNNING = false;
             notifyManager.cancel(NOTIFY_ACTIVE_ID);
-            entryLogger(getResources().getString(R.string.main_scanner_6), false);
+            mainScanLogger(getResources().getString(R.string.main_scanner_28), false);
             pilferShushJammer.stopActiveJammer();
         }
     }
 
     private void runScanner() {
-        //runScansButton.setText(getResources().getString(R.string.main_scanner_1));
-        //runScansButton.setBackgroundColor(Color.RED);
+        if (!pilferShushScanner.checkScanner()) {
+            // no mic or audio record capabilities
+            mainScanLogger(getResources().getString(R.string.init_state_17), true);
+            return;
+        }
+        if (wakeLock == null) {
+            wakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, TAG);
+        }
+
+        SCANNING = true;
+        startTime = System.currentTimeMillis();
+        timerHandler.postDelayed(timerRunnable, 0);
+        // clear any caution lines from previous session
+        visualiserView.clearFrequencyCaution();
+        wakeLock.acquire();
+
         mainScanLogger(getResources().getString(R.string.main_scanner_2), false);
 
         int audioNum = pilferShushScanner.getAudioRecordAppsNumber();
@@ -1187,23 +1131,26 @@ public class MainActivity extends AppCompatActivity
         else {
             mainScanLogger(getResources().getString(R.string.main_scanner_6), false);
         }
-
-        mainScanLogger(getResources().getString(R.string.main_scanner_7), false);
-        if (pilferShushScanner.mainPollingCheck()) {
-            mainScanLogger(getResources().getString(R.string.main_scanner_8), true);
-        }
-        else {
-            mainScanLogger(getResources().getString(R.string.main_scanner_9), false);
-        }
-        pilferShushScanner.mainPollingStop();
-
         mainScanLogger(getResources().getString(R.string.main_scanner_10), false);
         pilferShushScanner.runAudioScanner();
     }
 
     private void stopScanner() {
-        // FINISHED, determine type of signal
+        // do first to free up mic in case of passive jammer interrupt
         pilferShushScanner.stopAudioScanner();
+
+        SCANNING = false;
+        timerHandler.removeCallbacks(timerRunnable);
+        timerText.setText("timer - 00:00");
+
+        if (wakeLock != null) {
+            if (wakeLock.isHeld()) {
+                wakeLock.release(); // this
+                wakeLock = null;
+            }
+        }
+
+        // FINISHED, determine type of signal
         //runScansButton.setText(getResources().getString(R.string.main_scanner_11));
         //runScansButton.setBackgroundColor(Color.LTGRAY);
         mainScanLogger(getResources().getString(R.string.main_scanner_12), false);
@@ -1227,6 +1174,7 @@ public class MainActivity extends AppCompatActivity
         pilferShushScanner.resetAudioScanner();
 
         mainScanLogger("\n" + getResources().getString(R.string.main_scanner_17) + "\n\n", false);
+
     }
 
     private void hasAudioBeaconAppsList() {
@@ -1312,48 +1260,6 @@ public class MainActivity extends AppCompatActivity
         }
     }
 
-    private void toggleMicCheck() {
-        if (POLLING) {
-            // do not do this as well
-            entryLogger(getResources().getString(R.string.mic_check_1), true);
-            return;
-        }
-
-        if (MIC_CHECKING) {
-            // currently running, stop it
-            pilferShushScanner.micChecking(MIC_CHECKING = false);
-            micCheckButton.setText(getResources().getString(R.string.mic_check_2));
-            micCheckButton.setBackgroundColor(Color.LTGRAY);
-        }
-        else {
-            // not running, start it
-            if (pilferShushScanner.checkScanner()) {
-                micCheckButton.setText(getResources().getString(R.string.mic_check_3));
-                micCheckButton.setBackgroundColor(Color.RED);
-                if (pilferShushScanner.micChecking(MIC_CHECKING = true) == false) {
-                    toggleMicCheck();
-                }
-            }
-        }
-    }
-
-    private void togglePollingCheck() {
-        if (MIC_CHECKING) {
-            entryLogger(getResources().getString(R.string.poll_check_1), true);
-            return;
-        }
-        if (POLLING) {
-            pilferShushScanner.pollingCheck(POLLING = false);
-            micPollingButton.setText(getResources().getString(R.string.poll_check_2));
-            micPollingButton.setBackgroundColor(Color.LTGRAY);
-        }
-        else {
-            pilferShushScanner.pollingCheck(POLLING = true);
-            micPollingButton.setText(getResources().getString(R.string.poll_check_3));
-            micPollingButton.setBackgroundColor(Color.RED);
-        }
-    }
-
     private void toggleEq(boolean eqOn) {
         if (pilferShushJammer.hasActiveJammer()) {
             // need to stop so eq change can take effect
@@ -1364,8 +1270,8 @@ public class MainActivity extends AppCompatActivity
             pilferShushJammer.setEqOn(eqOn);
         }
 
-        if (eqOn) entryLogger(getResources().getString(R.string.app_status_6), false);
-        else entryLogger(getResources().getString(R.string.app_status_5), false);
+        if (eqOn) mainScanLogger(getResources().getString(R.string.app_status_6), false);
+        else mainScanLogger(getResources().getString(R.string.app_status_5), false);
 
     }
 

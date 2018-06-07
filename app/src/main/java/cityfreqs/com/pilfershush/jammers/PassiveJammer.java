@@ -17,24 +17,22 @@ public class PassiveJammer {
         this.audioSettings = audioSettings;
     }
 
-    public boolean startPassiveJammer() {
-        if (audioRecord == null) {
-            try {
-                audioRecord = new AudioRecord(audioSettings.getAudioSource(),
-                        audioSettings.getSampleRate(),
-                        audioSettings.getChannelInConfig(),
-                        audioSettings.getEncoding(),
-                        audioSettings.getBufferInSize());
+    public boolean initPassiveJammer() {
+        try {
+            audioRecord = new AudioRecord(audioSettings.getAudioSource(),
+                    audioSettings.getSampleRate(),
+                    audioSettings.getChannelInConfig(),
+                    audioSettings.getEncoding(),
+                    audioSettings.getBufferInSize());
 
-                MainActivity.entryLogger(context.getResources().getString(R.string.passive_state_1), false);
-                return true;
-            }
-            catch (Exception ex) {
-                ex.printStackTrace();
-                MainActivity.entryLogger(context.getResources().getString(R.string.passive_state_2), true);
-            }
+            MainActivity.entryLogger(context.getResources().getString(R.string.passive_state_1), false);
+            return true;
         }
-        return false;
+        catch (Exception ex) {
+            ex.printStackTrace();
+            MainActivity.entryLogger(context.getResources().getString(R.string.passive_state_2), true);
+            return false;
+        }
     }
 
     public boolean runPassiveJammer() {

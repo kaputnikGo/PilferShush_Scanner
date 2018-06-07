@@ -8,15 +8,6 @@
     <string name="dialog_storage_warn_title">Caution</string>
     <string name="dialog_storage_warn_text">limited storage space for recording.</string>
 
-    <string name="action_settings">Polling Speed</string>
-    <string name="dialog_polling">Mic polling speed</string>
-    <string name="polling_1_text" translatable="false">1 second</string>
-    <string name="polling_2_text" translatable="false">2 seconds</string>
-    <string name="polling_3_text" translatable="false">3 seconds</string>
-    <string name="polling_4_text" translatable="false">4 seconds</string>
-    <string name="polling_5_text" translatable="false">5 seconds</string>
-    <string name="polling_default_text" translatable="false">6 secs (default)</string>
-
     <string name="action_audio_scan_settings">Audio Scan steps</string>
     <string name="dialog_freq_step">Frequency steps</string>
     <string name="freq_step_10_text" translatable="false">10 Hz</string>
@@ -111,13 +102,8 @@
     <string name="audiofocus_7">Audio Focus Listener: GAIN_TRANSIENT_DUCK.</string>
     <string name="audiofocus_8">Audio Focus Listener: UNKNOWN STATE.</string>
 
-    <string name="poll_check_1">DO NOT POLL WHEN MIC CHECKING</string>
-    <string name="poll_check_2">POLLING CHECK</string>
-    <string name="poll_check_3">POLLING...</string>
-
-    <string name="mic_check_1">DO NOT MIC CHECK WHEN POLLING</string>
-    <string name="mic_check_2">MICROPHONE CHECK</string>
-    <string name="mic_check_3">CHECKING...</string>
+    <string name="beacon_check_1">Beacon Check</string>
+    <string name="userapp_check_1">User App Check</string>
 
     <string name="audio_apps_check_1">NO AUDIO BEACON APPS FOUND.</string>
     <string name="user_apps_check_1">NO USER APPS FOUND FOR OVERRIDE SCAN.</string>
@@ -128,9 +114,11 @@
     <string name="main_scanner_4">No record audio apps found.</string>
     <string name="main_scanner_5">\u0020Audio Beacon SDKs detected.</string>
     <string name="main_scanner_6">No Audio Beacon SDKs detected.</string>
+    <!--
     <string name="main_scanner_7">Microphone check...</string>
     <string name="main_scanner_8">Microphone use detected.</string>
     <string name="main_scanner_9">No microphone use detected.</string>
+    -->
     <string name="main_scanner_10">Listening for near-ultra high audio...</string>
     <string name="main_scanner_11">scanner</string>
     <string name="main_scanner_12">Stop listening for audio.</string>
@@ -149,6 +137,7 @@
     <string name="main_scanner_29">Stop passive jamming.</string>
     <string name="main_scanner_30">PASSIVE</string>
     <string name="main_scanner_31">ACTIVE</string>
+    <string name="main_scanner_32">Stop scanner to free the microphone.</string>
 
     <string name="option_dialog_1">Limited storage space found.</string>
     <string name="option_dialog_2">Log storage size:\u0020</string>
@@ -167,7 +156,7 @@
     <string name="init_state_2">Using\u0020</string>
     <string name="init_state_3">Settings can be changed via the Options menu.</string>
     <string name="init_state_4">The Detailed View has logging and more information from scans.</string>
-    <string name="init_state_5">It also has a continuous Mic check and intermittent polling check to look for other apps using the microphone.</string>
+    <string name="init_state_5">It also has a polling Mic check to look for other apps using the microphone.</string>
     <string name="init_state_6">Init: save scan audio to file:\u0020</string>
     <string name="init_state_7_1">Wav audio:\u0020</string>
     <string name="init_state_7_2">, little-endian.</string>
@@ -228,7 +217,6 @@
     <string name="usb_state_7">has usb audio type.</string>
     <string name="usb_state_8">no usb audio type found.</string>
 
-    <string name="option_set_1">Polling speed set to (ms):\u0020</string>
     <string name="option_set_2">Frequency Step set to (hz):\u0020</string>
     <string name="option_set_3">Magnitude level set to (sqrt):\u0020</string>
 
@@ -255,7 +243,7 @@
     <string name="audio_check_2">Error: USB device container has no device.</string>
     <string name="audio_check_3">determine USB audio failure.</string>
     <string name="audio_check_4">Can start Microphone Check.</string>
-    <string name="audio_check_5">Microphone in use...</string>
+    <string name="audio_check_5">Possible microphone in use.</string>
     <string name="audio_check_6">check audioBufferState read error - status id:\u0020</string>
     <string name="audio_check_7">check audioBufferState init error.</string>
     <string name="audio_check_8">audioBufferState no error, checking...</string>
@@ -263,23 +251,6 @@
     <string name="audio_check_10">Stopping all audio.</string>
     <string name="audio_check_11">Audio record stopped and released.</string>
     <string name="audio_check_12">audioRecord is null.</string>
-
-    <!--
-    PollAudioChecker.java
-    -->
-    <string name="init_state_16">Error in setting up Audio Record.</string>
-
-    <string name="polling_check_1">Setup for polling mic ready, id:\u0020</string>
-    <string name="polling_check_2">Polling check: MIC IN USE</string>
-    <string name="polling_check_3">Start mic polling.</string>
-    <string name="polling_check_4">polling mic read error - status id:\u0020</string>
-    <string name="polling_check_5">polling mic exception on start.</string>
-    <string name="polling_check_6_1">polling mic at\u0020</string>
-    <string name="polling_check_6_2">(ms), no error.</string>
-    <string name="polling_check_7">polling mic exception on close.</string>
-    <string name="polling_check_8">stop polling mic.</string>
-    <string name="polling_check_9">Polling mic stop and release.</string>
-    <string name="polling_check_10">audioRecord is null.</string>
 
     <!--
     AudioScanner.java

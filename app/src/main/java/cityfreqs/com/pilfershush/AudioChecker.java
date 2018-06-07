@@ -19,15 +19,12 @@ public class AudioChecker {
 
     private Context context;
     private AudioRecord audioRecord;
-    private PollAudioChecker pollAudioChecker;
-    private int userPollSpeed;
 
     private AudioSettings audioSettings;
 
     public AudioChecker(Context context, AudioSettings audioSettings) {
         //
         this.context = context;
-        userPollSpeed = PollAudioChecker.LONG_DELAY;
         this.audioSettings = audioSettings;
         // still need to determine if this is useful if user switchable, ie USB.
         audioSource = AudioSource.DEFAULT; //DEFAULT = 0, MIC = 1, CAMCORDER = 5
@@ -37,9 +34,6 @@ public class AudioChecker {
         stopAllAudio();
         if (audioRecord != null) {
             audioRecord = null;
-        }
-        if (pollAudioChecker != null) {
-            pollAudioChecker.destroy();
         }
     }
 
@@ -347,44 +341,9 @@ public static final int HOTWORD = 1999; //  always-on software hotword detection
 
     protected boolean checkAudioRecord() {
         // return if can start new audioRecord object
-        boolean recordable = false;
-        if (audioRecord == null) {
-            try {
-                audioRecord = new AudioRecord(audioSource, sampleRate, channelConfig, encoding, bufferSize);
-                //audioSessionId = audioRecord.getAudioSessionId();
-                MainActivity.logger(context.getString(R.string.audio_check_4));
-            }
-            catch (Exception ex) {
-                ex.printStackTrace();
-                MainActivity.logger(context.getString(R.string.audio_check_5));
-                recordable = false;
-            }
-            finally {
-                try {
-                    audioRecord.release();
-                    recordable = true;
-                }
-                catch(Exception e){
-                    recordable = false;
-                }
-            }
-        }
-        else {
-            recordable = true;
-        }
-        return recordable;
-    }
-
-    // TODO
-    // can check for AUDIOFOCUS ?
-
-    /********************************************************************/
-/*
- *
- */
-    protected boolean checkAudioBufferState() {
         try {
             audioRecord = new AudioRecord(audioSource, sampleRate, channelConfig, encoding, bufferSize );
+            MainActivity.logger(context.getString(R.string.audio_check_4));
             // need to start reading buffer to trigger an exception
             audioRecord.startRecording();
             short buffer[] = new short[bufferSize];
@@ -395,6 +354,7 @@ public static final int HOTWORD = 1999; //  always-on software hotword detection
                     || audioStatus == AudioRecord.STATE_UNINITIALIZED) {
                 MainActivity.logger(context.getString(R.string.audio_check_6) + audioStatus);
                 // audioStatus == 0(uninitialized) is an error, does not throw exception
+                MainActivity.logger(context.getString(R.string.audio_check_5));
                 return false;
             }
         }
@@ -404,50 +364,14 @@ public static final int HOTWORD = 1999; //  always-on software hotword detection
             return false;
         }
         // no errors
+        if (audioRecord != null) {
+            audioRecord.stop();
+            audioRecord.release();
+        }
         MainActivity.logger(context.getString(R.string.audio_check_8));
         return true;
     }
 
-    // currently this will start and then destroy after single use...
-    protected boolean pollAudioCheckerInit() {
-        //set for default
-        pollAudioChecker = null;
-        pollAudioChecker = new PollAudioChecker(context, audioSource, sampleRate, channelConfig, encoding, bufferSize);
-        return pollAudioChecker.setupPollAudio();
-    }
-
-    protected boolean audioStateError() {
-        return pollAudioChecker.audioError;
-    }
-
-    protected void pollAudioCheckerStart() {
-        if (pollAudioChecker != null) {
-            pollAudioChecker.togglePolling(userPollSpeed);
-        }
-    }
-
-    protected void finishPollChecker() {
-        if (pollAudioChecker != null) {
-            pollAudioChecker.togglePolling(userPollSpeed);
-            pollAudioChecker = null;
-        }
-    }
-
-    protected void setPollingSpeed(int userSpeed) {
-        userPollSpeed = userSpeed;
-    }
-
-    protected boolean getDetected() {
-        if (pollAudioChecker != null) {
-            return pollAudioChecker.getDetected();
-        }
-        return false;
-    }
-
-    /********************************************************************/
-/*
- *
- */
     protected void stopAllAudio() {
         // ensure we don't keep resources
         MainActivity.logger(context.getString(R.string.audio_check_10));

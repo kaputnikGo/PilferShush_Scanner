@@ -116,49 +116,13 @@ public class PilferShushScanner {
         return audioChecker.checkAudioRecord();
     }
 
-    protected void setPollingSpeed(int delayMS) {
-        audioChecker.setPollingSpeed(delayMS);
-        entryLogger(context.getString(R.string.option_set_1) + delayMS, false);
-    }
-
-    protected boolean micChecking(boolean checking) {
-        if (checking) {
-            if (audioChecker.checkAudioBufferState()) {
-                //TODO
-                // this function is of concern as it may not work, uses logcat
-                backgroundChecker.auditLogAsync();
-                return true;
-            }
-            else {
-                // audioChecker found an error, possible uninitialized error, not an exception however
-                entryLogger("AUDIO ERROR FOUND, possible microphone in use.", true);
-                return false;
-            }
-        }
-        else {
-            audioChecker.stopAllAudio();
-            return false;
-        }
-    }
-
-    protected void pollingCheck(boolean polling) {
-        if (polling) {
-            if (audioChecker.pollAudioCheckerInit()) {
-                audioChecker.pollAudioCheckerStart();
-            }
-        }
-        else {
-            audioChecker.finishPollChecker();
-        }
-    }
-
     protected void setFrequencyStep(int freqStep) {
         audioSettings.setFreqStep(freqStep);
         entryLogger(context.getString(R.string.option_set_2) + freqStep, false);
     }
 
-    protected void setMinMagnitude(double magnitude) {
-        audioScanner.setMinMagnitude(magnitude);
+    protected void setMagnitude(double magnitude) {
+        audioScanner.setMagnitude(magnitude);
         entryLogger(context.getString(R.string.option_set_3) + magnitude, false);
     }
 
@@ -227,25 +191,6 @@ public class PilferShushScanner {
 
     protected void listScanDetails(int appNumber) {
         listAppOverrideScanDetails(appNumber);
-    }
-
-    protected boolean audioStateError() {
-        audioChecker.pollAudioCheckerInit();
-        return audioChecker.audioStateError();
-    }
-
-    protected boolean mainPollingCheck() {
-        boolean detected = false;
-        setPollingSpeed(100);
-        if (audioChecker.pollAudioCheckerInit()) {
-            audioChecker.pollAudioCheckerStart();
-            detected = audioChecker.getDetected();
-        }
-        return detected;
-    }
-
-    protected void mainPollingStop() {
-        audioChecker.finishPollChecker();
     }
 
     protected boolean hasAudioScanSequence() {

@@ -9,8 +9,6 @@ import cityfreqs.com.pilfershush.assist.AudioSettings;
 public class FreqDetector {
     private RecordTask recordTask;
     private AudioSettings audioSettings;
-    private int frequencyStepper;
-    private double magnitude;
 
     protected interface RecordTaskListener {
         void onFailure(String paramString);
@@ -23,15 +21,13 @@ public class FreqDetector {
 
     /********************************************************************/
 
-    protected void init(int frequencyStepper, double magnitude) {
-        this.frequencyStepper = frequencyStepper;
-        this.magnitude = magnitude;
-        recordTask = new RecordTask(audioSettings, frequencyStepper, magnitude);
+    protected void init() {
+        recordTask = new RecordTask(audioSettings, audioSettings.getFreqStep(), audioSettings.getMagnitude());
     }
 
     protected void startRecording(RecordTaskListener recordTaskListener) {
         if (recordTask == null) {
-            recordTask = new RecordTask(audioSettings, frequencyStepper, magnitude);
+            recordTask = new RecordTask(audioSettings, audioSettings.getFreqStep(), audioSettings.getMagnitude());
         }
         startRecordTaskListener(recordTaskListener);
     }
@@ -44,10 +40,6 @@ public class FreqDetector {
             recordTask.setOnResultsListener(recordTaskListener);
             recordTask.execute(new Void[0]);
         }
-    }
-
-    protected void setMagnitude(double magnitude) {
-        this.magnitude = magnitude;
     }
 
     protected boolean hasBufferStorage() {

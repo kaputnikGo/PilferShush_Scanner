@@ -9,14 +9,10 @@ import cityfreqs.com.pilfershush.jammers.PassiveJammer;
 public class PilferShushJammer {
     private PassiveJammer passiveJammer;
     private ActiveJammer activeJammer;
-    private Context context;
-    private AudioSettings audioSettings;
-
-
 
     protected boolean initJammer(Context context, AudioSettings audioSettings) {
         // setup Jammer
-        this.audioSettings = audioSettings;
+        //this.audioSettings = audioSettings;
         passiveJammer = new PassiveJammer(context, audioSettings);
         activeJammer = new ActiveJammer(context, audioSettings);
 
@@ -58,7 +54,6 @@ public class PilferShushJammer {
 
 
     protected void runActiveJammer(int activeTypeValue) {
-        // background service runnable, emits white noise within n-uhf ranges
         if (activeJammer != null) {
             activeJammer.play(activeTypeValue);
         }
@@ -69,10 +64,10 @@ public class PilferShushJammer {
         }
     }
 
-    protected boolean startPassiveJammer() {
+    protected boolean initPassiveJammer() {
         // holds mic and if needed records to zero values to dev/null
         if (passiveJammer != null) {
-            return passiveJammer.startPassiveJammer();
+            return passiveJammer.initPassiveJammer();
         }
         return false;
     }
