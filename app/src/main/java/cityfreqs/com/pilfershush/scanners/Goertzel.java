@@ -37,12 +37,26 @@ public class Goertzel {
         resetGoertzel();
     }
 
+    public double getOptimisedMagnitude() {
+        for (int i = 0; i < length; i++) {
+            processSample(data[i]);
+        }
+        double sqrt = Math.sqrt(getMagnitudeSquared());
+        resetGoertzel();
+        return sqrt;
+    }
+
     private void processSample(double sample) {
         double Q0 = ((coeff * Q1)- Q2) + sample;
         Q2 = Q1;
         Q1 = Q0;
     }
 
+    private double getMagnitudeSquared() {
+        return ((Q1 * Q1) + (Q2 * Q2) - (Q1 * Q2) * coeff);
+    }
+
+    // not used
     /*
     private double[] getRealImag(double[] dArr) {
         dArr[0] = Q1 - (Q2 * cosine);
@@ -51,13 +65,6 @@ public class Goertzel {
     }
     */
 
-    private double getMagnitudeSquared() {
-        return ((Q1 * Q1) + (Q2 * Q2) - (Q1 * Q2) * coeff);
-    }
-
-    /********************************************************************/
-
-    // not used
     /*
     public double getMagnitude() {
         double[] dArr = new double[2];
@@ -76,16 +83,6 @@ public class Goertzel {
         return magnitudeSquared;
     }
     */
-
-    // used
-    public double getOptimisedMagnitude() {
-        for (int i = 0; i < length; i++) {
-            processSample(data[i]);
-        }
-        double sqrt = Math.sqrt(getMagnitudeSquared());
-        resetGoertzel();
-        return sqrt;
-    }
 }
 
 

@@ -63,7 +63,6 @@ public class PilferShushJammer {
     }
 
     protected boolean initPassiveJammer() {
-        // holds mic and if needed records to zero values to dev/null
         return (passiveJammer != null && passiveJammer.initPassiveJammer());
     }
     protected boolean runPassiveJammer() {

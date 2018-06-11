@@ -192,6 +192,7 @@
     <string name="app_status_4">active jammer not running.</string>
     <string name="app_status_5">EQ is turned off.</string>
     <string name="app_status_6">EQ is turned on.</string>
+    <string name="app_status_7">EQ is not available.</string>
 
     <string name="jammer_dialog_1">Change active jammer signal type.</string>
     <string name="jammer_dialog_2">Audible tone drift (~440Hz)</string>

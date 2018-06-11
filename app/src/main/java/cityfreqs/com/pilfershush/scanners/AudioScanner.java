@@ -66,13 +66,6 @@ public class AudioScanner {
         }
     }
 
-
-    /*
-    public boolean hasBufferStorage() {
-        return freqDetector.hasBufferStorage();
-    }
-    */
-
     public boolean canProcessBufferStorage() {
         return bufferStorage != null;
     }

@@ -39,7 +39,6 @@ public class ProcessAudio {
     public String getLogicEntries() {
         StringBuilder sb = new StringBuilder();
 
-        //String logicEntries = "";
         for (Map.Entry<Integer, Integer> e : entries) {
             sb.append(context.getString(R.string.process_audio_1))
                     .append(e.getKey())
@@ -78,11 +77,7 @@ public class ProcessAudio {
 
     @SuppressLint("UseSparseArrays")
     private boolean checkSequenceDuplicates(ArrayList<Integer> freqList) {
-        // ideally looking for two freqs that are logic 0 and logic 1
-        // they may/should be separated by 100Hz
-
-        // N.B. we are not timing the audio scan to stop after 32 bits received...
-
+        // looking for two prominent freqs that may be thought of as logic 0 and logic 1
         // break for no audio:
         if (freqList.isEmpty()) {
             debugProcessAudio(context.getString(R.string.process_audio_6));
@@ -117,7 +112,6 @@ public class ProcessAudio {
                 debugProcessAudio(context.getString(R.string.process_audio_1) + e.getKey() + " : " + e.getValue());
             }
 
-            // we need at least two entries for this:
             if (entries.get(0) != null) {
                 logicZero = entries.get(0);
                 if (entries.size() >= 2) {

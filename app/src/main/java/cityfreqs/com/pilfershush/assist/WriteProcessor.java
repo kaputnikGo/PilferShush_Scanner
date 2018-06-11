@@ -23,13 +23,6 @@ import cityfreqs.com.pilfershush.MainActivity;
 import cityfreqs.com.pilfershush.R;
 
 public class WriteProcessor {
-    // pcm savefile for raw import into Audacity as 48 kHz, signed 16 bit, big-endian, mono
-
-    // wav has a little-endian
-
-    // laborious process to export files from Download(s) folder to PC, need Music folder or similar
-    // with proper file read access for external - possibly just a samsung pita
-
     private Context context;
     private AudioSettings audioSettings;
 
@@ -37,7 +30,6 @@ public class WriteProcessor {
 
     private String waveFilename;
     private String sessionFilename;
-    private static boolean writeWav;
 
     public static File AUDIO_OUTPUT_FILE;
     public static File WAV_OUTPUT_FILE;
@@ -47,7 +39,6 @@ public class WriteProcessor {
 
     private static final String APP_DIRECTORY_NAME = "PilferShush";
     private static final String DEFAULT_SESSION_NAME = "capture";
-    private static final String AUDIO_FILE_EXTENSION_RAW = ".pcm";
     private static final String AUDIO_FILE_EXTENSION_WAV = ".wav";
 
     private static final long MINIMUM_STORAGE_SIZE_BYTES = 2048; // approx 2 mins pcm audio
@@ -59,11 +50,10 @@ public class WriteProcessor {
     // nospace: 20180122-123729-capture
     private static final SimpleDateFormat TIMESTAMP_FORMAT = new SimpleDateFormat("yyyyMMdd-HH:mm:ss", Locale.ENGLISH);
 
-    public WriteProcessor(Context context, String sessionName, AudioSettings audioSettings, boolean writeWav) {
+    public WriteProcessor(Context context, String sessionName, AudioSettings audioSettings) {
         this.context = context;
         setSessionName(sessionName);
         this.audioSettings = audioSettings;
-        WriteProcessor.writeWav = writeWav;
 
         log(context.getString(R.string.writer_state_1));
         // checks for read/write state
@@ -117,33 +107,14 @@ public class WriteProcessor {
         }
         // add the extension and timestamp
         // eg: 20151218-10:14:32-capture.pcm(.wav)
-        String audioFilename = getTimestamp() + "-" + sessionFilename + AUDIO_FILE_EXTENSION_RAW;
-        if (writeWav) {
-            waveFilename = getTimestamp() + "-" + sessionFilename + AUDIO_FILE_EXTENSION_WAV;
-
-        }
-
+        waveFilename = getTimestamp() + "-" + sessionFilename + AUDIO_FILE_EXTENSION_WAV;
         // file save will overwrite unless new name is used...
         try {
-            AUDIO_OUTPUT_FILE = new File(location, audioFilename);
-            /*
-            if (!AUDIO_OUTPUT_FILE.exists()) {
-                AUDIO_OUTPUT_FILE.createNewFile();
-            }
-            */
-
             AUDIO_OUTPUT_STREAM = null;
             AUDIO_OUTPUT_STREAM = new BufferedOutputStream(new FileOutputStream(AUDIO_OUTPUT_FILE, false));
             AUDIO_RAW_STREAM = new DataOutputStream(AUDIO_OUTPUT_STREAM);
+            WAV_OUTPUT_FILE = new File(location, waveFilename);
 
-            if (writeWav) {
-                WAV_OUTPUT_FILE = new File(location, waveFilename);
-                /*
-                if (!WAV_OUTPUT_FILE.exists()) {
-                    WAV_OUTPUT_FILE.createNewFile();
-                }
-                */
-            }
             return true;
         }
         catch (IOException ex) {
@@ -157,19 +128,17 @@ public class WriteProcessor {
     /*
         audio logging writes
      */
-
     public static void writeAudioFile(final short[] shortBuffer, final int bufferRead) {
-
-            if (shortBuffer != null && AUDIO_RAW_STREAM != null) {
-                try {
-                    for (int i = 0; i < bufferRead; i++) {
-                        AUDIO_RAW_STREAM.writeShort(shortBuffer[i]);
-                    }
-                } catch (IOException e) {
-                    e.printStackTrace();
+        if (shortBuffer != null && AUDIO_RAW_STREAM != null) {
+            try {
+                for (int i = 0; i < bufferRead; i++) {
+                    AUDIO_RAW_STREAM.writeShort(shortBuffer[i]);
                 }
             }
-
+            catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
     }
 
     public void closeWriteFile() {
@@ -187,13 +156,9 @@ public class WriteProcessor {
     }
 
     public void audioFileConvert() {
-        if (writeWav) {
-            if (convertToWav()) {
-                // TODO when finished, delete the raw pcm file
-                //AUDIO_OUTPUT_FILE.delete();
-                AUDIO_OUTPUT_FILE.deleteOnExit();
-                log(context.getString(R.string.writer_state_21));
-            }
+        if (convertToWav()) {
+            AUDIO_OUTPUT_FILE.deleteOnExit();
+            log(context.getString(R.string.writer_state_21));
         }
     }
 

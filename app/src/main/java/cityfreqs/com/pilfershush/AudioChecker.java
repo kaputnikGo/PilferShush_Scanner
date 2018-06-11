@@ -246,23 +246,20 @@ public static final int HOTWORD = 1999; //  always-on software hotword detection
                                 buffSize,
                                 AudioTrack.MODE_STREAM);
 
-                        //if (audioTrack != null) {
                         if (audioTrack.getState() == AudioTrack.STATE_INITIALIZED) {
-
                             MainActivity.entryLogger("found: " + rate + ", buffer: " + buffSize + ", channelOutConfig: " + channelOutConfig, true);
-                            // set output values
                             // buffOutSize may not be same as buffInSize conformed to powersOfTwo
                             audioSettings.setChannelOutConfig(channelOutConfig);
                             audioSettings.setBufferOutSize(buffSize);
 
-                            // test onboardEQ
                             MainActivity.entryLogger("\nTesting for device audiofx equalizer.", false);
                             if (testOnboardEQ(audioTrack.getAudioSessionId())) {
                                 MainActivity.entryLogger("Device audiofx equalizer test passed.\n", false);
-                                // set a thing somewhere so that active jammer can use it
-                                // add settings to AudioSettings
-                            } else {
+                                audioSettings.setHasEQ(true);
+                            }
+                            else {
                                 MainActivity.entryLogger("Device audiofx equalizer test failed.\n", true);
+                                audioSettings.setHasEQ(false);
                             }
 
                             audioTrack.pause();
@@ -270,7 +267,6 @@ public static final int HOTWORD = 1999; //  always-on software hotword detection
                             audioTrack.release();
                             return true;
                         }
-                        //}
                     }
                     catch (Exception e) {
                         MainActivity.entryLogger("Error, keep trying.", false);
@@ -288,7 +284,6 @@ public static final int HOTWORD = 1999; //  always-on software hotword detection
         try {
             Equalizer equalizer = new Equalizer(0, audioSessionId);
             equalizer.setEnabled(true);
-            audioSettings.setHasEQ(true);
             // get some info
             short bands = equalizer.getNumberOfBands();
             final short minEQ = equalizer.getBandLevelRange()[0]; // returns milliBel

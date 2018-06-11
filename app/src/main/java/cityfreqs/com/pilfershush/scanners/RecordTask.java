@@ -116,7 +116,6 @@ public class RecordTask extends AsyncTask<Void, Integer, String> {
 
                 do {
                     bufferRead = audioRecord.read(bufferArray, 0, audioSettings.getBufferInSize());
-                    // not proper wav yet
                     if (audioSettings.getWriteFiles()) {
                         WriteProcessor.writeAudioFile(bufferArray, bufferRead);
                     }
@@ -162,8 +161,7 @@ public class RecordTask extends AsyncTask<Void, Integer, String> {
     /********************************************************************/
 
     private void magnitudeRecordScan(int windowType) {
-        // TODO many type conversions (x2)
-        // need to add diff version of scanning, not freqStepper version
+        // TODO need to add diff version of scanning, not freqStepper version
         int bufferSize;
         double[] recordScan;
         int candidateFreq;

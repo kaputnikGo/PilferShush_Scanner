@@ -30,7 +30,7 @@ public class PilferShushScanner {
         scanBufferSize = 0;
         this.audioSettings = audioSettings;
         audioChecker = new AudioChecker(context, audioSettings);
-        writeProcessor = new WriteProcessor(context, sessionName, audioSettings, audioSettings.getWriteFiles());
+        writeProcessor = new WriteProcessor(context, sessionName, audioSettings);
 
         entryLogger(context.getString(R.string.audio_check_pre_1), false);
         if (audioChecker.determineRecordAudioType()) {
@@ -80,11 +80,10 @@ public class PilferShushScanner {
     protected void setWriteFiles(boolean writeFiles) {
         audioSettings.setWriteFiles(writeFiles);
     }
-    /*
-    protected boolean getWriteFiles() {
+
+    protected boolean canWriteFiles() {
         return audioSettings.getWriteFiles();
     }
-    */
 
     protected long getLogStorageSize() {
         return writeProcessor.getStorageSize();

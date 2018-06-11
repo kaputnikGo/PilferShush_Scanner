@@ -55,16 +55,13 @@ public class MainActivity extends AppCompatActivity
 
     private static final String TAG = "PilferShush";
     private static final boolean DEBUG = true;
-    private static final boolean INIT_WRITE_FILES = true;
-    // keep as internal switch
-    private static final boolean WRITE_WAV = true;
 
     private static final int REQUEST_MULTIPLE_PERMISSIONS = 123;
     private static final int NOTIFY_PASSIVE_ID = 112;
     private static final int NOTIFY_ACTIVE_ID = 113;
 
     // dev internal version numbering
-    public static final String VERSION = "2.2.04";
+    public static final String VERSION = "2.2.05";
 
     private ViewSwitcher viewSwitcher;
     private boolean mainView;
@@ -79,6 +76,7 @@ public class MainActivity extends AppCompatActivity
     private ToggleButton runScansButton;
     private ToggleButton passiveJammerButton;
     private ToggleButton activeJammerButton;
+    private Switch eqSwitch;
     private TextView mainScanText;
 
     private String[] freqSteps;
@@ -114,7 +112,6 @@ public class MainActivity extends AppCompatActivity
     private boolean PASSIVE_RUNNING;
     private boolean ACTIVE_RUNNING;
     private boolean IRQ_TELEPHONY;
-    //private boolean HAS_HEADSET;
 
     private boolean activeTypeValue;
     private String[] jammerTypes;
@@ -130,7 +127,7 @@ public class MainActivity extends AppCompatActivity
         headsetReceiver = new HeadsetIntentReceiver();
         powerManager = (PowerManager) this.getSystemService(Context.POWER_SERVICE);
 
-        audioSettings = new AudioSettings(WRITE_WAV);
+        audioSettings = new AudioSettings(true);
 
         pilferShushScanner = new PilferShushScanner();
         SCANNING = false;
@@ -169,7 +166,7 @@ public class MainActivity extends AppCompatActivity
                     // stopScanner first to allow mic to free up
                     stopScanner();
                     runScansButton.toggle();
-                    passiveJammerButton.toggle(); // fudge to re-toggle to off...
+                    passiveJammerButton.toggle();
                     mainScanLogger(getResources().getString(R.string.main_scanner_32), true);
                     return;
                 }
@@ -207,7 +204,7 @@ public class MainActivity extends AppCompatActivity
             }
         });
 
-        Switch eqSwitch = findViewById(R.id.eq_switch);
+        eqSwitch = findViewById(R.id.eq_switch);
         eqSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                 toggleEq(isChecked);
@@ -310,7 +307,6 @@ public class MainActivity extends AppCompatActivity
                 // assume already runonce, has permissions
                 initPilferShush();
             }
-
         }
         else {
             // pre API 23
@@ -346,7 +342,6 @@ public class MainActivity extends AppCompatActivity
             else if (status == AudioManager.AUDIOFOCUS_LOSS) {
                 // possible music player etc that has speaker focus but no need of microphone,
                 // can end up fighting for focus with music player,
-                // TODO may get an error from VOIP here.
                 // reset booleans to init state
                 PASSIVE_RUNNING = false;
                 IRQ_TELEPHONY = false;
@@ -360,6 +355,7 @@ public class MainActivity extends AppCompatActivity
         else {
             entryLogger(getResources().getString(R.string.app_status_2), true);
         }
+
         if (ACTIVE_RUNNING) {
             // return from background without irq_telephony
             entryLogger(getResources().getString(R.string.app_status_3), true);
@@ -367,8 +363,6 @@ public class MainActivity extends AppCompatActivity
         else {
             entryLogger(getResources().getString(R.string.app_status_4), true);
         }
-
-
     }
 
     @Override
@@ -388,7 +382,6 @@ public class MainActivity extends AppCompatActivity
         if (PASSIVE_RUNNING && IRQ_TELEPHONY) {
             // make UI conform to jammer override by system telephony
             stopPassive();
-
         }
         if (ACTIVE_RUNNING && IRQ_TELEPHONY) {
             // make UI conform
@@ -404,8 +397,6 @@ public class MainActivity extends AppCompatActivity
 
 
     /********************************************************************/
-// need to be able to have main view that is simple,
-// then a switch for the debug view.
     private void switchViews() {
         if (mainView) {
             viewSwitcher.showNext();
@@ -483,7 +474,6 @@ public class MainActivity extends AppCompatActivity
     private boolean addPermission(List<String> permissionsList, String permission) {
         if (ActivityCompat.checkSelfPermission(this, permission) != PackageManager.PERMISSION_GRANTED) {
             permissionsList.add(permission);
-            // Check for Rationale Option
             return (ActivityCompat.shouldShowRequestPermissionRationale(this, permission));
         }
         return true;
@@ -676,14 +666,15 @@ public class MainActivity extends AppCompatActivity
         mainScanLogger("\n" + getResources().getString(R.string.init_state_2) + pilferShushScanner.getAudioCheckerReport(), false);
         mainScanLogger("\n" + getResources().getString(R.string.init_state_3), true);
         mainScanLogger("\n" + getResources().getString(R.string.init_state_4) + getResources().getString(R.string.init_state_5), false);
-        mainScanLogger("\n" + getResources().getString(R.string.init_state_6) + Boolean.toString(INIT_WRITE_FILES), true);
+        mainScanLogger("\n" + getResources().getString(R.string.init_state_6) + Boolean.toString(pilferShushScanner.canWriteFiles()), true);
 
-        if (WRITE_WAV) {
+        if (pilferShushScanner.canWriteFiles()) {
             mainScanLogger("\n" + getResources().getString(R.string.init_state_7_1) +
                     pilferShushScanner.getSaveFileType() +
                     getResources().getString(R.string.init_state_7_2), false);
         }
         else {
+            // not using raw file saves
             mainScanLogger("\n" + getResources().getString(R.string.init_state_8_1) +
                     pilferShushScanner.getSaveFileType() +
                     getResources().getString(R.string.init_state_8_2), false);
@@ -813,7 +804,6 @@ public class MainActivity extends AppCompatActivity
     }
 
     private void changeWriteFile() {
-        // flip current value
         dialogBuilder = new AlertDialog.Builder(this);
 
         dialogBuilder.setTitle(R.string.dialog_write_file);
@@ -935,7 +925,7 @@ public class MainActivity extends AppCompatActivity
         LayoutInflater inflater = this.getLayoutInflater();
         View inputView = inflater.inflate(R.layout.default_ranged_form, null);
         dialogBuilder.setView(inputView);
-        final EditText userCarrierInput = (EditText) inputView.findViewById(R.id.carrier_input);
+        final EditText userCarrierInput = inputView.findViewById(R.id.carrier_input);
 
         dialogBuilder.setTitle(R.string.jammer_dialog_4);
 
@@ -1092,7 +1082,7 @@ public class MainActivity extends AppCompatActivity
             ACTIVE_RUNNING = true;
             notifyManager.notify(NOTIFY_ACTIVE_ID, notifyActiveBuilder.build());
             mainScanLogger(getResources().getString(R.string.main_scanner_27), false);
-            pilferShushJammer.runActiveJammer(activeTypeValue ? 1 : 0); // to change to proper int
+            pilferShushJammer.runActiveJammer(activeTypeValue ? 1 : 0);
             toggleHeadset(ACTIVE_RUNNING);
         }
     }
@@ -1270,6 +1260,16 @@ public class MainActivity extends AppCompatActivity
     }
 
     private void toggleEq(boolean eqOn) {
+        if (!audioSettings.getHasEQ()) {
+            // failure when testing onboard audiofx/equalizer, device specific
+            mainScanLogger(getResources().getString(R.string.app_status_7), false);
+            if (eqOn) {
+                // if togglebutton pressed on, reset to off
+                eqSwitch.toggle();
+            }
+            return;
+        }
+
         if (pilferShushJammer.hasActiveJammer()) {
             // need to stop so eq change can take effect
             if (ACTIVE_RUNNING) {
@@ -1279,8 +1279,10 @@ public class MainActivity extends AppCompatActivity
             pilferShushJammer.setEqOn(eqOn);
         }
 
-        if (eqOn) mainScanLogger(getResources().getString(R.string.app_status_6), false);
-        else mainScanLogger(getResources().getString(R.string.app_status_5), false);
+        if (eqOn)
+            mainScanLogger(getResources().getString(R.string.app_status_6), false);
+        else
+            mainScanLogger(getResources().getString(R.string.app_status_5), false);
 
     }
 
