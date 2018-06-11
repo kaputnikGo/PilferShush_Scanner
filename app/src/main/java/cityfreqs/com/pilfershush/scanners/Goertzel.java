@@ -10,7 +10,7 @@ public class Goertzel {
     private double coeff;
     private double Q1;
     private double Q2;
-    private double sine;
+    //private double sine;
     private double cosine;
 
     public Goertzel(float sampleRate, float targetFreq, double[] data) {
@@ -18,7 +18,7 @@ public class Goertzel {
         this.targetFreq = targetFreq;
         this.data = data;
         length = data.length;
-        sine = 0.14904226617617444d;
+        //sine = 0.14904226617617444d;
         cosine = -0.9888308262251285d;
         coeff = 2.0d * cosine;
     }
@@ -31,7 +31,7 @@ public class Goertzel {
     public void initGoertzel() {
         float f = (float)length;
         double omega = (AudioSettings.PI2 * ((double) ((int) (0.5d + ((double) ((targetFreq * f) / sampleRate)))))) / ((double) f);
-        sine = Math.sin(omega);
+        //sine = Math.sin(omega);
         cosine = Math.cos(omega);
         coeff = 2.0d * cosine;
         resetGoertzel();
@@ -43,11 +43,13 @@ public class Goertzel {
         Q1 = Q0;
     }
 
+    /*
     private double[] getRealImag(double[] dArr) {
         dArr[0] = Q1 - (Q2 * cosine);
         dArr[1] = Q2 * sine;
         return dArr;
     }
+    */
 
     private double getMagnitudeSquared() {
         return ((Q1 * Q1) + (Q2 * Q2) - (Q1 * Q2) * coeff);
@@ -56,6 +58,7 @@ public class Goertzel {
     /********************************************************************/
 
     // not used
+    /*
     public double getMagnitude() {
         double[] dArr = new double[2];
         double magnitudeSquared;
@@ -72,6 +75,7 @@ public class Goertzel {
         resetGoertzel();
         return magnitudeSquared;
     }
+    */
 
     // used
     public double getOptimisedMagnitude() {

@@ -11,8 +11,6 @@ public class PilferShushJammer {
     private ActiveJammer activeJammer;
 
     protected boolean initJammer(Context context, AudioSettings audioSettings) {
-        // setup Jammer
-        //this.audioSettings = audioSettings;
         passiveJammer = new PassiveJammer(context, audioSettings);
         activeJammer = new ActiveJammer(context, audioSettings);
 
@@ -66,17 +64,12 @@ public class PilferShushJammer {
 
     protected boolean initPassiveJammer() {
         // holds mic and if needed records to zero values to dev/null
-        if (passiveJammer != null) {
-            return passiveJammer.initPassiveJammer();
-        }
-        return false;
+        return (passiveJammer != null && passiveJammer.initPassiveJammer());
     }
     protected boolean runPassiveJammer() {
-        if (passiveJammer != null) {
-            return passiveJammer.runPassiveJammer();
-        }
-        return false;
+        return (passiveJammer != null && passiveJammer.runPassiveJammer());
     }
+
     protected void stopPassiveJammer() {
         if (passiveJammer != null) {
             passiveJammer.stopPassiveJammer();

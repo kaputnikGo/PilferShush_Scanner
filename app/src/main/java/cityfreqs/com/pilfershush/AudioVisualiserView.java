@@ -33,7 +33,7 @@ public class AudioVisualiserView extends View {
     //
     private static final int HISTORY_SIZE = 6;
     private static final float MAX_AMPLITUDE_TO_DRAW = 8192.0f;
-    private final LinkedList<short[]> mAudioData = new LinkedList<short[]>();
+    private final LinkedList<short[]> mAudioData = new LinkedList<>();
     private int colourDelta;
     private int brightness;
 
@@ -129,7 +129,7 @@ public class AudioVisualiserView extends View {
 
             // only draw lines that align with pixel boundaries.
             for (int x = 0; x < getWidth(); x++) {
-                int index = (int) ((x / getWidth()) * buffer.length);
+                int index = ((x / getWidth()) * buffer.length);
                 short sample = buffer[index];
                 float y = (sample / MAX_AMPLITUDE_TO_DRAW) * centerY + centerY;
 

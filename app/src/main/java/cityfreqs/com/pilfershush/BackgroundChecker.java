@@ -87,24 +87,27 @@ public class BackgroundChecker {
         }
     }
 
+    /*
     protected boolean checkCautionedApps() {
         int counter = 0;
         if (appEntries.size() > 0) {
             for (AppEntry appEntry : appEntries) {
-                if (appEntry.getCaution() == true) {
+                if (appEntry.getCaution()) {
                     counter++;
                 }
             }
         }
         return (counter > 0);
     }
+    */
 
+    /*
     protected String[] getCautionedAppNames() {
         String[] appNames = new String[appEntries.size()];
         int i = 0;
         if (appEntries.size() > 0) {
             for (AppEntry appEntry : appEntries) {
-                if (appEntry.getCaution() == true) {
+                if (appEntry.getCaution()) {
                     appNames[i] = appEntry.getActivityName();
                     i++;
                 }
@@ -112,33 +115,31 @@ public class BackgroundChecker {
         }
         return appNames;
     }
+    */
 
+    /*
     protected AppEntry getCautionedAppEntry(int appEntryIndex) {
         //TODO
         // base on name..
         return appEntries.get(appEntryIndex);
     }
+    */
 
     protected boolean checkAudioBeaconApps() {
         // while we check, populate audioBeaconAppEntries list for later use
         audioBeaconAppEntries = new ArrayList<>();
         if (appEntries.size() > 0) {
             for (AppEntry appEntry : appEntries) {
-                if (appEntry.getServices() == true) {
+                if (appEntry.getServices()) {
                     // have services, check for audioBeacon names
-                    if (checkForAudioBeaconService(appEntry.getServiceNames()) == true) {
+                    if (checkForAudioBeaconService(appEntry.getServiceNames())) {
                         // have a substring match
                         audioBeaconAppEntries.add(appEntry);
                     }
                 }
             }
         }
-        if (audioBeaconAppEntries.size() > 0) {
-            return true;
-        }
-        else {
-            return false;
-        }
+        return (audioBeaconAppEntries.size() > 0);
     }
 
     protected String[] getAudioBeaconAppNames() {
@@ -159,11 +160,10 @@ public class BackgroundChecker {
 // loop though services/receivers lists and look for substrings of interest,
 // hardcoded for now, user added later?
 // if find one instance return true
-
     private boolean checkForAudioBeaconService(String[] serviceNames) {
         for (String name: serviceNames) {
-            for (int i = 0; i < SDK_NAMES.length; i++) {
-                if (name.contains(SDK_NAMES[i])) {
+            for (String sdkName : SDK_NAMES) {
+                if (name.contains(sdkName)){
                     return true;
                 }
             }
@@ -258,6 +258,7 @@ public class BackgroundChecker {
     }
 
     /*
+    // remm'ed for now - probably not useful
     protected void auditLogAsync() {
         //TODO
         // this may not work for logic reasons, and

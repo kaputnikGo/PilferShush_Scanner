@@ -40,6 +40,7 @@ public class PilferShushScanner {
             entryLogger(context.getString(R.string.audio_check_pre_2), false);
             if (!audioChecker.determineOutputAudioType()) {
                 // have a setup error getting the audio for output
+                entryLogger(context.getString(R.string.audio_check_pre_3), true);
             }
 
             initBackgroundChecks();
@@ -49,7 +50,7 @@ public class PilferShushScanner {
 
         // TODO wont yet run usb audio, no return true, background checks...
         if(hasUSB) {
-            if (audioChecker.determineUsbRecordAudioType(hasUSB)) {
+            if (audioChecker.determineUsbRecordAudioType()) {
                 MainActivity.logger(context.getString(R.string.usb_state_7));
             }
             else {
@@ -79,9 +80,11 @@ public class PilferShushScanner {
     protected void setWriteFiles(boolean writeFiles) {
         audioSettings.setWriteFiles(writeFiles);
     }
+    /*
     protected boolean getWriteFiles() {
         return audioSettings.getWriteFiles();
     }
+    */
 
     protected long getLogStorageSize() {
         return writeProcessor.getStorageSize();
@@ -207,16 +210,19 @@ public class PilferShushScanner {
 
     // MainActivity.stopScanner() debug type outputs
     // currently rem'd out
+    /*
     protected String getFrequencySequence() {
         // get original sequence as transmitted...
-        String sequence = "";
+        StringBuilder sb = new StringBuilder();
         for (Integer freq : audioScanner.getFreqSequence()) {
-            sequence += freq.toString();
+            sb.append(freq.toString());
             // add a space
-            sequence += " ";
+            sb.append(" ");
+
         }
-        return sequence;
+        return sb.toString();
     }
+    */
 
     protected String getFreqSeqLogicEntries() {
         return audioScanner.getFreqSeqLogicEntries();
@@ -289,8 +295,8 @@ public class PilferShushScanner {
 
     private void logAppEntryInfo(String[] appEntryInfoList) {
         entryLogger("\n" + context.getString(R.string.background_scan_8) + "\n", false);
-        for (int i = 0; i < appEntryInfoList.length; i++) {
-            entryLogger(appEntryInfoList[i] + "\n", false);
+        for (String entry : appEntryInfoList) {
+            entryLogger(entry + "\n", false);
         }
     }
 

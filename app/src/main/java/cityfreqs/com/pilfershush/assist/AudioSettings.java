@@ -2,7 +2,6 @@ package cityfreqs.com.pilfershush.assist;
 
 import android.media.AudioFormat;
 
-import java.nio.ByteBuffer;
 import java.util.Random;
 
 public class AudioSettings {
@@ -14,8 +13,10 @@ public class AudioSettings {
     public static final int[] POWERS_TWO_HIGH = new int[] {
             512, 1024, 2048, 4096, 8192, 16384 };
 
+    /*
     public static final int[] POWERS_TWO_LOW = new int[] {
             2, 4, 8, 16, 32, 64, 128, 256 };
+    */
 
     public static final double PI2 = 6.283185307179586;
     public static final double PI4 = 12.566370614359172;
@@ -62,9 +63,11 @@ public class AudioSettings {
     public static final int DEFAULT_WINDOW_TYPE = 2;
 
     //public static final int MICRO_DELAY = 1; // for modulated code
+    /*
     public static final int[] POLLING_DELAY = new int[] {
             1000, 2000, 3000, 4000, 5000, 6000
     };
+    */
 
     public static final int CARRIER_NUHF_FREQUENCY = 21000;
     public static final int MAXIMUM_NUHF_FREQUENCY = 24000;
@@ -160,9 +163,12 @@ public class AudioSettings {
         return channelOutConfig;
     }
 
+    /*
     public int getChannelInCount() {
         return channelInCount;
     }
+    */
+
     public int getAudioSource() {
         return audioSource;
     }
@@ -217,13 +223,13 @@ public class AudioSettings {
     }
 
     public String toString() {
-        return new String("audio record format: "
+        return ("audio record format: "
                 + sampleRate + ", " + bufferInSize + ", "
                 + encoding + ", " + channelInConfig + ", " + audioSource);
     }
 
     public String saveFormatToString() {
-        return new String(sampleRate + " Hz, "
+        return (sampleRate + " Hz, "
                 + getBitDepth() + " bits, "
                 + channelInCount + " channel");
     }
@@ -295,12 +301,12 @@ public class AudioSettings {
         return reported;
     }
 
-    /********************************************************************/
 /*
  * Utilities, that may be useful...
  *
  */
 
+    /*
     public static int getClosestPowersLow(int reported) {
         // return the next highest power from the minimum reported
         // 2, 4, 8, 16, 32, 64, 128, 256
@@ -312,19 +318,16 @@ public class AudioSettings {
         // didn't find power, return reported
         return reported;
     }
-
     public static byte[] toBytes(short s) {
         // convert shorts to bytes
         // Java short is a 16-bit type, and byte is an 8-bit type.
         return new byte[]{(byte)(s & 0x00FF),(byte)((s & 0xFF00)>>8)};
     }
-
     public static byte[] shortToByte(short[] arr) {
         ByteBuffer bb = ByteBuffer.allocate(arr.length * 2);
         bb.asShortBuffer().put(arr);
         return bb.array();
     }
-
 	public double soundPressureLevel(final float[] buffer) {
 		double power = 0.0D;
 		for (float element : buffer) {
@@ -333,6 +336,7 @@ public class AudioSettings {
 		double value = Math.pow(power, 0.5) / buffer.length;
 		return 20.0 * Math.log10(value);
 	}
+	*/
 
 }
 

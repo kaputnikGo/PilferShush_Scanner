@@ -37,11 +37,17 @@ public class ProcessAudio {
     }
 
     public String getLogicEntries() {
-        String logicEntries = "";
+        StringBuilder sb = new StringBuilder();
+
+        //String logicEntries = "";
         for (Map.Entry<Integer, Integer> e : entries) {
-            logicEntries += context.getString(R.string.process_audio_1) + e.getKey() + " : " + e.getValue() + "\n";
+            sb.append(context.getString(R.string.process_audio_1))
+                    .append(e.getKey())
+                    .append(" : ")
+                    .append(e.getValue())
+                    .append("\n");
         }
-        return logicEntries;
+        return sb.toString();
     }
 
     public String getLogicZero() {
@@ -85,7 +91,7 @@ public class ProcessAudio {
 
         // sort into list of frequencies and number of occurrences:
         // freqMap<int frequency, int count>
-        HashMap<Integer, Integer> freqMap = new HashMap<Integer, Integer>();
+        HashMap<Integer, Integer> freqMap = new HashMap<>();
         for (int freq : freqList) {
             if (freqMap.containsKey(freq)) {
                 freqMap.put(freq, freqMap.get(freq) + 1);
@@ -96,7 +102,7 @@ public class ProcessAudio {
         }
 
         // sort into list with highest values order
-        entries = new ArrayList<Map.Entry<Integer,Integer>>(freqMap.entrySet());
+        entries = new ArrayList<>(freqMap.entrySet());
 
         Collections.sort(entries, new Comparator<Map.Entry<Integer, Integer>>() {
             public int compare(Map.Entry<Integer, Integer> a, Map.Entry<Integer, Integer> b) {

@@ -9,7 +9,6 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -36,7 +35,6 @@ public class WriteProcessor {
 
     private File extDirectory;
 
-    private String audioFilename;
     private String waveFilename;
     private String sessionFilename;
     private static boolean writeWav;
@@ -65,7 +63,7 @@ public class WriteProcessor {
         this.context = context;
         setSessionName(sessionName);
         this.audioSettings = audioSettings;
-        this.writeWav = writeWav;
+        WriteProcessor.writeWav = writeWav;
 
         log(context.getString(R.string.writer_state_1));
         // checks for read/write state
@@ -79,7 +77,7 @@ public class WriteProcessor {
     }
 
     public void setSessionName(String sessionName) {
-        if (sessionName == null || sessionName == "") {
+        if (sessionName == null || sessionName.equals("")) {
             sessionFilename = DEFAULT_SESSION_NAME;
         }
         else {
@@ -102,10 +100,7 @@ public class WriteProcessor {
     }
 
     public boolean cautionFreeSpace() {
-        if (calculateFreeStorageSpace() <= MINIMUM_STORAGE_SIZE_BYTES) {
-            return true;
-        }
-        return false;
+        return (calculateFreeStorageSpace() <= MINIMUM_STORAGE_SIZE_BYTES);
     }
 
     /**************************************************************/
@@ -122,7 +117,7 @@ public class WriteProcessor {
         }
         // add the extension and timestamp
         // eg: 20151218-10:14:32-capture.pcm(.wav)
-        audioFilename = getTimestamp() + "-" + sessionFilename + AUDIO_FILE_EXTENSION_RAW;
+        String audioFilename = getTimestamp() + "-" + sessionFilename + AUDIO_FILE_EXTENSION_RAW;
         if (writeWav) {
             waveFilename = getTimestamp() + "-" + sessionFilename + AUDIO_FILE_EXTENSION_WAV;
 
@@ -131,39 +126,37 @@ public class WriteProcessor {
         // file save will overwrite unless new name is used...
         try {
             AUDIO_OUTPUT_FILE = new File(location, audioFilename);
+            /*
             if (!AUDIO_OUTPUT_FILE.exists()) {
                 AUDIO_OUTPUT_FILE.createNewFile();
             }
+            */
+
             AUDIO_OUTPUT_STREAM = null;
             AUDIO_OUTPUT_STREAM = new BufferedOutputStream(new FileOutputStream(AUDIO_OUTPUT_FILE, false));
             AUDIO_RAW_STREAM = new DataOutputStream(AUDIO_OUTPUT_STREAM);
 
             if (writeWav) {
                 WAV_OUTPUT_FILE = new File(location, waveFilename);
+                /*
                 if (!WAV_OUTPUT_FILE.exists()) {
                     WAV_OUTPUT_FILE.createNewFile();
                 }
+                */
             }
             return true;
         }
-        catch (FileNotFoundException ex) {
+        catch (IOException ex) {
             ex.printStackTrace();
             log(context.getString(R.string.writer_state_5));
-            return false;
-        }
-        catch (IOException e) {
-            e.printStackTrace();
             log(context.getString(R.string.writer_state_9));
             return false;
         }
     }
 
-
-    /**************************************************************/
     /*
         audio logging writes
      */
-    /********************************************************************/
 
     public static void writeAudioFile(final short[] shortBuffer, final int bufferRead) {
 
@@ -197,12 +190,9 @@ public class WriteProcessor {
         if (writeWav) {
             if (convertToWav()) {
                 // TODO when finished, delete the raw pcm file
-                AUDIO_OUTPUT_FILE.delete();
+                //AUDIO_OUTPUT_FILE.delete();
+                AUDIO_OUTPUT_FILE.deleteOnExit();
                 log(context.getString(R.string.writer_state_21));
-            }
-            else {
-                // no file or error writing file,
-                // do not delete pcm
             }
         }
     }
@@ -244,7 +234,7 @@ public class WriteProcessor {
         DataInputStream input = null;
         try {
             input = new DataInputStream(new FileInputStream(rawFile));
-            input.read(rawData);
+            //input.read(rawData);
         }
         finally {
             if (input != null) {
@@ -319,7 +309,7 @@ public class WriteProcessor {
         extDirectory = new File(Environment.getExternalStoragePublicDirectory(
                 Environment.DIRECTORY_DOWNLOADS), APP_DIRECTORY_NAME);
         if (!extDirectory.exists()) {
-            extDirectory.mkdirs();
+            log(context.getString(R.string.writer_state_22));
         }
     }
 
@@ -331,8 +321,9 @@ public class WriteProcessor {
         }
         String[] filesDelete = extDirectory.list();
         log(context.getString(R.string.writer_state_18_1) + filesDelete.length + context.getString(R.string.writer_state_18_3));
-        for (int i = 0; i < filesDelete.length; i++) {
-            new File(extDirectory, filesDelete[i]).delete();
+
+        for (String file : filesDelete) {
+            new File(extDirectory, file).deleteOnExit();
         }
         log(context.getString(R.string.writer_state_19));
     }

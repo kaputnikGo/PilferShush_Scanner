@@ -18,15 +18,12 @@ public class RecordTask extends AsyncTask<Void, Integer, String> {
     private static final String TAG = "RecordTask";
 
     private short[] bufferArray; // (shorts do not make a byte)
-    private double[] recordScan;
     private RecordTaskListener recordTaskListener;
     private AudioRecord audioRecord;
     private AudioSettings audioSettings;
     private int bufferRead;
     private double minMagnitude;
     private int freqStepper;
-    private int candidateFreq;
-    private Integer[] tempBuffer;
     private ArrayList<Integer[]> bufferStorage;
 
 
@@ -35,7 +32,7 @@ public class RecordTask extends AsyncTask<Void, Integer, String> {
         this.freqStepper = freqStepper;
         minMagnitude = magnitude;
         bufferArray = new short[audioSettings.getBufferInSize()];
-        bufferStorage = new ArrayList<Integer[]>();
+        bufferStorage = new ArrayList<>();
 
         if (audioRecord == null) {
             try {
@@ -61,10 +58,7 @@ public class RecordTask extends AsyncTask<Void, Integer, String> {
     /********************************************************************/
 
     protected boolean hasBufferStorage() {
-        if (bufferStorage != null) {
-            return !bufferStorage.isEmpty();
-        }
-        return false;
+        return (bufferStorage != null && !bufferStorage.isEmpty());
     }
 
     protected ArrayList<Integer[]> getBufferStorage() {
@@ -86,7 +80,7 @@ public class RecordTask extends AsyncTask<Void, Integer, String> {
         }
 
         if (paramArgs[0] != null) {
-            recordTaskListener.onSuccess(paramArgs[0].intValue());
+            recordTaskListener.onSuccess(paramArgs[0]);
         }
         else {
             recordTaskListener.onFailure("RecordTaskListener failed, no params.");
@@ -104,8 +98,6 @@ public class RecordTask extends AsyncTask<Void, Integer, String> {
             return "isCancelled()";
         }
         // check audioRecord object first
-        // TODO getting a couple of RecordThread: buffer overflow warnings etc in adb at start of record
-
         if ((audioRecord != null) || (audioRecord.getState() == AudioRecord.STATE_INITIALIZED)) {
             try {
                 audioRecord.startRecording();
@@ -173,6 +165,10 @@ public class RecordTask extends AsyncTask<Void, Integer, String> {
         // TODO many type conversions (x2)
         // need to add diff version of scanning, not freqStepper version
         int bufferSize;
+        double[] recordScan;
+        int candidateFreq;
+        Integer[] tempBuffer;
+
         if (bufferRead > 0) {
             bufferSize = audioSettings.getBufferInSize();
 
@@ -202,7 +198,7 @@ public class RecordTask extends AsyncTask<Void, Integer, String> {
                     // saved here for later analysis
                     bufferStorage.add(tempBuffer);
                     // draw on view
-                    publishProgress(new Integer[]{Integer.valueOf(candidateFreq)});
+                    publishProgress(candidateFreq);
                 }
                 // next freq for loop
                 candidateFreq += freqStepper;

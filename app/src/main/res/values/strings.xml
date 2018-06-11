@@ -87,7 +87,7 @@
     <string name="headset_state_2">Headset is plugged in.</string>
     <string name="headset_state_3">Headset state unknown</string>
 
-    <string name="audiofocus_check_1">AudioFocus check...</string>
+    <string name="audiofocus_check_1">AudioFocus check\u2026</string>
     <string name="audiofocus_check_2">AudioFocus request granted.</string>
     <string name="audiofocus_check_3">AudioFocus request failed.</string>
     <string name="audiofocus_check_4">AudioFocus unknown.</string>
@@ -109,7 +109,7 @@
     <string name="user_apps_check_1">NO USER APPS FOUND FOR OVERRIDE SCAN.</string>
 
     <string name="main_scanner_1">SCANNING</string>
-    <string name="main_scanner_2">Running scans on user installed apps...</string>
+    <string name="main_scanner_2">Running scans on user installed apps\u2026</string>
     <string name="main_scanner_3">Record audio apps found:\u0020</string>
     <string name="main_scanner_4">No record audio apps found.</string>
     <string name="main_scanner_5">\u0020Audio Beacon SDKs detected.</string>
@@ -119,7 +119,7 @@
     <string name="main_scanner_8">Microphone use detected.</string>
     <string name="main_scanner_9">No microphone use detected.</string>
     -->
-    <string name="main_scanner_10">Listening for near-ultra high audio...</string>
+    <string name="main_scanner_10">Listening for near-ultra high audio\u2026</string>
     <string name="main_scanner_11">scanner</string>
     <string name="main_scanner_12">Stop listening for audio.</string>
     <string name="main_scanner_13">Detected possible n-uhf audio.</string>
@@ -131,8 +131,8 @@
     <string name="main_scanner_23">passive</string>
     <string name="main_scanner_24">Stopping scanner when jamming.</string>
     <string name="main_scanner_25">Stopping jamming when scanning.</string>
-    <string name="main_scanner_26">Running passive jamming...</string>
-    <string name="main_scanner_27">Running active jamming...</string>
+    <string name="main_scanner_26">Running passive jamming\u2026</string>
+    <string name="main_scanner_27">Running active jamming\u2026</string>
     <string name="main_scanner_28">Stop active jamming.</string>
     <string name="main_scanner_29">Stop passive jamming.</string>
     <string name="main_scanner_30">PASSIVE</string>
@@ -186,6 +186,8 @@
     <string name="dialog_button_cancel">Cancel</string>
     <string name="dialog_button_okay">OK</string>
 
+    <string name="app_status_1">passive jammer running.</string>
+    <string name="app_status_2">passive jammer not running.</string>
     <string name="app_status_3">active jammer running.</string>
     <string name="app_status_4">active jammer not running.</string>
     <string name="app_status_5">EQ is turned off.</string>
@@ -204,7 +206,7 @@
     <string name="jammer_dialog_10">1000</string>
     <string name="jammer_dialog_11">(All frequencies constrained to NUHF)</string>
 
-    <string name="drift_dialog_1">Drift speed (1-10)</string>
+    <string name="drift_dialog_1">Drift speed (1 to 10)</string>
     <string name="drift_dialog_2">1</string>
     <string name="drift_dialog_3">(1 = fast, 10 = slow)</string>
 
@@ -213,6 +215,7 @@
     -->
     <string name="audio_check_pre_1">Checking for best audio record type.</string>
     <string name="audio_check_pre_2">\nChecking for best audio output type.</string>
+    <string name="audio_check_pre_3">Error in setting up audio output.</string>
 
     <string name="usb_state_7">has usb audio type.</string>
     <string name="usb_state_8">no usb audio type found.</string>
@@ -220,13 +223,13 @@
     <string name="option_set_2">Frequency Step set to (hz):\u0020</string>
     <string name="option_set_3">Magnitude level set to (sqrt):\u0020</string>
 
-    <string name="main_scanner_18">Audio scanning start...</string>
+    <string name="main_scanner_18">Audio scanning start\u2026</string>
     <string name="main_scanner_19">Audio scanning stop.</string>
     <string name="main_scanner_20">Buffer storage size:\u0020</string>
     <string name="main_scanner_21">Buffer storage empty</string>
 
     <string name="background_scan_1">Background scanner fail.</string>
-    <string name="background_scan_2">run background checks...</string>
+    <string name="background_scan_2">run background checks\u2026</string>
     <string name="background_scan_3">User Apps with RECORD AUDIO:\u0020</string>
     <string name="background_scan_4">Found audio beacon services for\u0020</string>
     <string name="background_scan_5">Found audio beacon receivers for\u0020</string>
@@ -246,7 +249,7 @@
     <string name="audio_check_5">Possible microphone in use.</string>
     <string name="audio_check_6">check audioBufferState read error - status id:\u0020</string>
     <string name="audio_check_7">check audioBufferState init error.</string>
-    <string name="audio_check_8">audioBufferState no error, checking...</string>
+    <string name="audio_check_8">audioBufferState no error, checking\u2026</string>
     <string name="audio_check_9">check audioBufferState exception on close.</string>
     <string name="audio_check_10">Stopping all audio.</string>
     <string name="audio_check_11">Audio record stopped and released.</string>
@@ -276,7 +279,7 @@
 
     <string name="writer_state_1">Check storage.</string>
     <string name="writer_state_2">external directory location:\u0020</string>
-    <string name="writer_state_3">preparing text log file...</string>
+    <string name="writer_state_3">preparing text log file\u2026</string>
     <string name="writer_state_4">Error getting storage directory</string>
     <string name="writer_state_5">File not found error.</string>
     <string name="writer_state_6">Log file write error.</string>
@@ -286,17 +289,18 @@
     <string name="writer_state_10">Write audio file close error.</string>
     <string name="writer_state_11">no raw audio file found.</string>
     <string name="writer_state_12">no wav output file found.</string>
-    <string name="writer_state_13">Converting raw audio to wav file...</string>
+    <string name="writer_state_13">Converting raw audio to wav file\u2026</string>
     <string name="writer_state_14">Error writing pcm file to wav file.</string>
     <string name="writer_state_15">Finished saving\u0020</string>
     <string name="writer_state_16">No storage folder found.</string>
-    <string name="writer_state_17">Deleting empty files...</string>
+    <string name="writer_state_17">Deleting empty files\u2026</string>
     <string name="writer_state_18_1">Deleted\u0020</string>
     <string name="writer_state_18_2">\u0020empty file(s) from storage.</string>
-    <string name="writer_state_18_3">\u0020files from storage...</string>
+    <string name="writer_state_18_3">\u0020files from storage\u2026</string>
     <string name="writer_state_19">Storage folder now empty.</string>
     <string name="writer_state_20">Storage size:\u0020</string>
     <string name="writer_state_21">temp raw audio file deleted.</string>
+    <string name="writer_state_22">Error creating storage directory.</string>
 
     <!--
 PassiveJammer.java

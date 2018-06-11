@@ -33,20 +33,14 @@ public class FreqDetector {
     }
 
     private void startRecordTaskListener(RecordTaskListener recordTaskListener) {
-        if (recordTask.getStatus() == AsyncTask.Status.RUNNING) {
-            //
-        }
-        else {
+        if (recordTask.getStatus() != AsyncTask.Status.RUNNING) {
             recordTask.setOnResultsListener(recordTaskListener);
-            recordTask.execute(new Void[0]);
+            recordTask.execute();
         }
     }
 
     protected boolean hasBufferStorage() {
-        if (recordTask != null) {
-            return recordTask.hasBufferStorage();
-        }
-        return false;
+        return (recordTask != null && recordTask.hasBufferStorage());
     }
 
 

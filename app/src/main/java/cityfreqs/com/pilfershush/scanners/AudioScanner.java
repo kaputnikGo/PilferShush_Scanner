@@ -14,7 +14,6 @@ public class AudioScanner {
     private FreqDetector freqDetector;
     private ProcessAudio processAudio;
     private AudioSettings audioSettings;
-    public boolean audioDetected;
 
     private ArrayList<Integer> frequencySequence;
     private ArrayList<Integer[]> bufferStorage;
@@ -32,7 +31,6 @@ public class AudioScanner {
     public void resetAudioScanner() {
         frequencySequence = new ArrayList<>();
         bufferStorage = new ArrayList<>();
-        audioDetected = false;
     }
 
     public void setMagnitude(double magnitude) {
@@ -56,7 +54,7 @@ public class AudioScanner {
 
     public void stopAudioScanner() {
         try {
-            if (hasBufferStorage()) {
+            if (freqDetector.hasBufferStorage()) {
                 // this can return a null
                 bufferStorage = freqDetector.getBufferStorage();
             }
@@ -68,9 +66,12 @@ public class AudioScanner {
         }
     }
 
+
+    /*
     public boolean hasBufferStorage() {
         return freqDetector.hasBufferStorage();
     }
+    */
 
     public boolean canProcessBufferStorage() {
         return bufferStorage != null;
@@ -105,8 +106,10 @@ public class AudioScanner {
         return processAudio.getLogicEntries();
     }
 
+    /*
     public ArrayList<Integer> getFreqSequence() {
         return frequencySequence;
     }
+    */
 }
 

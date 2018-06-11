@@ -44,6 +44,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 import cityfreqs.com.pilfershush.assist.AudioSettings;
@@ -63,8 +64,7 @@ public class MainActivity extends AppCompatActivity
     private static final int NOTIFY_ACTIVE_ID = 113;
 
     // dev internal version numbering
-    public static final String VERSION = "2.2.03";
-    //TODO more logger info re jammers
+    public static final String VERSION = "2.2.04";
 
     private ViewSwitcher viewSwitcher;
     private boolean mainView;
@@ -75,14 +75,10 @@ public class MainActivity extends AppCompatActivity
     private Runnable timerRunnable;
 
     private TextView focusText;
-    private Button beaconCheckButton;
-    private Button userAppCheckButton;
 
     private ToggleButton runScansButton;
     private ToggleButton passiveJammerButton;
     private ToggleButton activeJammerButton;
-    private Button debugViewButton;
-    private Button mainViewButton;
     private TextView mainScanText;
 
     private String[] freqSteps;
@@ -92,9 +88,7 @@ public class MainActivity extends AppCompatActivity
     private String[] storageAdmins;
 
     // USB
-    private static final String ACTION_USB_PERMISSION = "pilfershush.USB_PERMISSION";
-    private PendingIntent permissionIntent;
-    private DeviceContainer deviceContainer;
+    //private static final String ACTION_USB_PERMISSION = "pilfershush.USB_PERMISSION";
     private UsbManager usbManager;
 
     private boolean SCANNING;
@@ -130,7 +124,7 @@ public class MainActivity extends AppCompatActivity
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        viewSwitcher = (ViewSwitcher) findViewById(R.id.main_view_switcher);
+        viewSwitcher = findViewById(R.id.main_view_switcher);
         mainView = true;
 
         headsetReceiver = new HeadsetIntentReceiver();
@@ -144,7 +138,6 @@ public class MainActivity extends AppCompatActivity
         pilferShushJammer = new PilferShushJammer();
 
         //MAIN VIEW
-        //TODO
         runScansButton = findViewById(R.id.run_scans_button);
         runScansButton.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
@@ -169,7 +162,6 @@ public class MainActivity extends AppCompatActivity
             }
         });
 
-        //TODO
         passiveJammerButton = findViewById(R.id.run_passive_button);
         passiveJammerButton.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
@@ -229,7 +221,7 @@ public class MainActivity extends AppCompatActivity
 
         visualiserView = findViewById(R.id.audio_visualiser_view);
 
-        debugViewButton = findViewById(R.id.debug_view_button);
+        Button debugViewButton = findViewById(R.id.debug_view_button);
         debugViewButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 switchViews();
@@ -238,7 +230,7 @@ public class MainActivity extends AppCompatActivity
 
         // DEBUG VIEW
 
-        beaconCheckButton = findViewById(R.id.beacon_check_button);
+        Button beaconCheckButton = findViewById(R.id.beacon_check_button);
         beaconCheckButton.setOnClickListener(new View.OnClickListener() {
              public void onClick(View v) {
                  hasAudioBeaconAppsList();
@@ -246,7 +238,7 @@ public class MainActivity extends AppCompatActivity
          });
 
 
-        userAppCheckButton = findViewById(R.id.userapp_check_button);
+        Button userAppCheckButton = findViewById(R.id.userapp_check_button);
         userAppCheckButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 hasUserAppsList();
@@ -266,7 +258,7 @@ public class MainActivity extends AppCompatActivity
         focusText = findViewById(R.id.focus_text);
         focusText.setTextColor(Color.parseColor("#ffff00")); // yellow
 
-        mainViewButton = findViewById(R.id.main_view_button);
+        Button mainViewButton = findViewById(R.id.main_view_button);
         mainViewButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 switchViews();
@@ -274,16 +266,16 @@ public class MainActivity extends AppCompatActivity
         });
 
         usbManager = (UsbManager) getSystemService(Context.USB_SERVICE);
-        permissionIntent = PendingIntent.getBroadcast(this, 0, new Intent(ACTION_USB_PERMISSION), 0);
-        IntentFilter filter = new IntentFilter(ACTION_USB_PERMISSION);
+        //permissionIntent = PendingIntent.getBroadcast(this, 0, new Intent(ACTION_USB_PERMISSION), 0);
+        //IntentFilter filter = new IntentFilter(ACTION_USB_PERMISSION);
 
         // permissions ask:
         // check API version, above 23 permissions are asked at runtime
         // if API version < 23 (6.x) fallback is manifest.xml file permission declares
         if (android.os.Build.VERSION.SDK_INT > android.os.Build.VERSION_CODES.LOLLIPOP) {
 
-            List<String> permissionsNeeded = new ArrayList<String>();
-            final List<String> permissionsList = new ArrayList<String>();
+            List<String> permissionsNeeded = new ArrayList<>();
+            final List<String> permissionsList = new ArrayList<>();
 
             if (!addPermission(permissionsList, Manifest.permission.RECORD_AUDIO))
                 permissionsNeeded.add(getResources().getString(R.string.perms_state_1));
@@ -292,12 +284,14 @@ public class MainActivity extends AppCompatActivity
 
             if (permissionsList.size() > 0) {
                 if (permissionsNeeded.size() > 0) {
-                    // Need Rationale
-                    String message = getResources().getString(R.string.perms_state_3) + permissionsNeeded.get(0);
+                    StringBuilder sb = new StringBuilder();
+                    sb.append(getResources().getString(R.string.perms_state_3));
+                    sb.append(permissionsNeeded.get(0));
                     for (int i = 1; i < permissionsNeeded.size(); i++) {
-                        message = message + ", " + permissionsNeeded.get(i);
+                        sb.append(", ");
+                        sb.append(permissionsNeeded.get(i));
                     }
-                    showPermissionsDialog(message,
+                    showPermissionsDialog(sb.toString(),
                             new DialogInterface.OnClickListener() {
                                 @Override
                                 public void onClick(DialogInterface dialog, int which) {
@@ -311,7 +305,6 @@ public class MainActivity extends AppCompatActivity
                 ActivityCompat.requestPermissions(this,
                         permissionsList.toArray(new String[permissionsList.size()]),
                         REQUEST_MULTIPLE_PERMISSIONS);
-                return;
             }
             else {
                 // assume already runonce, has permissions
@@ -348,7 +341,7 @@ public class MainActivity extends AppCompatActivity
                 // reset booleans to init state
                 PASSIVE_RUNNING = false;
                 IRQ_TELEPHONY = false;
-                stopPassive();
+                runPassive();
             }
             else if (status == AudioManager.AUDIOFOCUS_LOSS) {
                 // possible music player etc that has speaker focus but no need of microphone,
@@ -357,23 +350,25 @@ public class MainActivity extends AppCompatActivity
                 // reset booleans to init state
                 PASSIVE_RUNNING = false;
                 IRQ_TELEPHONY = false;
-                stopPassive();
-            }
-            else if (PASSIVE_RUNNING) {
-                // return from background without irq_telephony
-                entryLogger("status: passive jammer running.", true);
-            }
-            else {
-                entryLogger("status: passive jammer not running.", true);
-            }
-            if (ACTIVE_RUNNING) {
-                // return from background without irq_telephony
-                entryLogger(getResources().getString(R.string.app_status_3), true);
-            }
-            else {
-                entryLogger(getResources().getString(R.string.app_status_4), true);
+                runPassive();
             }
         }
+        else if (PASSIVE_RUNNING) {
+            // return from background without irq_telephony
+            entryLogger(getResources().getString(R.string.app_status_1), true);
+        }
+        else {
+            entryLogger(getResources().getString(R.string.app_status_2), true);
+        }
+        if (ACTIVE_RUNNING) {
+            // return from background without irq_telephony
+            entryLogger(getResources().getString(R.string.app_status_3), true);
+        }
+        else {
+            entryLogger(getResources().getString(R.string.app_status_4), true);
+        }
+
+
     }
 
     @Override
@@ -388,7 +383,7 @@ public class MainActivity extends AppCompatActivity
         sharedPrefsEditor.putBoolean("passive_running", PASSIVE_RUNNING);
         sharedPrefsEditor.putBoolean("active_running", ACTIVE_RUNNING);
         sharedPrefsEditor.putBoolean("irq_telephony", IRQ_TELEPHONY);
-        sharedPrefsEditor.commit();
+        sharedPrefsEditor.apply();
         // then work out if need to toggle jammer off (UI) due to irq_telephony
         if (PASSIVE_RUNNING && IRQ_TELEPHONY) {
             // make UI conform to jammer override by system telephony
@@ -489,8 +484,7 @@ public class MainActivity extends AppCompatActivity
         if (ActivityCompat.checkSelfPermission(this, permission) != PackageManager.PERMISSION_GRANTED) {
             permissionsList.add(permission);
             // Check for Rationale Option
-            if (!ActivityCompat.shouldShowRequestPermissionRationale(this, permission))
-                return false;
+            return (ActivityCompat.shouldShowRequestPermissionRationale(this, permission));
         }
         return true;
     }
@@ -546,10 +540,20 @@ public class MainActivity extends AppCompatActivity
         //TODO
         logger(getResources().getString(R.string.usb_state_1));
         usbManager = (UsbManager) getSystemService(Context.USB_SERVICE);
-        HashMap<String, UsbDevice> deviceList = usbManager.getDeviceList();
+        HashMap<String, UsbDevice> deviceList;
+        try {
+            if (usbManager.getDeviceList() == null) {
+                return false;
+            }
+        }
+        catch(NullPointerException ex) {
+            return false;
+        }
+        deviceList = usbManager.getDeviceList();
         Iterator<UsbDevice> deviceIterator = deviceList.values().iterator();
+        DeviceContainer deviceContainer;
 
-        while(deviceIterator.hasNext()) {
+        if(deviceIterator.hasNext()) {
             UsbDevice device = deviceIterator.next();
             deviceContainer = new DeviceContainer(device);
             logger(getResources().getString(R.string.usb_state_2) + deviceContainer.toString());
@@ -559,6 +563,7 @@ public class MainActivity extends AppCompatActivity
         return false;
     }
 
+    /*
     private final BroadcastReceiver usbReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -591,11 +596,12 @@ public class MainActivity extends AppCompatActivity
             }
         }
     };
+    */
 
     private void initPilferShush() {
         audioManager = (AudioManager)getSystemService(Context.AUDIO_SERVICE);
 
-        timerText = (TextView) findViewById(R.id.timer_text);
+        timerText = findViewById(R.id.timer_text);
         // on screen timer
         timerHandler = new Handler();
         timerRunnable = new Runnable() {
@@ -605,7 +611,7 @@ public class MainActivity extends AppCompatActivity
                 int seconds = (int)(millis / 1000);
                 int minutes = seconds / 60;
                 seconds = seconds % 60;
-                timerText.setText(String.format("timer - %02d:%02d", minutes, seconds));
+                timerText.setText(String.format(Locale.getDefault(), "timer - %02d:%02d", minutes, seconds));
                 timerHandler.postDelayed(this, 500);
             }
         };
@@ -617,8 +623,9 @@ public class MainActivity extends AppCompatActivity
             initAudioFocusListener();
             populateMenuItems();
             reportInitialState();
-            pilferShushJammer.initJammer(this, audioSettings);
-            mainScanLogger("Active jammer set to: " + jammerTypes[pilferShushJammer.getJammerTypeSwitch()], true);
+            if (pilferShushJammer.initJammer(this, audioSettings)) {
+                mainScanLogger("Active jammer set to: " + jammerTypes[pilferShushJammer.getJammerTypeSwitch()], true);
+            }
         }
         else {
             mainScanLogger(getResources().getString(R.string.init_state_12), true);
@@ -631,7 +638,7 @@ public class MainActivity extends AppCompatActivity
         sharedPrefsEditor = sharedPrefs.edit();
         sharedPrefsEditor.putBoolean("passive_running", PASSIVE_RUNNING);
         sharedPrefsEditor.putBoolean("irq_telephony", IRQ_TELEPHONY);
-        sharedPrefsEditor.commit();
+        sharedPrefsEditor.apply();
         createNotifications();
     }
 
@@ -664,7 +671,8 @@ public class MainActivity extends AppCompatActivity
     }
 
     private void reportInitialState() {
-        mainScanText.setText(getResources().getString(R.string.init_state_1) + VERSION);
+        String startText = getResources().getString(R.string.init_state_1) + VERSION;
+        mainScanText.setText(startText);
         mainScanLogger("\n" + getResources().getString(R.string.init_state_2) + pilferShushScanner.getAudioCheckerReport(), false);
         mainScanLogger("\n" + getResources().getString(R.string.init_state_3), true);
         mainScanLogger("\n" + getResources().getString(R.string.init_state_4) + getResources().getString(R.string.init_state_5), false);
@@ -755,7 +763,7 @@ public class MainActivity extends AppCompatActivity
         LayoutInflater inflater = this.getLayoutInflater();
         View inputView = inflater.inflate(R.layout.session_form, null);
         dialogBuilder.setView(inputView);
-        final EditText userInput = (EditText) inputView.findViewById(R.id.session_input);
+        final EditText userInput = inputView.findViewById(R.id.session_input);
 
         dialogBuilder
                 .setCancelable(false)
@@ -960,8 +968,8 @@ public class MainActivity extends AppCompatActivity
         View inputView = inflater.inflate(R.layout.user_ranged_form, null);
         dialogBuilder.setView(inputView);
 
-        final EditText userCarrierInput = (EditText) inputView.findViewById(R.id.carrier_input);
-        final EditText userLimitInput = (EditText) inputView.findViewById(R.id.limit_input);
+        final EditText userCarrierInput = inputView.findViewById(R.id.carrier_input);
+        final EditText userLimitInput = inputView.findViewById(R.id.limit_input);
 
         dialogBuilder.setTitle(R.string.jammer_dialog_5);
 
@@ -998,7 +1006,7 @@ public class MainActivity extends AppCompatActivity
         View inputView = inflater.inflate(R.layout.drift_speed_form, null);
         dialogBuilder.setView(inputView);
 
-        final EditText userDriftInput = (EditText) inputView.findViewById(R.id.drift_input);
+        final EditText userDriftInput = inputView.findViewById(R.id.drift_input);
 
         dialogBuilder.setTitle(R.string.drift_dialog_1);
         dialogBuilder.setMessage("");
@@ -1039,9 +1047,10 @@ public class MainActivity extends AppCompatActivity
             runScansButton.toggle();
         }
         if (focusChange == AudioManager.AUDIOFOCUS_LOSS) {
-            // total loss, focus abandoned
+            // total loss, focus abandoned, need to confirm this behaviour
+            IRQ_TELEPHONY = true;
         }
-        if (focusChange == AudioManager.AUDIOFOCUS_LOSS_TRANSIENT) {
+        else if (focusChange == AudioManager.AUDIOFOCUS_LOSS_TRANSIENT) {
             // system forced loss, assuming telephony
             IRQ_TELEPHONY = true;
         }
@@ -1113,7 +1122,7 @@ public class MainActivity extends AppCompatActivity
         timerHandler.postDelayed(timerRunnable, 0);
         // clear any caution lines from previous session
         visualiserView.clearFrequencyCaution();
-        wakeLock.acquire();
+        wakeLock.acquire(600000); // timeout in ms (10 mins)
 
         mainScanLogger(getResources().getString(R.string.main_scanner_2), false);
 
@@ -1141,7 +1150,7 @@ public class MainActivity extends AppCompatActivity
 
         SCANNING = false;
         timerHandler.removeCallbacks(timerRunnable);
-        timerText.setText("timer - 00:00");
+        timerText.setText(getResources().getString(R.string.timer_text));
 
         if (wakeLock != null) {
             if (wakeLock.isHeld()) {
@@ -1151,8 +1160,6 @@ public class MainActivity extends AppCompatActivity
         }
 
         // FINISHED, determine type of signal
-        //runScansButton.setText(getResources().getString(R.string.main_scanner_11));
-        //runScansButton.setBackgroundColor(Color.LTGRAY);
         mainScanLogger(getResources().getString(R.string.main_scanner_12), false);
 
         if (pilferShushScanner.hasAudioScanSequence()) {
@@ -1162,7 +1169,9 @@ public class MainActivity extends AppCompatActivity
             mainScanLogger(pilferShushScanner.getModFrequencyLogic(), true);
 
             // all captures to detailed view:
-            pilferShushScanner.getFreqSeqLogicEntries();
+            if (pilferShushScanner.getFreqSeqLogicEntries().isEmpty()) {
+                mainScanLogger("FreqSequence Logic entries empty.", false);
+            }
 
             // simple report to main logger
             mainScanLogger(getResources().getString(R.string.main_scanner_14) + pilferShushScanner.getFrequencySequenceSize(), true);
@@ -1330,6 +1339,10 @@ public class MainActivity extends AppCompatActivity
 
     private class HeadsetIntentReceiver extends BroadcastReceiver {
         @Override public void onReceive(Context context, Intent intent) {
+            if (intent.getAction() == null) {
+                return;
+            }
+
             if (intent.getAction().equals(Intent.ACTION_HEADSET_PLUG)) {
                 int state = intent.getIntExtra("state", -1);
                 switch (state) {

@@ -16,21 +16,15 @@ public class AppEntry {
     private boolean bootCheck;
     private boolean receivers;
     private boolean services;
-    private boolean caution;
 
     private int servicesNum;
     private int receiversNum;
-    private int permissionsNum;
+    //private int permissionsNum;
 
-    private String[] requestedPermissions;
     private ServiceInfo[] serviceInfo;
     private ActivityInfo[] receiversInfo;
     private String[] beaconServices;
     private String[] beaconReceivers;
-
-    public AppEntry() {
-        // keep empty
-    }
 
     public AppEntry(String packageName, String activityName) {
         this.packageName = packageName;
@@ -40,16 +34,17 @@ public class AppEntry {
         bootCheck = false;
         receivers = false;
         services = false;
-        caution = false;
         servicesNum = 0;
         receiversNum = 0;
-        permissionsNum = 0;
+        //permissionsNum = 0;
     }
 
     /********************************************************************/
 /*
  *
  */
+
+    /*
     public void setPackageName(String packageName) {
         this.packageName = packageName;
     }
@@ -59,15 +54,20 @@ public class AppEntry {
     public void setActivityName(String activityName) {
         this.activityName = activityName;
     }
+    */
+
     public String getActivityName() {
         return activityName;
     }
     public void setIdNum(int idNum) {
         this.idNum = idNum;
     }
+
+    /*
     public int getIdNum() {
         return idNum;
     }
+    */
 
     public int getServicesNum() {
         return servicesNum;
@@ -75,9 +75,13 @@ public class AppEntry {
     public int getReceiversNum() {
         return receiversNum;
     }
+
+    /*
     public int getPermissionsNum() {
         return permissionsNum;
     }
+    */
+
     /*
      *
      */
@@ -91,16 +95,22 @@ public class AppEntry {
     public void setBootCheck(boolean bootCheck) {
         this.bootCheck = bootCheck;
     }
+
+    /*
     public boolean getBootCheck() {
         return bootCheck;
     }
+    */
 
     public void setReceivers(boolean receivers) {
         this.receivers = receivers;
     }
+
+    /*
     public boolean getReceivers() {
         return receivers;
     }
+    */
 
     public void setServices(boolean services) {
         this.services = services;
@@ -113,18 +123,19 @@ public class AppEntry {
         // set and return,
         // called by BackgroundChecker.appEntryLog(),
         // later boolean is checked for in-depth scanning of services, receivers, etc.
-        return caution = ((recordable) && (bootCheck) && (receivers) && (services));
+        return ((recordable) && (bootCheck) && (receivers) && (services));
     }
+
+    /*
+
 
     public boolean getCaution() {
         return caution;
     }
+    */
 
     public boolean checkBeaconServiceNames() {
-        if (beaconServices != null)
-            return beaconServices.length > 0;
-        else
-            return false;
+        return (beaconServices != null && beaconServices.length > 0);
     }
 
     public int getBeaconServiceNamesNum() {
@@ -142,10 +153,7 @@ public class AppEntry {
     }
 
     public boolean checkBeaconReceiverNames() {
-        if (beaconReceivers != null)
-            return beaconReceivers.length > 0;
-        else
-            return false;
+        return (beaconReceivers != null && beaconReceivers.length > 0);
     }
 
     public int getBeaconReceiverNamesNum() {
@@ -166,12 +174,14 @@ public class AppEntry {
 /*
  *  arrays
  */
+    /*
     public void setRequestedPermissions(String[] requestedPermissions) {
         // manifest declared permissions list
-        this.requestedPermissions = new String[requestedPermissions.length];
-        this.requestedPermissions = Arrays.copyOf(requestedPermissions, requestedPermissions.length);
-        permissionsNum = this.requestedPermissions.length;
+        requestedPermissions = new String[requestedPermissions.length];
+        requestedPermissions = Arrays.copyOf(requestedPermissions, requestedPermissions.length);
+        permissionsNum = requestedPermissions.length;
     }
+    */
 
     public void setServiceInfo(ServiceInfo[] serviceInfo) {
         // any background recording service list
@@ -204,7 +214,7 @@ public class AppEntry {
     // .processName
     // .permission
     public String[] getServiceNames() {
-        String[] beaconServices = new String[serviceInfo.length];
+        beaconServices = new String[serviceInfo.length];
         int i = 0;
 
         String[] names = new String[serviceInfo.length];
@@ -225,7 +235,7 @@ public class AppEntry {
     // .processName
     // .targetActivity
     public String[] getReceiverNames() {
-        String[] beaconReceivers = new String[receiversInfo.length];
+        beaconReceivers = new String[receiversInfo.length];
         int i = 0;
 
         String[] names = new String[receiversInfo.length];
