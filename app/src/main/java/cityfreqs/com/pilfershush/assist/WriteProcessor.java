@@ -27,8 +27,6 @@ public class WriteProcessor {
     private AudioSettings audioSettings;
 
     private File extDirectory;
-
-    private String waveFilename;
     private String sessionFilename;
 
     public static File AUDIO_OUTPUT_FILE;
@@ -39,6 +37,7 @@ public class WriteProcessor {
 
     private static final String APP_DIRECTORY_NAME = "PilferShush";
     private static final String DEFAULT_SESSION_NAME = "capture";
+    private static final String AUDIO_FILE_EXTENSION_RAW = ".pcm";
     private static final String AUDIO_FILE_EXTENSION_WAV = ".wav";
 
     private static final long MINIMUM_STORAGE_SIZE_BYTES = 2048; // approx 2 mins pcm audio
@@ -107,9 +106,11 @@ public class WriteProcessor {
         }
         // add the extension and timestamp
         // eg: 20151218-10:14:32-capture.pcm(.wav)
-        waveFilename = getTimestamp() + "-" + sessionFilename + AUDIO_FILE_EXTENSION_WAV;
+        String audioFilename = getTimestamp() + "-" + sessionFilename + AUDIO_FILE_EXTENSION_RAW;
+        String waveFilename = getTimestamp() + "-" + sessionFilename + AUDIO_FILE_EXTENSION_WAV;
         // file save will overwrite unless new name is used...
         try {
+            AUDIO_OUTPUT_FILE = new File(location, audioFilename);
             AUDIO_OUTPUT_STREAM = null;
             AUDIO_OUTPUT_STREAM = new BufferedOutputStream(new FileOutputStream(AUDIO_OUTPUT_FILE, false));
             AUDIO_RAW_STREAM = new DataOutputStream(AUDIO_OUTPUT_STREAM);
@@ -187,7 +188,7 @@ public class WriteProcessor {
             log(context.getString(R.string.writer_state_14));
             return false;
         }
-        log(context.getString(R.string.writer_state_15) + waveFilename);
+        log(context.getString(R.string.writer_state_15));
         return true;
     }
 
@@ -284,11 +285,9 @@ public class WriteProcessor {
             log(context.getString(R.string.writer_state_16));
             return;
         }
-        String[] filesDelete = extDirectory.list();
-        log(context.getString(R.string.writer_state_18_1) + filesDelete.length + context.getString(R.string.writer_state_18_3));
-
-        for (String file : filesDelete) {
-            new File(extDirectory, file).deleteOnExit();
+        log(context.getString(R.string.writer_state_18));
+        for (File file : extDirectory.listFiles()) {
+            file.delete();
         }
         log(context.getString(R.string.writer_state_19));
     }
@@ -305,7 +304,6 @@ public class WriteProcessor {
                 length += file.length();
             }
         }
-        log(context.getString(R.string.writer_state_20) + (int)length);
         return length;
     }
 

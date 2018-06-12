@@ -157,7 +157,7 @@
     <string name="init_state_3">Settings can be changed via the Options menu.</string>
     <string name="init_state_4">The Detailed View has logging and more information from scans.</string>
     <string name="init_state_5">It also has a user app scan for services and receivers.</string>
-    <string name="init_state_6">Save scanner audio to file (wav):\u0020</string>
+    <string name="init_state_6">Save scanner audio to file:\u0020</string>
     <string name="init_state_7_1">Wav audio:\u0020</string>
     <string name="init_state_7_2">, little-endian.</string>
     <string name="init_state_8_1">Raw audio:\u0020</string>
@@ -295,12 +295,10 @@
     <string name="writer_state_12">no wav output file found.</string>
     <string name="writer_state_13">Converting raw audio to wav file\u2026</string>
     <string name="writer_state_14">Error writing pcm file to wav file.</string>
-    <string name="writer_state_15">Finished saving\u0020</string>
+    <string name="writer_state_15">Finished saving to wav file.</string>
     <string name="writer_state_16">No storage folder found.</string>
     <string name="writer_state_17">Deleting empty files\u2026</string>
-    <string name="writer_state_18_1">Deleted\u0020</string>
-    <string name="writer_state_18_2">\u0020empty file(s) from storage.</string>
-    <string name="writer_state_18_3">\u0020files from storage\u2026</string>
+    <string name="writer_state_18">Deleting files from storage\u2026</string>
     <string name="writer_state_19">Storage folder now empty.</string>
     <string name="writer_state_20">Storage size:\u0020</string>
     <string name="writer_state_21">temp raw audio file deleted.</string>

@@ -61,7 +61,7 @@ public class MainActivity extends AppCompatActivity
     private static final int NOTIFY_ACTIVE_ID = 113;
 
     // dev internal version numbering
-    public static final String VERSION = "2.2.06";
+    public static final String VERSION = "2.2.07";
 
     private ViewSwitcher viewSwitcher;
     private boolean mainView;
