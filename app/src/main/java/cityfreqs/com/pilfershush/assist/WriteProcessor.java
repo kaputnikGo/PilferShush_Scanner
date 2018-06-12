@@ -157,6 +157,10 @@ public class WriteProcessor {
     }
 
     public void audioFileConvert() {
+        if (!audioSettings.getWriteFiles()) {
+           // write disabled
+            return;
+        }
         if (convertToWav()) {
             AUDIO_OUTPUT_FILE.deleteOnExit();
             log(context.getString(R.string.writer_state_21));
