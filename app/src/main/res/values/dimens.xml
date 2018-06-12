@@ -2,5 +2,6 @@
 <resources>
     <dimen name="activity_horizontal_margin">8dp</dimen>
     <dimen name="activity_vertical_margin">8dp</dimen>
+    <dimen name="toggle_button_width">100dp</dimen>
 
 </resources>

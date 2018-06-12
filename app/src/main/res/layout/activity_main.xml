@@ -30,12 +30,12 @@
 
             <ToggleButton
                 android:id="@+id/run_scans_button"
-                android:layout_width="wrap_content"
+                android:layout_width="@dimen/toggle_button_width"
                 android:layout_height="wrap_content"
-                android:layout_alignParentLeft="true"
+                android:layout_alignParentStart="true"
                 android:layout_alignParentTop="true"
                 android:layout_marginBottom="@dimen/activity_vertical_margin"
-                android:layout_weight=".30"
+                android:maxWidth="@dimen/toggle_button_width"
                 android:text="@string/main_scanner_11"
                 android:textAllCaps="false"
                 android:textOff="@string/main_scanner_11"
@@ -43,12 +43,12 @@
 
             <ToggleButton
                 android:id="@+id/run_active_button"
-                android:layout_width="wrap_content"
+                android:layout_width="@dimen/toggle_button_width"
                 android:layout_height="wrap_content"
                 android:layout_alignParentTop="true"
                 android:layout_centerHorizontal="true"
                 android:layout_marginBottom="@dimen/activity_vertical_margin"
-                android:layout_weight=".30"
+                android:maxWidth="@dimen/toggle_button_width"
                 android:text="@string/main_scanner_22"
                 android:textAllCaps="false"
                 android:textOff="@string/main_scanner_22"
@@ -56,12 +56,12 @@
 
             <ToggleButton
                 android:id="@+id/run_passive_button"
-                android:layout_width="wrap_content"
+                android:layout_width="@dimen/toggle_button_width"
                 android:layout_height="wrap_content"
-                android:layout_alignParentRight="true"
+                android:layout_alignParentEnd="true"
                 android:layout_alignParentTop="true"
                 android:layout_marginBottom="@dimen/activity_vertical_margin"
-                android:layout_weight=".30"
+                android:maxWidth="@dimen/toggle_button_width"
                 android:text="@string/main_scanner_23"
                 android:textAllCaps="false"
                 android:textOff="@string/main_scanner_23"
@@ -71,7 +71,7 @@
                 android:id="@+id/debug_view_button"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_alignParentLeft="true"
+                android:layout_alignParentStart="true"
                 android:layout_below="@+id/run_scans_button"
                 android:layout_marginBottom="@dimen/activity_vertical_margin"
                 android:text="@string/debug_view_button_text" />
@@ -83,16 +83,16 @@
                 android:layout_alignEnd="@+id/active_type_switch"
                 android:layout_below="@+id/run_passive_button"
                 android:checked="false"
-                android:text="EQ" />
+                android:text="@string/button_eq" />
 
             <Switch
                 android:id="@+id/active_type_switch"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_alignParentRight="true"
+                android:layout_alignParentEnd="true"
                 android:layout_below="@+id/eq_switch"
                 android:checked="false"
-                android:text="Noise" />
+                android:text="@string/button_noise" />
 
 
             <cityfreqs.com.pilfershush.AudioVisualiserView
@@ -133,9 +133,8 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_alignParentTop="true"
-                android:layout_alignParentLeft="true"
+                android:layout_alignParentStart="true"
                 android:layout_marginBottom="@dimen/activity_vertical_margin"
-                android:layout_weight=".30"
                 android:text="@string/main_view_button_text" />
 
             <Button
@@ -144,8 +143,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="@dimen/activity_vertical_margin"
                 android:layout_alignParentTop="true"
-                android:layout_toRightOf="@id/main_view_button"
-                android:layout_weight=".30"
+                android:layout_toEndOf="@id/main_view_button"
                 android:textAllCaps="false"
                 android:text="@string/beacon_check_1" />
 
@@ -153,11 +151,10 @@
                 android:id="@+id/userapp_check_button"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_alignParentRight="true"
+                android:layout_alignParentEnd="true"
                 android:layout_alignParentTop="true"
                 android:layout_marginBottom="@dimen/activity_vertical_margin"
-                android:layout_toRightOf="@id/beacon_check_button"
-                android:layout_weight=".30"
+                android:layout_toEndOf="@id/beacon_check_button"
                 android:textAllCaps="false"
                 android:text="@string/userapp_check_1" />
 

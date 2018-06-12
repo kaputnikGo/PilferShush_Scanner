@@ -120,15 +120,15 @@
     <string name="main_scanner_9">No microphone use detected.</string>
     -->
     <string name="main_scanner_10">Listening for near-ultra high audio\u2026</string>
-    <string name="main_scanner_11">scanner</string>
+    <string name="main_scanner_11" translatable="false">scanner</string>
     <string name="main_scanner_12">Stop listening for audio.</string>
     <string name="main_scanner_13">Detected possible n-uhf audio.</string>
     <string name="main_scanner_14">Frequency list size:\u0020</string>
     <string name="main_scanner_15">Original sequence as transmitted:</string>
     <string name="main_scanner_16">No detected audio beacon signals.</string>
     <string name="main_scanner_17">[-: end of scan :-]</string>
-    <string name="main_scanner_22">active</string>
-    <string name="main_scanner_23">passive</string>
+    <string name="main_scanner_22" translatable="false">active</string>
+    <string name="main_scanner_23" translatable="false">passive</string>
     <string name="main_scanner_24">Stopping scanner when jamming.</string>
     <string name="main_scanner_25">Stopping jamming when scanning.</string>
     <string name="main_scanner_26">Running passive jamming\u2026</string>
@@ -156,15 +156,15 @@
     <string name="init_state_2">Using\u0020</string>
     <string name="init_state_3">Settings can be changed via the Options menu.</string>
     <string name="init_state_4">The Detailed View has logging and more information from scans.</string>
-    <string name="init_state_5">It also has a polling Mic check to look for other apps using the microphone.</string>
-    <string name="init_state_6">Init: save scan audio to file:\u0020</string>
+    <string name="init_state_5">It also has a user app scan for services and receivers.</string>
+    <string name="init_state_6">Save scanner audio to file (wav):\u0020</string>
     <string name="init_state_7_1">Wav audio:\u0020</string>
     <string name="init_state_7_2">, little-endian.</string>
     <string name="init_state_8_1">Raw audio:\u0020</string>
     <string name="init_state_8_2">, big-endian.</string>
     <string name="init_state_9">Free storage space:\u0020</string>
     <string name="init_state_10_1">Press\u0020</string>
-    <string name="init_state_10_2">\u0020button to start and stop scanning for audio.</string>
+    <string name="init_state_10_2">\u0020button to scan for NUHF audio.</string>
     <string name="init_state_11">DO NOT RUN SCANNER FOR A LONG TIME.</string>
     <string name="init_state_12">PilferShush init failed.</string>
     <string name="init_state_13">Failed to init audio device.</string>
@@ -185,6 +185,9 @@
     <string name="dialog_button_save">Save</string>
     <string name="dialog_button_cancel">Cancel</string>
     <string name="dialog_button_okay">OK</string>
+
+    <string name="button_noise" translatable="false">Noise</string>
+    <string name="button_eq" translatable="false">EQ</string>
 
     <string name="app_status_1">passive jammer running.</string>
     <string name="app_status_2">passive jammer not running.</string>

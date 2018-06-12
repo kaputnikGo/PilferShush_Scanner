@@ -61,7 +61,7 @@ public class MainActivity extends AppCompatActivity
     private static final int NOTIFY_ACTIVE_ID = 113;
 
     // dev internal version numbering
-    public static final String VERSION = "2.2.05";
+    public static final String VERSION = "2.2.06";
 
     private ViewSwitcher viewSwitcher;
     private boolean mainView;
@@ -666,10 +666,10 @@ public class MainActivity extends AppCompatActivity
         mainScanLogger("\n" + getResources().getString(R.string.init_state_2) + pilferShushScanner.getAudioCheckerReport(), false);
         mainScanLogger("\n" + getResources().getString(R.string.init_state_3), true);
         mainScanLogger("\n" + getResources().getString(R.string.init_state_4) + getResources().getString(R.string.init_state_5), false);
-        mainScanLogger("\n" + getResources().getString(R.string.init_state_6) + Boolean.toString(pilferShushScanner.canWriteFiles()), true);
+        mainScanLogger("\n" + getResources().getString(R.string.init_state_6) + Boolean.toString(pilferShushScanner.canWriteFiles()), false);
 
         if (pilferShushScanner.canWriteFiles()) {
-            mainScanLogger("\n" + getResources().getString(R.string.init_state_7_1) +
+            mainScanLogger(getResources().getString(R.string.init_state_7_1) +
                     pilferShushScanner.getSaveFileType() +
                     getResources().getString(R.string.init_state_7_2), false);
         }
@@ -681,7 +681,7 @@ public class MainActivity extends AppCompatActivity
         }
 
         // run at init for awareness
-        mainScanLogger("\n" + getResources().getString(R.string.init_state_9) + printFreeSize(), true);
+        mainScanLogger(getResources().getString(R.string.init_state_9) + printFreeSize(), true);
         if (pilferShushScanner.cautionFreeSpace()) {
             // has under a minimum of 2048 bytes , pop a toast.
             cautionStorageSize();
@@ -691,7 +691,7 @@ public class MainActivity extends AppCompatActivity
                 getResources().getString(R.string.main_scanner_11) +
                 getResources().getString(R.string.init_state_10_2), false);
 
-        mainScanLogger("\n" + getResources().getString(R.string.init_state_11) + "\n", true);
+        mainScanLogger(getResources().getString(R.string.init_state_11) + "\n", true);
     }
 
     private void populateMenuItems() {
