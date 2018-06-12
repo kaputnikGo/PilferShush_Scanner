@@ -27,7 +27,7 @@ public class AudioVisualiserView extends View {
     private static final int MULTIPLIER = 4;
     private static final int RANGE = 256;
     private static final int CAUTION_LINE_WIDTH = 6;
-    private static final int CAUTION_LINE_MEDIAN = 90;
+    private static final int CAUTION_LINE_MEDIAN = 60;
     private static final int CAUTION_MAX = 128;
 
     //
@@ -86,9 +86,18 @@ public class AudioVisualiserView extends View {
         invalidate();
     }
 
-    public void frequencyCaution(int frequency) {
-        // canvas.drawLine(line.startX, line.startY, line.stopX, line.stopY, paint);
-        //TODO make a peak ghost line that remains, fade out previous caution lines
+    public void frequencyCaution(int frequency, int magnitude) {
+        // found freq magnitudes into ARGB value range
+        int cautionAlpha = magnitude / 2000;
+
+        // clamp values
+        if (cautionAlpha <= 125)
+            cautionAlpha = 125;
+        if (cautionAlpha >= 255)
+            cautionAlpha = 255;
+
+        mCautionPaint.setColor(Color.argb(cautionAlpha, 255, 0, 0));
+
         lineSpacer = RANGE - (lineCounter * (CAUTION_LINE_WIDTH + 2));
         if (lineSpacer <= 0) lineSpacer = 0;
 
@@ -105,6 +114,10 @@ public class AudioVisualiserView extends View {
             cautionLines[lineCounter * MULTIPLIER + 3] = rectMidHeight + CAUTION_LINE_MEDIAN + freqValue;
             lineCounter++;
         }
+
+        // reset cautionLines to draw from left
+        if (lineCounter >= 32)
+            lineCounter = 0;
     }
 
     public void clearFrequencyCaution() {

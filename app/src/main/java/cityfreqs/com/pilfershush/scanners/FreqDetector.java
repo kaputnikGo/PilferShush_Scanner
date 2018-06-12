@@ -12,7 +12,7 @@ public class FreqDetector {
 
     protected interface RecordTaskListener {
         void onFailure(String paramString);
-        void onSuccess(int paramInt);
+        void onSuccess(int paramInt, int magnitude);
     }
 
     protected FreqDetector(AudioSettings audioSettings) {

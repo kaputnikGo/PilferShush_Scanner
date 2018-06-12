@@ -5,7 +5,7 @@ Test application for researching methods of discovering use of audio beacons.
 Proper for Android Studio build/release.
 Added full passive and active jammers.
 
-   vers. 2.2.07
+   vers. 2.2.08
    - min API 18 (4.3)
    - target API 23 (6.x)
    - compiled API 26 (8.x)

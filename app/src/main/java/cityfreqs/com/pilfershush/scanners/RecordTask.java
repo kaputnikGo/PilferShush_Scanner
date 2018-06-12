@@ -80,7 +80,7 @@ public class RecordTask extends AsyncTask<Void, Integer, String> {
         }
 
         if (paramArgs[0] != null) {
-            recordTaskListener.onSuccess(paramArgs[0]);
+            recordTaskListener.onSuccess(paramArgs[0], paramArgs[1]);
         }
         else {
             recordTaskListener.onFailure("RecordTaskListener failed, no params.");
@@ -196,7 +196,7 @@ public class RecordTask extends AsyncTask<Void, Integer, String> {
                     // saved here for later analysis
                     bufferStorage.add(tempBuffer);
                     // draw on view
-                    publishProgress(candidateFreq);
+                    publishProgress(candidateFreq, (int)candidateMag);
                 }
                 // next freq for loop
                 candidateFreq += freqStepper;

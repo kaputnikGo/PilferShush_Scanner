@@ -1,6 +1,7 @@
 package cityfreqs.com.pilfershush.scanners;
 
 import android.content.Context;
+import android.util.Log;
 
 import java.util.ArrayList;
 
@@ -39,10 +40,11 @@ public class AudioScanner {
 
     public void runAudioScanner() {
         freqDetector.startRecording(new RecordTaskListener() {
-            public void onSuccess(int value) {
+            public void onSuccess(int value, int magnitude) {
                 if (processAudio.checkFrequency(value)) {
                     frequencySequence.add(value);
-                    MainActivity.visualiserView.frequencyCaution(value);
+                    MainActivity.visualiserView.frequencyCaution(value, magnitude);
+                    Log.d("MAGGERS", "value: " + magnitude);
                 }
             }
 
