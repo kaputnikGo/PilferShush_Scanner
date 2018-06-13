@@ -29,11 +29,11 @@ public class WriteProcessor {
     private File extDirectory;
     private String sessionFilename;
 
-    public static File AUDIO_OUTPUT_FILE;
-    public static File WAV_OUTPUT_FILE;
+    private File AUDIO_OUTPUT_FILE;
+    private File WAV_OUTPUT_FILE;
 
     public static BufferedOutputStream AUDIO_OUTPUT_STREAM;
-    public static DataOutputStream AUDIO_RAW_STREAM;
+    private static DataOutputStream AUDIO_RAW_STREAM;
 
     private static final String APP_DIRECTORY_NAME = "PilferShush";
     private static final String DEFAULT_SESSION_NAME = "capture";
@@ -106,16 +106,24 @@ public class WriteProcessor {
         }
         // add the extension and timestamp
         // eg: 20151218-10:14:32-capture.pcm(.wav)
-        String audioFilename = getTimestamp() + "-" + sessionFilename + AUDIO_FILE_EXTENSION_RAW;
-        String waveFilename = getTimestamp() + "-" + sessionFilename + AUDIO_FILE_EXTENSION_WAV;
+        String timestamp = getTimestamp();
+        String audioFilename = timestamp + "-" + sessionFilename + AUDIO_FILE_EXTENSION_RAW;
+        String waveFilename = timestamp + "-" + sessionFilename + AUDIO_FILE_EXTENSION_WAV;
         // file save will overwrite unless new name is used...
         try {
             AUDIO_OUTPUT_FILE = new File(location, audioFilename);
+            if (!AUDIO_OUTPUT_FILE.exists()) {
+                AUDIO_OUTPUT_FILE.createNewFile();
+            }
+
+            WAV_OUTPUT_FILE = new File(location, waveFilename);
+            if (!WAV_OUTPUT_FILE.exists()) {
+                WAV_OUTPUT_FILE.createNewFile();
+            }
+
             AUDIO_OUTPUT_STREAM = null;
             AUDIO_OUTPUT_STREAM = new BufferedOutputStream(new FileOutputStream(AUDIO_OUTPUT_FILE, false));
             AUDIO_RAW_STREAM = new DataOutputStream(AUDIO_OUTPUT_STREAM);
-            WAV_OUTPUT_FILE = new File(location, waveFilename);
-
             return true;
         }
         catch (IOException ex) {
@@ -162,7 +170,7 @@ public class WriteProcessor {
             return;
         }
         if (convertToWav()) {
-            AUDIO_OUTPUT_FILE.deleteOnExit();
+            AUDIO_OUTPUT_FILE.delete();
             log(context.getString(R.string.writer_state_21));
         }
     }
@@ -204,7 +212,7 @@ public class WriteProcessor {
         DataInputStream input = null;
         try {
             input = new DataInputStream(new FileInputStream(rawFile));
-            //input.read(rawData);
+            input.read(rawData);
         }
         finally {
             if (input != null) {

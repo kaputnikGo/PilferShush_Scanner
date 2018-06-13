@@ -1,11 +1,10 @@
 # PilferShush_prod
 Android near-ultra high frequency listener with microphone polling and audio beacon SDK detector  
 
-Test application for researching methods of discovering use of audio beacons.  
-Proper for Android Studio build/release.
+Test application for researching methods of discovering use of audio beacons.
 Added full passive and active jammers.
 
-   vers. 2.2.08
+   vers. 2.2.09
    - min API 18 (4.3)
    - target API 23 (6.x)
    - compiled API 26 (8.x)

@@ -60,7 +60,7 @@ public class MainActivity extends AppCompatActivity
     private static final int NOTIFY_PASSIVE_ID = 112;
     private static final int NOTIFY_ACTIVE_ID = 113;
 
-    public static final String VERSION = "2.2.08";
+    public static final String VERSION = "2.2.09";
 
     private ViewSwitcher viewSwitcher;
     private boolean mainView;

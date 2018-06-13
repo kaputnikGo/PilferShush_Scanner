@@ -162,6 +162,8 @@ public class RecordTask extends AsyncTask<Void, Integer, String> {
 
     private void magnitudeRecordScan(int windowType) {
         // TODO need to add diff version of scanning, not freqStepper version
+        // https://github.com/lucns/Android-Audio-Sample/tree/master/main/java/com/sample
+
         int bufferSize;
         double[] recordScan;
         int candidateFreq;
