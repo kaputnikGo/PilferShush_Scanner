@@ -287,7 +287,8 @@ public class WriteProcessor {
         extDirectory = new File(Environment.getExternalStoragePublicDirectory(
                 Environment.DIRECTORY_DOWNLOADS), APP_DIRECTORY_NAME);
         if (!extDirectory.exists()) {
-            log(context.getString(R.string.writer_state_22));
+            extDirectory.mkdirs();
+            log(context.getString(R.string.writer_state_23));
         }
     }
 

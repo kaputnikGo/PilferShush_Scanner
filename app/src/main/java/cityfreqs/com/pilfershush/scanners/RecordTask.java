@@ -110,6 +110,7 @@ public class RecordTask extends AsyncTask<Void, Integer, String> {
 
                     public void onPeriodicNotification(AudioRecord audioRecord) {
                         magnitudeRecordScan(audioSettings.getUserWindowType());
+
                         MainActivity.visualiserView.updateVisualiser(bufferArray); //byteBuffer
                     }
                 });
@@ -163,6 +164,7 @@ public class RecordTask extends AsyncTask<Void, Integer, String> {
     private void magnitudeRecordScan(int windowType) {
         // TODO need to add diff version of scanning, not freqStepper version
         // https://github.com/lucns/Android-Audio-Sample/tree/master/main/java/com/sample
+        // https://github.com/bewantbe/audio-analyzer-for-android
 
         int bufferSize;
         double[] recordScan;

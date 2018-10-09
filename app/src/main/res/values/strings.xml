@@ -303,6 +303,7 @@
     <string name="writer_state_20">Storage size:\u0020</string>
     <string name="writer_state_21">temp raw audio file deleted.</string>
     <string name="writer_state_22">Error creating storage directory.</string>
+    <string name="writer_state_23">Creating storage directory.</string>
 
     <!--
 PassiveJammer.java

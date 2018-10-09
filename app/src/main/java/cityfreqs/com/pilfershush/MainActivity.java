@@ -56,11 +56,13 @@ public class MainActivity extends AppCompatActivity
     private static final String TAG = "PilferShush";
     private static final boolean DEBUG = true;
 
+    // TODO consider testing/using https://github.com/ACRA/acra : via email?
+
     private static final int REQUEST_MULTIPLE_PERMISSIONS = 123;
     private static final int NOTIFY_PASSIVE_ID = 112;
     private static final int NOTIFY_ACTIVE_ID = 113;
 
-    public static final String VERSION = "2.2.09";
+    public static final String VERSION = "2.2.11";
 
     private ViewSwitcher viewSwitcher;
     private boolean mainView;
@@ -247,7 +249,6 @@ public class MainActivity extends AppCompatActivity
         debugText.setOnClickListener(new TextView.OnClickListener() {
             @Override
             public void onClick(View v) {
-                debugText.setGravity(Gravity.NO_GRAVITY);
                 debugText.setSoundEffectsEnabled(false); // no further click sounds
             }
         });

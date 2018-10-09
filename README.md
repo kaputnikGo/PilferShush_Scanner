@@ -4,7 +4,7 @@ Android near-ultra high frequency listener with microphone polling and audio bea
 Test application for researching methods of discovering use of audio beacons.
 Added full passive and active jammers.
 
-   vers. 2.2.09
+   vers. 2.2.11
    - min API 18 (4.3)
    - target API 23 (6.x)
    - compiled API 26 (8.x)
@@ -18,6 +18,7 @@ Added full passive and active jammers.
  TODO:
  - rebuild scanner to allow different methods of scanning
  - build for API 26, 8.x, 'O' and up features
+ - fork Scanner part to separate app (no background scans, no jammer, make proper)
 
 # 2018 Kaputnik Go
 
