@@ -3,6 +3,7 @@ package cityfreqs.com.pilfershush;
 import android.Manifest;
 import android.app.AlertDialog;
 import android.app.Notification;
+import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
@@ -56,13 +57,14 @@ public class MainActivity extends AppCompatActivity
     private static final String TAG = "PilferShush";
     private static final boolean DEBUG = true;
 
-    // TODO consider testing/using https://github.com/ACRA/acra : via email?
-
     private static final int REQUEST_MULTIPLE_PERMISSIONS = 123;
     private static final int NOTIFY_PASSIVE_ID = 112;
     private static final int NOTIFY_ACTIVE_ID = 113;
+    private static final String CHANNEL_ID = "PS";
+    private static final String CHANNEL_NAME = "PilferShush";
 
-    public static final String VERSION = "2.2.11";
+
+    public static final String VERSION = "2.3.0";
 
     private ViewSwitcher viewSwitcher;
     private boolean mainView;
@@ -390,6 +392,24 @@ public class MainActivity extends AppCompatActivity
     }
 
     @Override
+    protected void onStop() {
+        super.onStop();
+        // called from back button press
+        // save state
+        sharedPrefs = getPreferences(Context.MODE_PRIVATE);
+        sharedPrefsEditor = sharedPrefs.edit();
+        sharedPrefsEditor.putBoolean("passive_running", PASSIVE_RUNNING);
+        sharedPrefsEditor.putBoolean("active_running", ACTIVE_RUNNING);
+        sharedPrefsEditor.putBoolean("irq_telephony", IRQ_TELEPHONY);
+        sharedPrefsEditor.apply();
+    }
+
+    @Override
+    public void onBackPressed() {
+        moveTaskToBack(true);
+    }
+
+    @Override
     protected void onDestroy() {
         super.onDestroy();
         pilferShushScanner.onDestroy();
@@ -640,6 +660,15 @@ public class MainActivity extends AppCompatActivity
 
         notifyManager = (NotificationManager) this.getSystemService(Context.NOTIFICATION_SERVICE);
 
+        // TODO prep for API 28 builds
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+            NotificationChannel channel = new NotificationChannel(CHANNEL_ID,
+                    CHANNEL_NAME,
+                    NotificationManager.IMPORTANCE_DEFAULT);
+            channel.setDescription("PilferShush notifications");
+            notifyManager.createNotificationChannel(channel);
+        }
+
         notifyPassiveBuilder = new Notification.Builder(this);
         notifyActiveBuilder = new Notification.Builder(this);
 
@@ -649,6 +678,7 @@ public class MainActivity extends AppCompatActivity
                 .setContentText("Tap to return to app")
                 .setContentIntent(pendingIntent)
                 .setWhen(System.currentTimeMillis())
+                .setOngoing(true)
                 .setAutoCancel(false);
 
         notifyActiveBuilder.setSmallIcon(R.mipmap.ic_stat_logo_notify_jammer)
@@ -657,6 +687,7 @@ public class MainActivity extends AppCompatActivity
                 .setContentText("Tap to return to app")
                 .setContentIntent(pendingIntent)
                 .setWhen(System.currentTimeMillis())
+                .setOngoing(true)
                 .setAutoCancel(false);
     }
 
@@ -1054,14 +1085,14 @@ public class MainActivity extends AppCompatActivity
     private void runPassive() {
         if (pilferShushJammer.hasPassiveJammer() && !PASSIVE_RUNNING) {
             if (pilferShushJammer.initPassiveJammer()) {
+                PASSIVE_RUNNING = true;
                 if (!pilferShushJammer.runPassiveJammer()) {
-                    // check for errors in running
-                    passiveJammerButton.toggle();
+                    // has record state errors
                     stopPassive();
+                    passiveJammerButton.toggle();
                 }
                 else {
                     mainScanLogger(getResources().getString(R.string.main_scanner_26), false);
-                    PASSIVE_RUNNING = true;
                     notifyManager.notify(NOTIFY_PASSIVE_ID, notifyPassiveBuilder.build());
                 }
             }
@@ -1104,7 +1135,7 @@ public class MainActivity extends AppCompatActivity
             return;
         }
         if (wakeLock == null) {
-            wakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, TAG);
+            wakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, TAG + ":wakelock");
         }
 
         SCANNING = true;
