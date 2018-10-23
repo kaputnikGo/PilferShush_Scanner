@@ -18,8 +18,6 @@ Added full passive and active jammers.
  TODO:
  - prep for API 28 build, add notification for nuhf scanner
  - rebuild scanner to allow different methods of scanning
- - build for API 26, 8.x, 'O' and up features
- - fork Scanner part to separate app (no background scans, no jammer, make proper)
 
 # 2018 Kaputnik Go
 
