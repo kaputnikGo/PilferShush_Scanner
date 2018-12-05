@@ -1,10 +1,12 @@
 # PilferShush_prod
-Android near-ultra high frequency listener with microphone polling and audio beacon SDK detector  
+Android near-ultra high frequency (NUHF) listener with microphone polling and NUHF/ACR SDK detector  
 
 Test application for researching methods of discovering use of audio beacons.
 Added full passive and active jammers.
+Updating to match PilferShush Jammer app
+Adding checks for (ACR) Audio Content Recognition SDKs
 
-   vers. 2.3.0
+   vers. 2.3.1
    - min API 18 (4.3)
    - target API 26 (8.x)
    - compiled API 26 (8.x)
@@ -16,7 +18,7 @@ Added full passive and active jammers.
    - HIGH : s5 G900P (user) 7.1.2 (25)(LineageOS 14.1, F-Droid)
  
  TODO:
- - prep for API 28 build, add notification for nuhf scanner
+ - prep for API 28 build, AndroidX libs, add notification for nuhf scanner
  - rebuild scanner to allow different methods of scanning
 
 # 2018 Kaputnik Go

@@ -31,16 +31,25 @@ public class BackgroundChecker {
     // alphabetical list of package names
     private static final String[] SDK_NAMES =
             {
+                    "alphonso",
+                    "bitsound",
                     "copsonic",
+                    "cueaudio",
+                    "dv",
                     "fidzup",
+                    "fluzo",
+                    "hotstar",
+                    "intrasonics",
                     "lisnr",
                     "prontoly",
+                    "redbricklane",
                     "shopkick",
                     "signal360",
                     "silverpush",
                     "sonarax",
                     "soniccode",
-                    "sonicnotify"
+                    "sonicnotify",
+                    "zapr"
             };
 
     protected boolean initChecker(PackageManager packageManager) {

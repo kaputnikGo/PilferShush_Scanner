@@ -105,15 +105,15 @@
     <string name="beacon_check_1">Beacon Check</string>
     <string name="userapp_check_1">User App Check</string>
 
-    <string name="audio_apps_check_1">NO AUDIO BEACON APPS FOUND.</string>
+    <string name="audio_apps_check_1">NO NUHF/ACR APPS FOUND.</string>
     <string name="user_apps_check_1">NO USER APPS FOUND FOR OVERRIDE SCAN.</string>
 
     <string name="main_scanner_1">SCANNING</string>
     <string name="main_scanner_2">Running scans on user installed apps\u2026</string>
     <string name="main_scanner_3">Record audio apps found:\u0020</string>
     <string name="main_scanner_4">No record audio apps found.</string>
-    <string name="main_scanner_5">\u0020Audio Beacon SDKs detected.</string>
-    <string name="main_scanner_6">No Audio Beacon SDKs detected.</string>
+    <string name="main_scanner_5">\u0020NUHF/ACR SDKs detected.</string>
+    <string name="main_scanner_6">No NUHF/ACR SDKs detected.</string>
     <!--
     <string name="main_scanner_7">Microphone check...</string>
     <string name="main_scanner_8">Microphone use detected.</string>
@@ -122,10 +122,10 @@
     <string name="main_scanner_10">Listening for near-ultra high audio\u2026</string>
     <string name="main_scanner_11" translatable="false">scanner</string>
     <string name="main_scanner_12">Stop listening for audio.</string>
-    <string name="main_scanner_13">Detected possible n-uhf audio.</string>
+    <string name="main_scanner_13">Detected possible NUHF audio.</string>
     <string name="main_scanner_14">Frequency list size:\u0020</string>
     <string name="main_scanner_15">Original sequence as transmitted:</string>
-    <string name="main_scanner_16">No detected audio beacon signals.</string>
+    <string name="main_scanner_16">No detected NUHF audio signals.</string>
     <string name="main_scanner_17">[-: end of scan :-]</string>
     <string name="main_scanner_22" translatable="false">active</string>
     <string name="main_scanner_23" translatable="false">passive</string>
@@ -235,8 +235,8 @@
     <string name="background_scan_1">Background scanner fail.</string>
     <string name="background_scan_2">run background checks\u2026</string>
     <string name="background_scan_3">User Apps with RECORD AUDIO:\u0020</string>
-    <string name="background_scan_4">Found audio beacon services for\u0020</string>
-    <string name="background_scan_5">Found audio beacon receivers for\u0020</string>
+    <string name="background_scan_4">Found NUHF/ACR services for\u0020</string>
+    <string name="background_scan_5">Found NUHF/ACR receivers for\u0020</string>
     <string name="background_scan_6">Found User App services for\u0020</string>
     <string name="background_scan_7">Found User App receivers for\u0020</string>
     <string name="background_scan_8">AppEntry list:\u0020</string>

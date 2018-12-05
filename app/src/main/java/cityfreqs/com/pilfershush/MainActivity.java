@@ -64,7 +64,7 @@ public class MainActivity extends AppCompatActivity
     private static final String CHANNEL_NAME = "PilferShush";
 
 
-    public static final String VERSION = "2.3.0";
+    public static final String VERSION = "2.3.1";
 
     private ViewSwitcher viewSwitcher;
     private boolean mainView;
