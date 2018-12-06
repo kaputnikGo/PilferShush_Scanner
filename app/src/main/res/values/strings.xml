@@ -1,6 +1,6 @@
 <resources>
     <!-- default language strings, some translatable -->
-    <string name="app_name" translatable="false">PilferShush</string>
+    <string name="app_name" translatable="false">PilferShush Scanner</string>
     <string name="action_session_name">Set session name</string>
     <string name="dialog_session_name">Enter suffix for save files</string>
     <string name="session_default_name" translatable="false">capture</string>
@@ -21,8 +21,9 @@
     <string name="freq_range_one" translatable="false">18kHz - 21kHz (default)</string>
     <string name="freq_range_two" translatable="false">19kHz - 22kHz</string>
 
+    <string name="sdk_names_list">List of NUHF/ACR SDK names searched:\u0020</string>
     <string name="action_audio_beacons">Check Beacon Apps</string>
-    <string name="dialog_audio_beacon_apps">Audio Beacon List</string>
+    <string name="dialog_audio_beacon_apps">NUHF/ACR List</string>
 
     <string name="action_override_scan">Scan User App</string>
     <string name="dialog_override_scan_apps">Scan Apps List</string>
@@ -37,7 +38,7 @@
     <string name="dialog_write_file_no">No</string>
 
     <string name="action_storage_admin">Storage admin</string>
-    <string name="dialog_storage_size">Print storage size</string>
+    <string name="dialog_storage_size">Print storage size used</string>
     <string name="dialog_delete_empty_logs">Delete empty logs</string>
     <string name="dialog_delete_all_files">Delete all audio files</string>
     <string name="dialog_free_storage_size">Free storage space</string>
@@ -102,11 +103,11 @@
     <string name="audiofocus_7">Audio Focus Listener: GAIN_TRANSIENT_DUCK.</string>
     <string name="audiofocus_8">Audio Focus Listener: UNKNOWN STATE.</string>
 
-    <string name="beacon_check_1">Beacon Check</string>
-    <string name="userapp_check_1">User App Check</string>
+    <string name="beacon_check_1">NUHF/ACR</string>
+    <string name="userapp_check_1">User App Scan</string>
 
     <string name="audio_apps_check_1">NO NUHF/ACR APPS FOUND.</string>
-    <string name="user_apps_check_1">NO USER APPS FOUND FOR OVERRIDE SCAN.</string>
+    <string name="user_apps_check_1">NO USER APPS FOUND FOR SCAN.</string>
 
     <string name="main_scanner_1">SCANNING</string>
     <string name="main_scanner_2">Running scans on user installed apps\u2026</string>
@@ -152,7 +153,7 @@
     <string name="option_dialog_12">Loudness level (dB):\u0020</string>
     <string name="option_dialog_13">FFT Window set to:\u0020</string>
 
-    <string name="init_state_1">PilferShush scanner version\u0020</string>
+    <string name="init_state_1">PilferShush Scanner version\u0020</string>
     <string name="init_state_2">Using\u0020</string>
     <string name="init_state_3">Settings can be changed via the Options menu.</string>
     <string name="init_state_4">The Detailed View has logging and more information from scans.</string>

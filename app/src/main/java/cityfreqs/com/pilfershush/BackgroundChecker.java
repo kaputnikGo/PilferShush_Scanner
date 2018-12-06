@@ -169,6 +169,18 @@ public class BackgroundChecker {
         return audioBeaconAppEntries.get(appEntryIndex);
     }
 
+    protected String displayAudioSdkNames() {
+        // return a string of names + \n
+        if (SDK_NAMES != null && SDK_NAMES.length > 0) {
+            StringBuilder sb = new StringBuilder();
+            for (String name : SDK_NAMES) {
+                sb.append(name).append("\n");
+            }
+            return sb.toString();
+        }
+        return "error: none found \n";
+    }
+
 
 // loop though services/receivers lists and look for substrings of interest,
 // hardcoded for now, user added later?

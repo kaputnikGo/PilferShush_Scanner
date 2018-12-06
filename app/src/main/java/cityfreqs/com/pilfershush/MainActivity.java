@@ -1208,6 +1208,10 @@ public class MainActivity extends AppCompatActivity
     }
 
     private void hasAudioBeaconAppsList() {
+        // first publish list of names searched:
+        entryLogger("\n" + getResources().getString(R.string.sdk_names_list) + "\n"
+                + pilferShushScanner.displayAudioSdkList(), false);
+
         String[] appNames = pilferShushScanner.getAudioBeaconAppList();
 
         if (appNames != null && appNames.length > 0) {

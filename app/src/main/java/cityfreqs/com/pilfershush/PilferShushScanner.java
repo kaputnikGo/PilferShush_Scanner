@@ -175,6 +175,10 @@ public class PilferShushScanner {
         return backgroundChecker.checkAudioBeaconApps();
     }
 
+    protected String displayAudioSdkList() {
+        return backgroundChecker.displayAudioSdkNames();
+    }
+
     protected int getAudioBeaconAppNumber() {
         return backgroundChecker.getAudioBeaconAppNames().length;
     }

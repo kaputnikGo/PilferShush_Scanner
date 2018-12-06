@@ -3,8 +3,8 @@ Android near-ultra high frequency (NUHF) listener with microphone polling and NU
 
 Test application for researching methods of discovering use of audio beacons.
 Added full passive and active jammers.
-Updating to match PilferShush Jammer app
-Adding checks for (ACR) Audio Content Recognition SDKs
+Updating to match PilferShush Jammer app.
+Adding checks for (ACR) Audio Content Recognition SDKs.
 
    vers. 2.3.1
    - min API 18 (4.3)
