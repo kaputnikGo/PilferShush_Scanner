@@ -1,11 +1,8 @@
 package cityfreqs.com.pilfershush;
 
 import android.Manifest;
+import android.app.ActivityManager;
 import android.app.AlertDialog;
-import android.app.Notification;
-import android.app.NotificationChannel;
-import android.app.NotificationManager;
-import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -13,16 +10,11 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
-import android.graphics.BitmapFactory;
 import android.graphics.Color;
-import android.hardware.usb.UsbDevice;
-import android.hardware.usb.UsbManager;
 import android.media.AudioManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.PowerManager;
-import android.support.v4.app.ActivityCompat;
-import android.support.v7.app.AppCompatActivity;
 import android.text.Spannable;
 import android.text.method.ScrollingMovementMethod;
 import android.text.style.ForegroundColorSpan;
@@ -43,13 +35,16 @@ import android.widget.ViewSwitcher;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
 import cityfreqs.com.pilfershush.assist.AudioSettings;
-import cityfreqs.com.pilfershush.assist.DeviceContainer;
+import cityfreqs.com.pilfershush.jammers.ActiveJammerService;
+import cityfreqs.com.pilfershush.jammers.PassiveJammerService;
 
 public class MainActivity extends AppCompatActivity
         implements ActivityCompat.OnRequestPermissionsResultCallback {
@@ -58,13 +53,10 @@ public class MainActivity extends AppCompatActivity
     private static final boolean DEBUG = true;
 
     private static final int REQUEST_MULTIPLE_PERMISSIONS = 123;
-    private static final int NOTIFY_PASSIVE_ID = 112;
-    private static final int NOTIFY_ACTIVE_ID = 113;
     private static final String CHANNEL_ID = "PS";
     private static final String CHANNEL_NAME = "PilferShush";
 
-
-    public static final String VERSION = "2.3.1";
+    public static final String VERSION = "3.0.1";
 
     private ViewSwitcher viewSwitcher;
     private boolean mainView;
@@ -79,7 +71,6 @@ public class MainActivity extends AppCompatActivity
     private ToggleButton runScansButton;
     private ToggleButton passiveJammerButton;
     private ToggleButton activeJammerButton;
-    private Switch eqSwitch;
     private TextView mainScanText;
 
     private String[] freqSteps;
@@ -90,16 +81,14 @@ public class MainActivity extends AppCompatActivity
 
     // USB
     //private static final String ACTION_USB_PERMISSION = "pilfershush.USB_PERMISSION";
-    private UsbManager usbManager;
+    //private UsbManager usbManager;
 
     private boolean SCANNING;
 
-    private AudioSettings audioSettings;
     private PowerManager powerManager;
     private PowerManager.WakeLock wakeLock;
     private HeadsetIntentReceiver headsetReceiver;
     private PilferShushScanner pilferShushScanner;
-    private PilferShushJammer pilferShushJammer;
     private AudioManager audioManager;
     private AudioManager.OnAudioFocusChangeListener audioFocusListener;
     public static AudioVisualiserView visualiserView;
@@ -109,15 +98,12 @@ public class MainActivity extends AppCompatActivity
 
     private SharedPreferences sharedPrefs;
     private SharedPreferences.Editor sharedPrefsEditor;
-    private NotificationManager notifyManager;
-    private Notification.Builder notifyPassiveBuilder;
-    private Notification.Builder notifyActiveBuilder;
     private boolean PASSIVE_RUNNING;
     private boolean ACTIVE_RUNNING;
     private boolean IRQ_TELEPHONY;
-
-    private boolean activeTypeValue;
     private String[] jammerTypes;
+
+    private Bundle audioBundle;
 
 
     @Override
@@ -130,12 +116,7 @@ public class MainActivity extends AppCompatActivity
         headsetReceiver = new HeadsetIntentReceiver();
         powerManager = (PowerManager) this.getSystemService(Context.POWER_SERVICE);
 
-        audioSettings = new AudioSettings(true);
-
-        pilferShushScanner = new PilferShushScanner();
         SCANNING = false;
-
-        pilferShushJammer = new PilferShushJammer();
 
         //MAIN VIEW
         runScansButton = findViewById(R.id.run_scans_button);
@@ -203,14 +184,13 @@ public class MainActivity extends AppCompatActivity
         Switch activeTypeSwitch = findViewById(R.id.active_type_switch);
         activeTypeSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                activeTypeValue = isChecked;
-            }
-        });
-
-        eqSwitch = findViewById(R.id.eq_switch);
-        eqSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                toggleEq(isChecked);
+                audioBundle.putBoolean(AudioSettings.AUDIO_BUNDLE_KEYS[7], isChecked);
+                if (isChecked) {
+                    entryLogger(getResources().getString(R.string.app_status_8), false);
+                }
+                else {
+                    entryLogger(getResources().getString(R.string.app_status_9), false);
+                }
             }
         });
 
@@ -264,7 +244,7 @@ public class MainActivity extends AppCompatActivity
             }
         });
 
-        usbManager = (UsbManager) getSystemService(Context.USB_SERVICE);
+        //usbManager = (UsbManager) getSystemService(Context.USB_SERVICE);
         //permissionIntent = PendingIntent.getBroadcast(this, 0, new Intent(ACTION_USB_PERMISSION), 0);
         //IntentFilter filter = new IntentFilter(ACTION_USB_PERMISSION);
 
@@ -295,14 +275,14 @@ public class MainActivity extends AppCompatActivity
                                 @Override
                                 public void onClick(DialogInterface dialog, int which) {
                                     ActivityCompat.requestPermissions(MainActivity.this,
-                                            permissionsList.toArray(new String[permissionsList.size()]),
+                                            permissionsList.toArray(new String[0]),
                                             REQUEST_MULTIPLE_PERMISSIONS);
                                 }
                             });
                     return;
                 }
                 ActivityCompat.requestPermissions(this,
-                        permissionsList.toArray(new String[permissionsList.size()]),
+                        permissionsList.toArray(new String[0]),
                         REQUEST_MULTIPLE_PERMISSIONS);
             }
             else {
@@ -325,11 +305,30 @@ public class MainActivity extends AppCompatActivity
         ACTIVE_RUNNING = sharedPrefs.getBoolean("active_running", false);
         IRQ_TELEPHONY = sharedPrefs.getBoolean("irq_telephony", false);
 
+        // override check for return from system destroy
+        if (checkServiceRunning(PassiveJammerService.class)) {
+            // jammer is running
+            if (DEBUG) entryLogger(getResources().getString(R.string.resume_status_1), false);
+        }
+        else {
+            if (DEBUG) entryLogger(getResources().getString(R.string.resume_status_2), false);
+            PASSIVE_RUNNING = false;
+        }
+        if (checkServiceRunning(ActiveJammerService.class)) {
+            // jammer is running
+            if (DEBUG) entryLogger(getResources().getString(R.string.resume_status_3), false);
+        }
+        else {
+            if (DEBUG) entryLogger(getResources().getString(R.string.resume_status_4), false);
+            ACTIVE_RUNNING = false;
+        }
+
         IntentFilter filter = new IntentFilter(Intent.ACTION_HEADSET_PLUG);
         registerReceiver(headsetReceiver, filter);
-        audioManager = (AudioManager)getSystemService(Context.AUDIO_SERVICE);
         // refocus app, ready for fresh scanner run
         toggleHeadset(false); // default state at init
+
+        audioManager = (AudioManager)getSystemService(Context.AUDIO_SERVICE);
         int status = audioFocusCheck();
 
         if (IRQ_TELEPHONY && PASSIVE_RUNNING) {
@@ -339,31 +338,43 @@ public class MainActivity extends AppCompatActivity
                 // reset booleans to init state
                 PASSIVE_RUNNING = false;
                 IRQ_TELEPHONY = false;
-                runPassive();
             }
             else if (status == AudioManager.AUDIOFOCUS_LOSS) {
                 // possible music player etc that has speaker focus but no need of microphone,
                 // can end up fighting for focus with music player,
-                // reset booleans to init state
-                PASSIVE_RUNNING = false;
-                IRQ_TELEPHONY = false;
-                runPassive();
+                if (DEBUG) entryLogger(getResources().getString(R.string.resume_status_6), false);
             }
         }
         else if (PASSIVE_RUNNING) {
             // return from background without irq_telephony
             entryLogger(getResources().getString(R.string.app_status_1), true);
+            // check button state on
+            if (!passiveJammerButton.isChecked()) {
+                passiveJammerButton.toggle();
+            }
         }
         else {
             entryLogger(getResources().getString(R.string.app_status_2), true);
+            // check button state off
+            if (passiveJammerButton.isChecked()) {
+                passiveJammerButton.toggle();
+            }
         }
 
         if (ACTIVE_RUNNING) {
             // return from background without irq_telephony
             entryLogger(getResources().getString(R.string.app_status_3), true);
+            // check button state on
+            if (!activeJammerButton.isChecked()) {
+                activeJammerButton.toggle();
+            }
         }
         else {
             entryLogger(getResources().getString(R.string.app_status_4), true);
+            // check button state off
+            if (activeJammerButton.isChecked()) {
+                activeJammerButton.toggle();
+            }
         }
     }
 
@@ -500,7 +511,7 @@ public class MainActivity extends AppCompatActivity
     }
 
     @Override
-    public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
+    public void onRequestPermissionsResult(int requestCode, @NonNull String permissions[], @NonNull int[] grantResults) {
         switch (requestCode) {
             case REQUEST_MULTIPLE_PERMISSIONS: {
                 Map<String, Integer> perms = new HashMap<String, Integer>();
@@ -529,85 +540,6 @@ public class MainActivity extends AppCompatActivity
         }
     }
 
-
-/*
-* USB device - need replacement daughterboard before implementing this : S5-dev
-*/
-    // https://source.android.com/devices/audio/usb.html
-    // http://developer.android.com/guide/topics/connectivity/usb/host.html
-
-	/*
-	private boolean getIntentUsbDevice(Intent intent) {
-		// the device_filter.xml has a hardcoded usb device declaration
-		// update it to the SDR when it gets here...
-		deviceContainer = new DeviceContainer();
-		deviceContainer.setUsbDevice((UsbDevice) intent.getParcelableExtra(UsbManager.EXTRA_DEVICE));
-		return (deviceContainer.hasDevice() != false);
-	}
-	*/
-
-    private boolean scanUsbDevices() {
-        //TODO
-        logger(getResources().getString(R.string.usb_state_1));
-        usbManager = (UsbManager) getSystemService(Context.USB_SERVICE);
-        HashMap<String, UsbDevice> deviceList;
-        try {
-            if (usbManager.getDeviceList() == null) {
-                return false;
-            }
-        }
-        catch(NullPointerException ex) {
-            return false;
-        }
-        deviceList = usbManager.getDeviceList();
-        Iterator<UsbDevice> deviceIterator = deviceList.values().iterator();
-        DeviceContainer deviceContainer;
-
-        if(deviceIterator.hasNext()) {
-            UsbDevice device = deviceIterator.next();
-            deviceContainer = new DeviceContainer(device);
-            logger(getResources().getString(R.string.usb_state_2) + deviceContainer.toString());
-            return true;
-        }
-        logger(getResources().getString(R.string.usb_state_3));
-        return false;
-    }
-
-    /*
-    private final BroadcastReceiver usbReceiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            String action = intent.getAction();
-
-            if (UsbManager.ACTION_USB_DEVICE_DETACHED.equals(action)) {
-                synchronized (this) {
-                    if (intent.getBooleanExtra(UsbManager.EXTRA_PERMISSION_GRANTED, false)) {
-                        if ((deviceContainer != null) && (deviceContainer.hasDevice()))  {
-                            //call method to set up device communication
-                            if (usbManager.hasPermission(deviceContainer.getDevice())) {
-                                // re-route audio to usb audio device
-                                toggleHeadset(true);
-                                logger(getResources().getString(R.string.usb_state_4));
-                            }
-                            else {
-                                usbManager.requestPermission(deviceContainer.getDevice(), permissionIntent);
-                            }
-                        }
-                        else {
-                            logger(getResources().getString(R.string.usb_state_5));
-                        }
-                    }
-                    else {
-                        // re-route audio to phone hardware
-                        toggleHeadset(false);
-                        logger(getResources().getString(R.string.usb_state_6));
-                    }
-                }
-            }
-        }
-    };
-    */
-
     private void initPilferShush() {
         audioManager = (AudioManager)getSystemService(Context.AUDIO_SERVICE);
 
@@ -626,16 +558,28 @@ public class MainActivity extends AppCompatActivity
             }
         };
 
-        if (pilferShushScanner.initScanner(this, audioSettings, scanUsbDevices(), getResources().getString(R.string.session_default_name))) {
+        // apply audio checker settings to bundle for services
+        AudioChecker audioChecker = new AudioChecker(this);
+        audioBundle = audioChecker.getAudioBundle();
+        //TODO BUNDLE
+        audioBundle.putBoolean(AudioSettings.AUDIO_BUNDLE_KEYS[7], false);
+        audioBundle.putInt(AudioSettings.AUDIO_BUNDLE_KEYS[8], AudioSettings.JAMMER_TYPE_TEST);
+        audioBundle.putInt(AudioSettings.AUDIO_BUNDLE_KEYS[9], AudioSettings.CARRIER_TEST_FREQUENCY);
+        audioBundle.putInt(AudioSettings.AUDIO_BUNDLE_KEYS[10], AudioSettings.DEFAULT_RANGE_DRIFT_LIMIT);
+        audioBundle.putInt(AudioSettings.AUDIO_BUNDLE_KEYS[11], AudioSettings.MINIMUM_DRIFT_LIMIT);
+        // set defaults
+        audioBundle.putInt(AudioSettings.AUDIO_BUNDLE_KEYS[18], AudioSettings.DEFAULT_WINDOW_TYPE);
+        audioBundle.putBoolean(AudioSettings.AUDIO_BUNDLE_KEYS[19], true); //write audio files for scanner
+
+        pilferShushScanner = new PilferShushScanner(audioChecker);
+
+        if (pilferShushScanner.initScanner(this, audioBundle, getResources().getString(R.string.session_default_name))) {
             pilferShushScanner.checkScanner();
             toggleHeadset(false); // default state at init
             audioFocusCheck();
             initAudioFocusListener();
             populateMenuItems();
             reportInitialState();
-            if (pilferShushJammer.initJammer(this, audioSettings)) {
-                mainScanLogger("Active jammer set to: " + jammerTypes[pilferShushJammer.getJammerTypeSwitch()], true);
-            }
         }
         else {
             mainScanLogger(getResources().getString(R.string.init_state_12), true);
@@ -649,46 +593,6 @@ public class MainActivity extends AppCompatActivity
         sharedPrefsEditor.putBoolean("passive_running", PASSIVE_RUNNING);
         sharedPrefsEditor.putBoolean("irq_telephony", IRQ_TELEPHONY);
         sharedPrefsEditor.apply();
-        createNotifications();
-    }
-
-    private void createNotifications() {
-        Intent notificationIntent = new Intent(this, MainActivity.class);
-
-        PendingIntent pendingIntent = PendingIntent.getActivity(this,
-                0, notificationIntent,0);
-
-        notifyManager = (NotificationManager) this.getSystemService(Context.NOTIFICATION_SERVICE);
-
-        // TODO prep for API 28 builds
-        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
-            NotificationChannel channel = new NotificationChannel(CHANNEL_ID,
-                    CHANNEL_NAME,
-                    NotificationManager.IMPORTANCE_DEFAULT);
-            channel.setDescription("PilferShush notifications");
-            notifyManager.createNotificationChannel(channel);
-        }
-
-        notifyPassiveBuilder = new Notification.Builder(this);
-        notifyActiveBuilder = new Notification.Builder(this);
-
-        notifyPassiveBuilder.setSmallIcon(R.mipmap.ic_stat_logo_notify_jammer)
-                .setLargeIcon(BitmapFactory.decodeResource(this.getResources(), R.mipmap.ic_launcher))
-                .setContentTitle("passive jammer running")
-                .setContentText("Tap to return to app")
-                .setContentIntent(pendingIntent)
-                .setWhen(System.currentTimeMillis())
-                .setOngoing(true)
-                .setAutoCancel(false);
-
-        notifyActiveBuilder.setSmallIcon(R.mipmap.ic_stat_logo_notify_jammer)
-                .setLargeIcon(BitmapFactory.decodeResource(this.getResources(), R.mipmap.ic_launcher))
-                .setContentTitle("active jammer running")
-                .setContentText("Tap to return to app")
-                .setContentIntent(pendingIntent)
-                .setWhen(System.currentTimeMillis())
-                .setOngoing(true)
-                .setAutoCancel(false);
     }
 
     private void reportInitialState() {
@@ -926,12 +830,14 @@ public class MainActivity extends AppCompatActivity
                 // other user input needed for the below options
                 switch(which) {
                     case 0:
-                        pilferShushJammer.setJammerTypeSwitch(AudioSettings.JAMMER_TYPE_TEST);
-                        entryLogger("Jammer type changed to " + jammerTypes[which], false);
+                        audioBundle.putInt("jammerType", AudioSettings.JAMMER_TYPE_TEST);
+                        entryLogger(getResources().getString(R.string.jammer_dialog_13)
+                                + jammerTypes[which], false);
                         break;
                     case 1:
-                        pilferShushJammer.setJammerTypeSwitch(AudioSettings.JAMMER_TYPE_NUHF);
-                        entryLogger("Jammer type changed to " + jammerTypes[which], false);
+                        audioBundle.putInt("jammerType", AudioSettings.JAMMER_TYPE_NUHF);
+                        entryLogger(getResources().getString(R.string.jammer_dialog_13)
+                                + jammerTypes[which], false);
                         break;
                     case 2:
                         defaultRangedDialog();
@@ -964,10 +870,17 @@ public class MainActivity extends AppCompatActivity
                 .setPositiveButton(R.string.dialog_button_okay, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int id) {
-                        int userInputCarrier = Integer.parseInt(userCarrierInput.getText().toString());
-                        pilferShushJammer.setUserCarrier(userInputCarrier);
-                        pilferShushJammer.setJammerTypeSwitch(AudioSettings.JAMMER_TYPE_DEFAULT_RANGED);
-                        entryLogger("Jammer type changed to 1000Hz drift with carrier at " + userInputCarrier, false);
+                        int userInputCarrier = AudioSettings.DEFAULT_NUHF_FREQUENCY;
+                        if (userCarrierInput.getText().length() != 0) {
+                            userInputCarrier = Integer.parseInt(userCarrierInput.getText().toString());
+                        }
+
+                        userInputCarrier = checkCarrierFrequency(userInputCarrier);
+                        audioBundle.putInt("userCarrier", userInputCarrier);
+                        audioBundle.putInt("jammerType", AudioSettings.JAMMER_TYPE_DEFAULT_RANGED);
+
+                        entryLogger(getResources().getString(R.string.jammer_dialog_14)
+                                + userInputCarrier, false);
                     }
                 })
                 .setNegativeButton(R.string.dialog_button_cancel, new DialogInterface.OnClickListener() {
@@ -998,13 +911,23 @@ public class MainActivity extends AppCompatActivity
                 .setPositiveButton(R.string.dialog_button_okay, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int id) {
-                        int userInputCarrier = Integer.parseInt(userCarrierInput.getText().toString());
-                        int userInputLimit = Integer.parseInt(userLimitInput.getText().toString());
+                        int userInputCarrier = AudioSettings.DEFAULT_NUHF_FREQUENCY;
+                        if (userCarrierInput.getText().length() != 0) {
+                            userInputCarrier = Integer.parseInt(userCarrierInput.getText().toString());
+                        }
+                        int userInputLimit = AudioSettings.DEFAULT_RANGE_DRIFT_LIMIT;
+                        if (userLimitInput.getText().length() != 0) {
+                            userInputLimit = Integer.parseInt(userCarrierInput.getText().toString());
+                        }
 
-                        pilferShushJammer.setUserCarrier(userInputCarrier);
-                        pilferShushJammer.setUserLimit(userInputLimit);
-                        pilferShushJammer.setJammerTypeSwitch(AudioSettings.JAMMER_TYPE_USER_RANGED);
-                        entryLogger("Jammer type changed to " + userInputLimit + " Hz drift with carrier at " + userInputCarrier, false);
+                        userInputCarrier = checkCarrierFrequency(userInputCarrier);
+                        userInputLimit = checkDriftLimit(userInputLimit);
+                        audioBundle.putInt("userCarrier", userInputCarrier);
+                        audioBundle.putInt("userLimit", userInputLimit);
+                        audioBundle.putInt("jammerType", AudioSettings.JAMMER_TYPE_USER_RANGED);
+
+                        entryLogger("Jammer type changed to " + userInputLimit
+                                + " Hz drift with carrier at " + userInputCarrier, false);
 
                     }
                 })
@@ -1035,9 +958,14 @@ public class MainActivity extends AppCompatActivity
                 .setPositiveButton(R.string.dialog_button_okay, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int id) {
-                        int userInputDrift = Integer.parseInt(userDriftInput.getText().toString());
-                        pilferShushJammer.setDriftSpeed(userInputDrift);
-                        entryLogger("Jammer drift speed changed to " + userInputDrift, false);
+                        // set a default and check edit text field
+                        int userInputSpeed = 1;
+                        if (userDriftInput.getText().length() != 0) {
+                            userInputSpeed = Integer.parseInt(userDriftInput.getText().toString());
+                        }
+                        userInputSpeed = checkDriftSpeed(userInputSpeed);
+                        audioBundle.putInt("userSpeed", userInputSpeed);
+                        entryLogger("Jammer drift speed changed to " + userInputSpeed, false);
                     }
                 })
                 .setNegativeButton(R.string.dialog_button_cancel, new DialogInterface.OnClickListener() {
@@ -1077,56 +1005,70 @@ public class MainActivity extends AppCompatActivity
         }
     }
 
+    // As of Build.VERSION_CODES.O, this method is no longer available to third party applications.
+    // For backwards compatibility, it will still return the caller's own services.
+    private boolean checkServiceRunning(Class<?> serviceClass) {
+        ActivityManager manager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
+        for (ActivityManager.RunningServiceInfo service : manager.getRunningServices(Integer.MAX_VALUE)) {
+            if (serviceClass.getName().equals(service.service.getClassName())) {
+                return true;
+            }
+        }
+        return false;
+    }
+
 
     /********************************************************************/
-/*
- *
- */
+    /*
+     *      JAMMERS
+     */
     private void runPassive() {
-        if (pilferShushJammer.hasPassiveJammer() && !PASSIVE_RUNNING) {
-            if (pilferShushJammer.initPassiveJammer()) {
-                PASSIVE_RUNNING = true;
-                if (!pilferShushJammer.runPassiveJammer()) {
-                    // has record state errors
-                    stopPassive();
-                    passiveJammerButton.toggle();
-                }
-                else {
-                    mainScanLogger(getResources().getString(R.string.main_scanner_26), false);
-                    notifyManager.notify(NOTIFY_PASSIVE_ID, notifyPassiveBuilder.build());
-                }
-            }
+        if (PASSIVE_RUNNING) {
+            if (DEBUG) entryLogger(getResources().getString(R.string.resume_status_7), false);
+        }
+        else {
+            Intent startIntent = new Intent(MainActivity.this, PassiveJammerService.class);
+            startIntent.setAction(PassiveJammerService.ACTION_START_PASSIVE);
+            startIntent.putExtras(audioBundle);
+            startService(startIntent);
+            PASSIVE_RUNNING = true;
+            entryLogger(getResources().getString(R.string.main_scanner_26), true);
         }
     }
     private void stopPassive() {
-        if (pilferShushJammer.hasPassiveJammer() && PASSIVE_RUNNING) {
-            pilferShushJammer.stopPassiveJammer();
-            PASSIVE_RUNNING = false;
-            mainScanLogger(getResources().getString(R.string.main_scanner_29), false);
-            notifyManager.cancel(NOTIFY_PASSIVE_ID);
-        }
+        Intent stopIntent = new Intent(MainActivity.this, PassiveJammerService.class);
+        stopIntent.setAction(PassiveJammerService.ACTION_STOP_PASSIVE);
+        startService(stopIntent);
+        PASSIVE_RUNNING = false;
+        entryLogger(getResources().getString(R.string.main_scanner_29), true);
     }
 
     private void runActive() {
-        if (pilferShushJammer.hasActiveJammer() && !ACTIVE_RUNNING) {
-            // run it
+        if (ACTIVE_RUNNING) {
+            if (DEBUG) entryLogger(getResources().getString(R.string.resume_status_8), false);
+        }
+        else {
+            Intent startIntent = new Intent(MainActivity.this, ActiveJammerService.class);
+            startIntent.setAction(ActiveJammerService.ACTION_START_ACTIVE);
+            startIntent.putExtras(audioBundle);
+            startService(startIntent);
             ACTIVE_RUNNING = true;
-            notifyManager.notify(NOTIFY_ACTIVE_ID, notifyActiveBuilder.build());
-            mainScanLogger(getResources().getString(R.string.main_scanner_27), false);
-            pilferShushJammer.runActiveJammer(activeTypeValue ? 1 : 0);
-            toggleHeadset(ACTIVE_RUNNING);
+            entryLogger(getResources().getString(R.string.main_scanner_27), true);
         }
     }
 
     private void stopActive() {
-        if (pilferShushJammer.hasActiveJammer() && ACTIVE_RUNNING) {
-            // stop it
-            ACTIVE_RUNNING = false;
-            notifyManager.cancel(NOTIFY_ACTIVE_ID);
-            mainScanLogger(getResources().getString(R.string.main_scanner_28), false);
-            pilferShushJammer.stopActiveJammer();
-        }
+        Intent stopIntent = new Intent(MainActivity.this, ActiveJammerService.class);
+        stopIntent.setAction(ActiveJammerService.ACTION_STOP_ACTIVE);
+        startService(stopIntent);
+        ACTIVE_RUNNING = false;
+        entryLogger(getResources().getString(R.string.main_scanner_28), true);
     }
+
+    /********************************************************************/
+    /*
+     *      SCANNER
+     */
 
     private void runScanner() {
         if (!pilferShushScanner.checkScanner()) {
@@ -1294,8 +1236,9 @@ public class MainActivity extends AppCompatActivity
         }
     }
 
+    /*
     private void toggleEq(boolean eqOn) {
-        if (!audioSettings.getHasEQ()) {
+        if (!audioBundle.getBoolean(AudioSettings.AUDIO_BUNDLE_KEYS[12])) {
             // failure when testing onboard audiofx/equalizer, device specific
             mainScanLogger(getResources().getString(R.string.app_status_7), false);
             if (eqOn) {
@@ -1320,6 +1263,7 @@ public class MainActivity extends AppCompatActivity
             mainScanLogger(getResources().getString(R.string.app_status_5), false);
 
     }
+    */
 
     private void initAudioFocusListener() {
         audioFocusListener = new AudioManager.OnAudioFocusChangeListener() {
@@ -1396,6 +1340,42 @@ public class MainActivity extends AppCompatActivity
                 }
             }
         }
+    }
+
+    /*
+
+    CONFORM CHECKS FOR USER INPUT
+*/
+    private int checkCarrierFrequency(int carrierFrequency) {
+        if (carrierFrequency > audioBundle.getInt(AudioSettings.AUDIO_BUNDLE_KEYS[13]))
+            return audioBundle.getInt(AudioSettings.AUDIO_BUNDLE_KEYS[13]);
+
+        else if (carrierFrequency < AudioSettings.MINIMUM_NUHF_FREQUENCY)
+            return AudioSettings.MINIMUM_NUHF_FREQUENCY;
+
+        else
+            return carrierFrequency;
+    }
+
+    private int checkDriftLimit(int driftLimit) {
+        if (driftLimit > AudioSettings.DEFAULT_RANGE_DRIFT_LIMIT)
+            return AudioSettings.DEFAULT_RANGE_DRIFT_LIMIT;
+
+        else if (driftLimit < AudioSettings.MINIMUM_DRIFT_LIMIT)
+            return AudioSettings.MINIMUM_DRIFT_LIMIT;
+
+        else
+            return driftLimit;
+    }
+
+    private int checkDriftSpeed(int driftSpeed) {
+        // is 1 - 10, then * 1000
+        if (driftSpeed < 1)
+            return 1;
+        else if (driftSpeed > 10)
+            return 10;
+        else
+            return driftSpeed;
     }
 
     /********************************************************************/

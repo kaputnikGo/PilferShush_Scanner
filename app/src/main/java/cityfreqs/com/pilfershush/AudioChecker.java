@@ -5,40 +5,45 @@ import android.media.AudioFormat;
 import android.media.AudioManager;
 import android.media.AudioRecord;
 import android.media.AudioTrack;
-import android.media.MediaRecorder.AudioSource;
+import android.media.MediaRecorder;
 import android.media.audiofx.Equalizer;
+import android.os.Bundle;
 
 import cityfreqs.com.pilfershush.assist.AudioSettings;
 
 public class AudioChecker {
-    private int sampleRate;
-    private int bufferSize;
-    private int encoding;
-    private int channelConfig;
-    private int audioSource;
-
     private Context context;
     private AudioRecord audioRecord;
+    private Bundle audioBundle;
+    private int channelInCount;
 
-    private AudioSettings audioSettings;
-
-    public AudioChecker(Context context, AudioSettings audioSettings) {
+    public AudioChecker(Context context) {
         //
         this.context = context;
-        this.audioSettings = audioSettings;
-        // still need to determine if this is useful if user switchable, ie USB.
-        audioSource = AudioSource.DEFAULT; //DEFAULT = 0, MIC = 1, CAMCORDER = 5
+        audioBundle = new Bundle();
     }
 
-    protected void destroy() {
+    void destroy() {
         stopAllAudio();
         if (audioRecord != null) {
             audioRecord = null;
         }
     }
 
-    protected String getAudioSettingsReport() {
-        return audioSettings.toString();
+    Bundle getAudioBundle() {
+        return audioBundle;
+    }
+
+    private int getClosestPowersHigh(int reported) {
+        // return the next highest power from the minimum reported
+        // 512, 1024, 2048, 4096, 8192, 16384
+        for (int power : AudioSettings.POWERS_TWO_HIGH) {
+            if (reported <= power) {
+                return power;
+            }
+        }
+        // didn't find power, return reported
+        return reported;
     }
 
     /********************************************************************/
@@ -118,29 +123,36 @@ public static final int HOTWORD = 1999; //  always-on software hotword detection
 
  *
  */
-    protected boolean determineRecordAudioType() {
+    boolean determineRecordAudioType() {
         // guaranteed default for Android is 44.1kHz, PCM_16BIT, CHANNEL_IN_DEFAULT
         int buffSize;
+        /*
+        AudioRecord.cpp ::
+        if (inputSource == AUDIO_SOURCE_DEFAULT) {
+            inputSource = AUDIO_SOURCE_MIC;
+        }
+        */
+        int audioSource = MediaRecorder.AudioSource.DEFAULT; // 0
         for (int rate : AudioSettings.SAMPLE_RATES) {
             for (short audioFormat : new short[] {
                     AudioFormat.ENCODING_PCM_16BIT,
                     AudioFormat.ENCODING_PCM_8BIT}) {
 
-                for (short channelConfig : new short[] {
+                for (short channelInConfig : new short[] {
                         AudioFormat.CHANNEL_IN_DEFAULT, // 1 - switched by OS, not native?
                         AudioFormat.CHANNEL_IN_MONO,    // 16, also CHANNEL_IN_FRONT == 16
                         AudioFormat.CHANNEL_IN_STEREO }) {  // 12
                     try {
-                        MainActivity.logger("Try rate " + rate + "Hz, bits: " + audioFormat + ", channelConfig: "+ channelConfig);
-                        buffSize = AudioRecord.getMinBufferSize(rate, channelConfig, audioFormat);
+                        MainActivity.logger("Try rate " + rate + "Hz, bits: " + audioFormat + ", channelInConfig: "+ channelInConfig);
+                        buffSize = AudioRecord.getMinBufferSize(rate, channelInConfig, audioFormat);
                         // force buffSize to powersOfTwo if it isnt (ie.S5)
-                        buffSize = AudioSettings.getClosestPowersHigh(buffSize);
+                        buffSize = getClosestPowersHigh(buffSize);
 
                         if (buffSize != AudioRecord.ERROR_BAD_VALUE) {
                             AudioRecord recorder = new AudioRecord(
                                     audioSource,
                                     rate,
-                                    channelConfig,
+                                    channelInConfig,
                                     audioFormat,
                                     buffSize);
 
@@ -148,12 +160,13 @@ public static final int HOTWORD = 1999; //  always-on software hotword detection
                                 MainActivity.logger("found, rate: " + rate + ", buffer: " + buffSize + ", channel count: " + recorder.getChannelCount());
                                 // set found values
                                 // AudioRecord.getChannelCount() is number of input audio channels (1 is mono, 2 is stereo)
-                                sampleRate = rate;
-                                this.channelConfig = channelConfig;
-                                encoding = audioFormat;
-                                bufferSize = buffSize;
-                                audioSettings.setBasicAudioSettings(sampleRate, bufferSize, encoding, this.channelConfig, recorder.getChannelCount());
-                                audioSettings.setAudioSource(audioSource);
+                                channelInCount = recorder.getChannelCount();
+                                audioBundle.putInt(AudioSettings.AUDIO_BUNDLE_KEYS[0], audioSource);
+                                audioBundle.putInt(AudioSettings.AUDIO_BUNDLE_KEYS[1], rate);
+                                audioBundle.putInt(AudioSettings.AUDIO_BUNDLE_KEYS[2], channelInConfig);
+                                audioBundle.putInt(AudioSettings.AUDIO_BUNDLE_KEYS[3], audioFormat);
+                                audioBundle.putInt(AudioSettings.AUDIO_BUNDLE_KEYS[4], buffSize);
+
                                 recorder.release();
                                 return true;
                             }
@@ -169,7 +182,8 @@ public static final int HOTWORD = 1999; //  always-on software hotword detection
         return false;
     }
 
-    protected boolean determineUsbRecordAudioType() {
+    /*
+    boolean determineUsbRecordAudioType() {
         // android should auto switch to using USB audio device as default...
         int buffSize;
         for (int rate : AudioSettings.SAMPLE_RATES) {
@@ -177,13 +191,13 @@ public static final int HOTWORD = 1999; //  always-on software hotword detection
                     AudioFormat.ENCODING_PCM_16BIT,
                     AudioFormat.ENCODING_PCM_8BIT }) {
 
-                for (short channelConfig : new short[] {
+                for (short channelInConfig : new short[] {
                         AudioFormat.CHANNEL_IN_DEFAULT,  //1
                         AudioFormat.CHANNEL_IN_MONO,  // 16
                         AudioFormat.CHANNEL_IN_STEREO }) { // 12
                     try {
-                        MainActivity.logger("USB - try rate " + rate + "Hz, bits: " + audioFormat + ", channelConfig: "+ channelConfig);
-                        buffSize = AudioRecord.getMinBufferSize(rate, channelConfig, audioFormat);
+                        MainActivity.logger("USB - try rate " + rate + "Hz, bits: " + audioFormat + ", channelConfig: "+ channelInConfig);
+                        buffSize = AudioRecord.getMinBufferSize(rate, channelInConfig, audioFormat);
                         // force buffSize to powersOfTwo if it isnt (ie.S5)
                         buffSize = AudioSettings.getClosestPowersHigh(buffSize);
 
@@ -191,7 +205,7 @@ public static final int HOTWORD = 1999; //  always-on software hotword detection
                             AudioRecord recorder = new AudioRecord(
                                     audioSource,
                                     rate,
-                                    channelConfig,
+                                    channelInConfig,
                                     audioFormat,
                                     buffSize);
 
@@ -200,10 +214,10 @@ public static final int HOTWORD = 1999; //  always-on software hotword detection
                                 MainActivity.logger("USB - Audio source: " + recorder.getAudioSource());
                                 // set found values
                                 sampleRate = rate;
-                                this.channelConfig = channelConfig;
+                                this.channelInConfig = channelInConfig;
                                 encoding = audioFormat;
                                 bufferSize = buffSize;
-                                audioSettings.setBasicAudioSettings(sampleRate, bufferSize, encoding, this.channelConfig, recorder.getChannelCount() );
+                                audioSettings.setBasicAudioSettings(sampleRate, bufferSize, encoding, this.channelInConfig, recorder.getChannelCount() );
                                 audioSettings.setAudioSource(audioSource);
                                 recorder.release();
                                 return true;
@@ -219,8 +233,9 @@ public static final int HOTWORD = 1999; //  always-on software hotword detection
         MainActivity.logger(context.getString(R.string.audio_check_3));
         return false;
     }
+    */
 
-    protected boolean determineOutputAudioType() {
+    boolean determineOutputAudioType() {
         // guaranteed default for Android is 44.1kHz, PCM_16BIT, CHANNEL_IN_DEFAULT
         int buffSize;
         for (int rate : AudioSettings.SAMPLE_RATES) {
@@ -249,22 +264,25 @@ public static final int HOTWORD = 1999; //  always-on software hotword detection
                         if (audioTrack.getState() == AudioTrack.STATE_INITIALIZED) {
                             MainActivity.entryLogger("found: " + rate + ", buffer: " + buffSize + ", channelOutConfig: " + channelOutConfig, true);
                             // buffOutSize may not be same as buffInSize conformed to powersOfTwo
-                            audioSettings.setChannelOutConfig(channelOutConfig);
-                            audioSettings.setBufferOutSize(buffSize);
+                            audioBundle.putInt(AudioSettings.AUDIO_BUNDLE_KEYS[5], channelOutConfig);
+                            audioBundle.putInt(AudioSettings.AUDIO_BUNDLE_KEYS[6], buffSize);
+                            audioBundle.putInt(AudioSettings.AUDIO_BUNDLE_KEYS[13], (int)(rate * 0.5f));
 
                             MainActivity.entryLogger("\nTesting for device audiofx equalizer.", false);
                             if (testOnboardEQ(audioTrack.getAudioSessionId())) {
                                 MainActivity.entryLogger("Device audiofx equalizer test passed.\n", false);
-                                audioSettings.setHasEQ(true);
+                                audioBundle.putBoolean(AudioSettings.AUDIO_BUNDLE_KEYS[12], true);
                             }
                             else {
                                 MainActivity.entryLogger("Device audiofx equalizer test failed.\n", true);
-                                audioSettings.setHasEQ(false);
+                                audioBundle.putBoolean(AudioSettings.AUDIO_BUNDLE_KEYS[12], false);
                             }
 
                             audioTrack.pause();
                             audioTrack.flush();
                             audioTrack.release();
+
+                            setBitDepth(audioFormat);
                             return true;
                         }
                     }
@@ -276,6 +294,26 @@ public static final int HOTWORD = 1999; //  always-on software hotword detection
         }
         MainActivity.entryLogger(context.getString(R.string.audio_check_2), true);
         return false;
+    }
+
+    private void setBitDepth(short encoding) {
+        // encoding == int value of bit depth
+        if (encoding == AudioFormat.ENCODING_PCM_8BIT)
+            audioBundle.putInt(AudioSettings.AUDIO_BUNDLE_KEYS[20], 8);
+        else if (encoding == AudioFormat.ENCODING_PCM_16BIT)
+            audioBundle.putInt(AudioSettings.AUDIO_BUNDLE_KEYS[20], 16);
+        else if (encoding == AudioFormat.ENCODING_PCM_FLOAT)
+            audioBundle.putInt(AudioSettings.AUDIO_BUNDLE_KEYS[20], 32);
+        else {
+            // default or error, return "guaranteed" default
+            audioBundle.putInt(AudioSettings.AUDIO_BUNDLE_KEYS[20], 16);
+        }
+    }
+
+    public String saveFormatToString() {
+        return (audioBundle.getInt(AudioSettings.AUDIO_BUNDLE_KEYS[1]) + " Hz, "
+                + audioBundle.getInt(AudioSettings.AUDIO_BUNDLE_KEYS[20]) + " bits, "
+                + channelInCount + " channel");
     }
 
     // testing android/media/audiofx/Equalizer
@@ -324,19 +362,20 @@ public static final int HOTWORD = 1999; //  always-on software hotword detection
         }
     }
 
-    protected AudioSettings getAudioSettings() {
-        return audioSettings;
-    }
-
-    protected boolean checkAudioRecord() {
+    boolean checkAudioRecord() {
         // return if can start new audioRecord object
         try {
-            audioRecord = new AudioRecord(audioSource, sampleRate, channelConfig, encoding, bufferSize );
+            audioRecord = new AudioRecord(
+                    audioBundle.getInt(AudioSettings.AUDIO_BUNDLE_KEYS[0]),
+                    audioBundle.getInt(AudioSettings.AUDIO_BUNDLE_KEYS[1]),
+                    audioBundle.getInt(AudioSettings.AUDIO_BUNDLE_KEYS[2]),
+                    audioBundle.getInt(AudioSettings.AUDIO_BUNDLE_KEYS[3]),
+                    audioBundle.getInt(AudioSettings.AUDIO_BUNDLE_KEYS[4]));
             MainActivity.logger(context.getString(R.string.audio_check_4));
             // need to start reading buffer to trigger an exception
             audioRecord.startRecording();
-            short buffer[] = new short[bufferSize];
-            int audioStatus = audioRecord.read(buffer, 0, bufferSize);
+            short buffer[] = new short[audioBundle.getInt(AudioSettings.AUDIO_BUNDLE_KEYS[4])];
+            int audioStatus = audioRecord.read(buffer, 0, audioBundle.getInt(AudioSettings.AUDIO_BUNDLE_KEYS[4]));
 
             // check for error on pre 6.x and 6.x API
             if(audioStatus == AudioRecord.ERROR_INVALID_OPERATION

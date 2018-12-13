@@ -49,10 +49,11 @@ public class BackgroundChecker {
                     "sonarax",
                     "soniccode",
                     "sonicnotify",
+                    "trillbit",
                     "zapr"
             };
 
-    protected boolean initChecker(PackageManager packageManager) {
+    boolean initChecker(PackageManager packageManager) {
         // need a user updatable SDK_NAMES list insert...
         this.packageManager = packageManager;
         appEntries = new ArrayList<>();
@@ -61,7 +62,7 @@ public class BackgroundChecker {
         return true;
     }
 
-    protected void destroy() {
+    void destroy() {
         if (packageManager != null) packageManager = null;
         if (packages != null) packages = null;
         if (packageInfo != null) packageInfo = null;
@@ -84,7 +85,7 @@ public class BackgroundChecker {
 
     /********************************************************************/
 
-    protected int getUserRecordNumApps() {
+    int getUserRecordNumApps() {
         if (audioAppEntries != null) {
             return audioAppEntries.size();
         }
@@ -92,7 +93,7 @@ public class BackgroundChecker {
             return 0;
     }
 
-    protected void audioAppEntryLog() {
+    void audioAppEntryLog() {
         if (appEntries.size() > 0) {
             for (AppEntry appEntry : appEntries) {
                 MainActivity.entryLogger(appEntry.toString(), appEntry.checkForCaution());
@@ -132,13 +133,12 @@ public class BackgroundChecker {
 
     /*
     protected AppEntry getCautionedAppEntry(int appEntryIndex) {
-        //TODO
         // base on name..
         return appEntries.get(appEntryIndex);
     }
     */
 
-    protected boolean checkAudioBeaconApps() {
+    boolean checkAudioBeaconApps() {
         // while we check, populate audioBeaconAppEntries list for later use
         audioBeaconAppEntries = new ArrayList<>();
         if (appEntries.size() > 0) {
@@ -155,7 +155,7 @@ public class BackgroundChecker {
         return (audioBeaconAppEntries.size() > 0);
     }
 
-    protected String[] getAudioBeaconAppNames() {
+    String[] getAudioBeaconAppNames() {
         String[] appNames = new String[audioBeaconAppEntries.size()];
         int i = 0;
         for (AppEntry appEntry : audioBeaconAppEntries) {
@@ -165,13 +165,13 @@ public class BackgroundChecker {
         return appNames;
     }
 
-    protected AppEntry getAudioBeaconAppEntry(int appEntryIndex) {
+    AppEntry getAudioBeaconAppEntry(int appEntryIndex) {
         return audioBeaconAppEntries.get(appEntryIndex);
     }
 
-    protected String displayAudioSdkNames() {
+    String displayAudioSdkNames() {
         // return a string of names + \n
-        if (SDK_NAMES != null && SDK_NAMES.length > 0) {
+        if (SDK_NAMES != null) {
             StringBuilder sb = new StringBuilder();
             for (String name : SDK_NAMES) {
                 sb.append(name).append("\n");
@@ -196,7 +196,7 @@ public class BackgroundChecker {
         return false;
     }
 
-    protected String[] getOverrideScanAppNames() {
+    String[] getOverrideScanAppNames() {
         //
         String[] appNames = new String[appEntries.size()];
         int i = 0;
@@ -207,7 +207,7 @@ public class BackgroundChecker {
         return appNames;
     }
 
-    protected AppEntry getOverrideScanAppEntry(int appEntryIndex) {
+    AppEntry getOverrideScanAppEntry(int appEntryIndex) {
         return appEntries.get(appEntryIndex);
     }
 
@@ -220,11 +220,9 @@ public class BackgroundChecker {
         return (applicationInfo.flags & mask) == 0;
     }
 
-    protected void runChecker() {
+    void runChecker() {
         // get list of apps
         // only lists apps with declared AudioRecord/Mic permission...
-        // need to check for runonce...
-        //TODO
         packages = packageManager.getInstalledApplications(PackageManager.GET_META_DATA);
         int idCounter = 0;
         for (ApplicationInfo applicationInfo : packages) {
@@ -237,8 +235,6 @@ public class BackgroundChecker {
                 // check permissions and services
 
                 if (packageInfo.requestedPermissions != null && isUserApp(applicationInfo)) {
-                    //TODO
-                    // have user switch, or collect theses elsewhere in UI
                     // do not include system apps
                     AppEntry appEntry = new AppEntry(packageInfo.packageName,
                             (String) packageInfo.applicationInfo.loadLabel(packageManager));
@@ -285,7 +281,6 @@ public class BackgroundChecker {
     /*
     // remm'ed for now - probably not useful
     protected void auditLogAsync() {
-        //TODO
         // this may not work for logic reasons, and
         // cos in JB (API 16) up can only access this activity's log entries... ??
         // therefore, it can only find when we provoke the exception

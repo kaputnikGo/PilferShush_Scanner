@@ -13,6 +13,7 @@ import static android.hardware.usb.UsbConstants.USB_DIR_OUT;
 
 public class DeviceContainer {
     // TODO -->  MUST BE MIN API 21 (Android 5.0) for host-mode audio
+	// TODO NOT IMPLEMENTED PROPERLY
     /*
     - USB audio is not supported in development mode.
     - dev mode is for adb, fastboot etc
@@ -146,35 +147,35 @@ public class DeviceContainer {
 *       specific int to string getters
 */
 
-    public String getDeviceName() {
+    String getDeviceName() {
         return device.getDeviceName();
     }
 
-    public int getInterfaceCount() {
+    int getInterfaceCount() {
         return device.getInterfaceCount();
     }
 
-    public int getVendorId() {
+    int getVendorId() {
         return device.getVendorId();
     }
 
-    public int getDeviceId() {
+    int getDeviceId() {
         return device.getDeviceId();
     }
 
-    public int getProductId() {
+    int getProductId() {
         return device.getProductId();
     }
 
-    public int getUsbClass() {
+    int getUsbClass() {
         return device.getDeviceClass();
     }
 
-    public int getUsbSubClass() {
+    int getUsbSubClass() {
         return device.getDeviceSubclass();
     }
 
-    public int getUsbProtocol() {
+    int getUsbProtocol() {
         return device.getDeviceProtocol();
     }
 

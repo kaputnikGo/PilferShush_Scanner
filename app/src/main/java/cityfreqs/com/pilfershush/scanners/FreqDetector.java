@@ -1,33 +1,32 @@
 package cityfreqs.com.pilfershush.scanners;
 
 import android.os.AsyncTask;
+import android.os.Bundle;
 
 import java.util.ArrayList;
 
-import cityfreqs.com.pilfershush.assist.AudioSettings;
-
 public class FreqDetector {
     private RecordTask recordTask;
-    private AudioSettings audioSettings;
+    private Bundle audioBundle;
 
     protected interface RecordTaskListener {
         void onFailure(String paramString);
         void onSuccess(int paramInt, int magnitude);
     }
 
-    protected FreqDetector(AudioSettings audioSettings) {
-        this.audioSettings = audioSettings;
+    protected FreqDetector(Bundle audioBundle) {
+        this.audioBundle = audioBundle;
     }
 
     /********************************************************************/
 
     protected void init() {
-        recordTask = new RecordTask(audioSettings, audioSettings.getFreqStep(), audioSettings.getMagnitude());
+        recordTask = new RecordTask(audioBundle);
     }
 
     protected void startRecording(RecordTaskListener recordTaskListener) {
         if (recordTask == null) {
-            recordTask = new RecordTask(audioSettings, audioSettings.getFreqStep(), audioSettings.getMagnitude());
+            recordTask = new RecordTask(audioBundle);
         }
         startRecordTaskListener(recordTaskListener);
     }

@@ -2,6 +2,7 @@ package cityfreqs.com.pilfershush.assist;
 
 
 import android.content.Context;
+import android.os.Bundle;
 import android.os.Environment;
 
 import java.io.BufferedOutputStream;
@@ -24,8 +25,7 @@ import cityfreqs.com.pilfershush.R;
 
 public class WriteProcessor {
     private Context context;
-    private AudioSettings audioSettings;
-
+    private Bundle audioBundle;
     private File extDirectory;
     private String sessionFilename;
 
@@ -49,10 +49,10 @@ public class WriteProcessor {
     // nospace: 20180122-123729-capture
     private static final SimpleDateFormat TIMESTAMP_FORMAT = new SimpleDateFormat("yyyyMMdd-HH:mm:ss", Locale.ENGLISH);
 
-    public WriteProcessor(Context context, String sessionName, AudioSettings audioSettings) {
+    public WriteProcessor(Context context, String sessionName, Bundle audioBundle) {
         this.context = context;
         setSessionName(sessionName);
-        this.audioSettings = audioSettings;
+        this.audioBundle = audioBundle;
 
         log(context.getString(R.string.writer_state_1));
         // checks for read/write state
@@ -165,7 +165,7 @@ public class WriteProcessor {
     }
 
     public void audioFileConvert() {
-        if (!audioSettings.getWriteFiles()) {
+        if (!audioBundle.getBoolean(AudioSettings.AUDIO_BUNDLE_KEYS[19])) {
            // write disabled
             return;
         }
@@ -234,10 +234,10 @@ public class WriteProcessor {
             writeInt(fileChannel, 16, ByteOrder.LITTLE_ENDIAN); // subchunk 1 size
             writeShort(fileChannel, (short) 1, ByteOrder.LITTLE_ENDIAN); // audio format (1 = PCM)
             writeShort(fileChannel, (short) 1, ByteOrder.LITTLE_ENDIAN); // number of channels
-            writeInt(fileChannel, audioSettings.getSampleRate(), ByteOrder.LITTLE_ENDIAN); // sample rate
-            writeInt(fileChannel, audioSettings.getSampleRate() * 2, ByteOrder.LITTLE_ENDIAN); // byte rate
+            writeInt(fileChannel, audioBundle.getInt(AudioSettings.AUDIO_BUNDLE_KEYS[1]), ByteOrder.LITTLE_ENDIAN); // sample rate
+            writeInt(fileChannel, audioBundle.getInt(AudioSettings.AUDIO_BUNDLE_KEYS[1]) * 2, ByteOrder.LITTLE_ENDIAN); // byte rate
             writeShort(fileChannel, (short) 2, ByteOrder.LITTLE_ENDIAN); // block align
-            writeShort(fileChannel, (short) audioSettings.getBitDepth(), ByteOrder.LITTLE_ENDIAN); // bits per sample
+            writeShort(fileChannel, (short) audioBundle.getInt(AudioSettings.AUDIO_BUNDLE_KEYS[20]), ByteOrder.LITTLE_ENDIAN); // bits per sample
             writeString(fileChannel, "data", ByteOrder.BIG_ENDIAN); // subchunk 2 id
             writeInt(fileChannel, rawData.length, ByteOrder.LITTLE_ENDIAN); // subchunk 2 size
 

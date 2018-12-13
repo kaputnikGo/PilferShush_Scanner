@@ -1,6 +1,7 @@
 package cityfreqs.com.pilfershush.scanners;
 
 import android.content.Context;
+import android.os.Bundle;
 
 import java.util.ArrayList;
 
@@ -13,16 +14,17 @@ public class AudioScanner {
     private Context context;
     private FreqDetector freqDetector;
     private ProcessAudio processAudio;
-    private AudioSettings audioSettings;
+    //private AudioSettings audioSettings;
+    private Bundle audioBundle;
 
     private ArrayList<Integer> frequencySequence;
     private ArrayList<Integer[]> bufferStorage;
 
-    public AudioScanner(Context context, AudioSettings audioSettings) {
+    public AudioScanner(Context context, Bundle audioBundle) {
         this.context = context;
-        this.audioSettings = audioSettings;
+        this.audioBundle = audioBundle;
 
-        freqDetector = new FreqDetector(this.audioSettings);
+        freqDetector = new FreqDetector(this.audioBundle);
         freqDetector.init();
         processAudio = new ProcessAudio(context);
         resetAudioScanner();
@@ -34,7 +36,7 @@ public class AudioScanner {
     }
 
     public void setMagnitude(double magnitude) {
-        audioSettings.setMagnitude(magnitude);
+        audioBundle.putDouble(AudioSettings.AUDIO_BUNDLE_KEYS[17], magnitude);
     }
 
     public void runAudioScanner() {

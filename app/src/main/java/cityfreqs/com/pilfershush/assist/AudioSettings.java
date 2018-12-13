@@ -1,9 +1,5 @@
 package cityfreqs.com.pilfershush.assist;
 
-import android.media.AudioFormat;
-
-import java.util.Random;
-
 public class AudioSettings {
     // helper vars and defaults
     // guaranteed default for Android is 44.1kHz, PCM_16BIT, CHANNEL_IN_DEFAULT
@@ -72,13 +68,15 @@ public class AudioSettings {
     public static final int CARRIER_NUHF_FREQUENCY = 21000;
     public static final int MAXIMUM_NUHF_FREQUENCY = 24000;
     public static final int MINIMUM_NUHF_FREQUENCY = 18000;
+    public static final int DEFAULT_NUHF_FREQUENCY = 19000;
 
-    private static final int CARRIER_TEST_FREQUENCY = 440;
-    private static final int MAXIMUM_TEST_FREQUENCY = CARRIER_TEST_FREQUENCY + (int)(CARRIER_TEST_FREQUENCY * 0.5);
-    private static final int MINIMUM_TEST_FREQUENCY = CARRIER_TEST_FREQUENCY - (int)(CARRIER_TEST_FREQUENCY * 0.5);
+    public static final int CARRIER_TEST_FREQUENCY = 440;
+    public static final int MAXIMUM_TEST_FREQUENCY = CARRIER_TEST_FREQUENCY + (int)(CARRIER_TEST_FREQUENCY * 0.5);
+    public static final int MINIMUM_TEST_FREQUENCY = CARRIER_TEST_FREQUENCY - (int)(CARRIER_TEST_FREQUENCY * 0.5);
 
     public static final int DEFAULT_RANGE_DRIFT_LIMIT = 1000;
     public static final int DEFAULT_DRIFT_SPEED = 1000;
+    public static final int MINIMUM_DRIFT_LIMIT = 10;
     public static final int DRIFT_SPEED_MULTIPLIER = 1000;
 
     public static final int JAMMER_TONE = 0;
@@ -88,6 +86,15 @@ public class AudioSettings {
     public static final int JAMMER_TYPE_NUHF = 1;
     public static final int JAMMER_TYPE_DEFAULT_RANGED = 2;
     public static final int JAMMER_TYPE_USER_RANGED = 3;
+
+    // Bundle keys string names
+    public static final String[] AUDIO_BUNDLE_KEYS = new String[] {
+            "audioSource", "sampleRate", "channelInConfig", "encoding", //3
+            "bufferInSize", "channelOutConfig", "bufferOutSize", "activeType", //7
+            "jammerType", "userCarrier", "userLimit", "userSpeed", "hasEQ", //12
+            "maxFreq", "scanMinFreq", "scanMaxFreq", "scanFreqStep",  //16
+            "ScanMagnitude", "scanWindow", "writeFiles", "bitDepth" //20
+    };
 
     // vars for AudioRecord creation and use
     private int sampleRate;
@@ -222,84 +229,7 @@ public class AudioSettings {
         return USER_WINDOW_TYPE;
     }
 
-    public String toString() {
-        return ("audio record format: "
-                + sampleRate + ", " + bufferInSize + ", "
-                + encoding + ", " + channelInConfig + ", " + audioSource);
-    }
 
-    public String saveFormatToString() {
-        return (sampleRate + " Hz, "
-                + getBitDepth() + " bits, "
-                + channelInCount + " channel");
-    }
-
-    public static int getTestDrift() {
-        return new Random().nextInt(MAXIMUM_TEST_FREQUENCY
-                - MINIMUM_TEST_FREQUENCY)
-                + MINIMUM_TEST_FREQUENCY;
-    }
-
-    public static int getNuhfDrift() {
-        return new Random().nextInt(MAXIMUM_NUHF_FREQUENCY
-                - MINIMUM_NUHF_FREQUENCY)
-                + MINIMUM_NUHF_FREQUENCY;
-    }
-
-    public static int getDefaultRangedDrift(int carrierFrequency) {
-        int min = conformMinimumRangedValue(carrierFrequency - DEFAULT_RANGE_DRIFT_LIMIT);
-        int max = conformMaximumRangedValue(carrierFrequency + DEFAULT_RANGE_DRIFT_LIMIT);
-
-        return new Random().nextInt(max - min) + min;
-    }
-
-    // carrier should be between 18k - 24k
-    public static int getUserRangedDrift(int carrierFrequency, int limit) {
-        carrierFrequency = conformCarrierFrequency(carrierFrequency);
-        int min = conformMinimumRangedValue(carrierFrequency - limit);
-        int max = conformMaximumRangedValue(carrierFrequency + limit);
-
-        return new Random().nextInt(max - min) + min;
-    }
-
-    private static int conformCarrierFrequency(int carrier) {
-        if (carrier < MINIMUM_NUHF_FREQUENCY) carrier = MINIMUM_NUHF_FREQUENCY;
-        if (carrier > MAXIMUM_NUHF_FREQUENCY) carrier = MAXIMUM_NUHF_FREQUENCY;
-        return carrier;
-    }
-
-    private static int conformMinimumRangedValue(int minValue) {
-        if (minValue >= MINIMUM_NUHF_FREQUENCY) return minValue;
-        else return MINIMUM_NUHF_FREQUENCY;
-    }
-
-    private static int conformMaximumRangedValue(int maxValue) {
-        if (maxValue <= MAXIMUM_NUHF_FREQUENCY) return maxValue;
-        else return MAXIMUM_NUHF_FREQUENCY;
-    }
-
-    public int getBitDepth() {
-        // encoding == int value of bit depth
-        if (encoding == AudioFormat.ENCODING_PCM_8BIT) return 8;
-        else if (encoding == AudioFormat.ENCODING_PCM_16BIT) return 16;
-        else if (encoding == AudioFormat.ENCODING_PCM_FLOAT) return 32;
-        else {
-            // default or error, return "guaranteed" default
-            return 16;
-        }
-    }
-
-    public static int getClosestPowersHigh(int reported) {
-        // return the next highest power from the minimum reported
-        // 512, 1024, 2048, 4096, 8192, 16384
-        for (int power : POWERS_TWO_HIGH) {
-            if (reported <= power) {
-                return power;
-            }
-        }
-        // didn't find power, return reported
-        return reported;
-    }
 
 /*
  * Utilities, that may be useful...

@@ -4,6 +4,8 @@
     <string name="action_session_name">Set session name</string>
     <string name="dialog_session_name">Enter suffix for save files</string>
     <string name="session_default_name" translatable="false">capture</string>
+    <string name="passive_service_name">PiferShush Passive</string>
+    <string name="active_service_name">PiferShush Active</string>
 
     <string name="dialog_storage_warn_title">Caution</string>
     <string name="dialog_storage_warn_text">limited storage space for recording.</string>
@@ -198,6 +200,13 @@
     <string name="app_status_6">EQ is turned on.</string>
     <string name="app_status_7">EQ is not available.</string>
 
+    <string name="app_status_8">Active jammer switched to tones.</string>
+    <string name="app_status_9">Active jammer switched to whitenoise.</string>
+
+    <string name="app_status_10">Passive jammer running.</string>
+    <string name="app_status_11">Active jammer running.</string>
+    <string name="app_status_12">Tap to return to app.</string>
+
     <string name="jammer_dialog_1">Change active jammer signal type.</string>
     <string name="jammer_dialog_2">Audible tone drift (~440Hz)</string>
     <string name="jammer_dialog_3">Full NUHF drift (18kHz-24kHz)</string>
@@ -211,9 +220,22 @@
     <string name="jammer_dialog_10">1000</string>
     <string name="jammer_dialog_11">(All frequencies constrained to NUHF)</string>
 
+    <string name="jammer_dialog_12">Tone / Noise switch</string>
+    <string name="jammer_dialog_13">Jammer type changed to\u0020</string>
+    <string name="jammer_dialog_14">Jammer type changed to 1000Hz drift with carrier at\u0020</string>
+
     <string name="drift_dialog_1">Drift speed (1 to 10)</string>
     <string name="drift_dialog_2">1</string>
     <string name="drift_dialog_3">(1 = fast, 10 = slow)</string>
+
+    <string name="resume_status_1">PASSIVE SERVICE FOUND</string>
+    <string name="resume_status_2">PASSIVE SERVICE NOT FOUND</string>
+    <string name="resume_status_3">ACTIVE SERVICE FOUND</string>
+    <string name="resume_status_4">ACTIVE SERVICE NOT FOUND</string>
+    <string name="resume_status_5">RESUME AUDIOFOCUS GRANT</string>
+    <string name="resume_status_6">RESUME AUDIOFOCUS LOSS</string>
+    <string name="resume_status_7">runPassive() when PASSIVE_RUNNING</string>
+    <string name="resume_status_8">runActive() when ACTIVE_RUNNING</string>
 
     <!--
     PilferShushScanner.java
@@ -327,5 +349,14 @@ PassiveJammer.java
     <string name="active_state_1">threadPlay run exception.</string>
     <string name="active_state_2">stopPlayer thread exception.</string>
     <string name="active_state_3">stopPlayer audioTrack exception.</string>
+
+    <!--
+    ~ JammerService.java
+    -->
+    <string name="service_state_1">PilferShush Jammer notifications</string>
+    <string name="service_state_2">Active Jammer service started.</string>
+    <string name="service_state_3">Active Jammer service stopped.</string>
+    <string name="service_state_4">Passive Jammer service started.</string>
+    <string name="service_state_5">Passive Jammer service stopped.</string>
 
 </resources>

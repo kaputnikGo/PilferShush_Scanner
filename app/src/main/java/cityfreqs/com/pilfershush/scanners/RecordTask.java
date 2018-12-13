@@ -2,6 +2,7 @@ package cityfreqs.com.pilfershush.scanners;
 
 import android.media.AudioRecord;
 import android.os.AsyncTask;
+import android.os.Bundle;
 import android.util.Log;
 
 import java.io.IOException;
@@ -20,27 +21,24 @@ public class RecordTask extends AsyncTask<Void, Integer, String> {
     private short[] bufferArray; // (shorts do not make a byte)
     private RecordTaskListener recordTaskListener;
     private AudioRecord audioRecord;
-    private AudioSettings audioSettings;
+    private Bundle audioBundle;
     private int bufferRead;
-    private double minMagnitude;
-    private int freqStepper;
     private ArrayList<Integer[]> bufferStorage;
 
 
-    public RecordTask(AudioSettings audioSettings, int freqStepper, double magnitude) {
-        this.audioSettings = audioSettings;
-        this.freqStepper = freqStepper;
-        minMagnitude = magnitude;
-        bufferArray = new short[audioSettings.getBufferInSize()];
+    public RecordTask(Bundle audioBundle) {
+        this.audioBundle = audioBundle;
+        bufferArray = new short[audioBundle.getInt(AudioSettings.AUDIO_BUNDLE_KEYS[4])];
         bufferStorage = new ArrayList<>();
 
         if (audioRecord == null) {
             try {
-                audioRecord = new AudioRecord(audioSettings.getAudioSource(),
-                        audioSettings.getSampleRate(),
-                        audioSettings.getChannelInConfig(),
-                        audioSettings.getEncoding(),
-                        audioSettings.getBufferInSize());
+                audioRecord = new AudioRecord(
+                        audioBundle.getInt(AudioSettings.AUDIO_BUNDLE_KEYS[0]),
+                        audioBundle.getInt(AudioSettings.AUDIO_BUNDLE_KEYS[1]),
+                        audioBundle.getInt(AudioSettings.AUDIO_BUNDLE_KEYS[2]),
+                        audioBundle.getInt(AudioSettings.AUDIO_BUNDLE_KEYS[3]),
+                        audioBundle.getInt(AudioSettings.AUDIO_BUNDLE_KEYS[4]));
 
                 logger("RecordTask ready.");
             }
@@ -102,22 +100,22 @@ public class RecordTask extends AsyncTask<Void, Integer, String> {
             try {
                 audioRecord.startRecording();
                 logger("audioRecord started...");
-                audioRecord.setPositionNotificationPeriod(audioSettings.getBufferInSize());// / 2);
+                audioRecord.setPositionNotificationPeriod(audioBundle.getInt(AudioSettings.AUDIO_BUNDLE_KEYS[4]));// / 2);
                 audioRecord.setRecordPositionUpdateListener(new AudioRecord.OnRecordPositionUpdateListener() {
                     public void onMarkerReached(AudioRecord audioRecord) {
                         logger("marker reached");
                     }
 
                     public void onPeriodicNotification(AudioRecord audioRecord) {
-                        magnitudeRecordScan(audioSettings.getUserWindowType());
+                        magnitudeRecordScan(audioBundle.getInt(AudioSettings.AUDIO_BUNDLE_KEYS[18]));
 
                         MainActivity.visualiserView.updateVisualiser(bufferArray); //byteBuffer
                     }
                 });
 
                 do {
-                    bufferRead = audioRecord.read(bufferArray, 0, audioSettings.getBufferInSize());
-                    if (audioSettings.getWriteFiles()) {
+                    bufferRead = audioRecord.read(bufferArray, 0, audioBundle.getInt(AudioSettings.AUDIO_BUNDLE_KEYS[4]));
+                    if (audioBundle.getBoolean(AudioSettings.AUDIO_BUNDLE_KEYS[19])) {
                         WriteProcessor.writeAudioFile(bufferArray, bufferRead);
                     }
                 } while (!isCancelled());
@@ -172,7 +170,7 @@ public class RecordTask extends AsyncTask<Void, Integer, String> {
         Integer[] tempBuffer;
 
         if (bufferRead > 0) {
-            bufferSize = audioSettings.getBufferInSize();
+            bufferSize = audioBundle.getInt(AudioSettings.AUDIO_BUNDLE_KEYS[4]);
 
             recordScan = new double[bufferSize]; // working array
             tempBuffer = new Integer[bufferSize]; // for bufferStorage scans
@@ -184,26 +182,26 @@ public class RecordTask extends AsyncTask<Void, Integer, String> {
 
             // default value set to 2
             recordScan = windowArray(windowType, recordScan);
-            candidateFreq = audioSettings.getMinFreq();
+            candidateFreq = audioBundle.getInt(AudioSettings.AUDIO_BUNDLE_KEYS[14]);
             Goertzel goertzel;
             double candidateMag;
 
-            while (candidateFreq <= audioSettings.getMaxFreq()) {
+            while (candidateFreq <= audioBundle.getInt(AudioSettings.AUDIO_BUNDLE_KEYS[15])) {
                 // look for any of our freqs here, increment by freqStepper
                 // this will result in a found candidate for anything in our ranges...
-                goertzel = new Goertzel((float)audioSettings.getSampleRate(), (float)candidateFreq, recordScan);
+                goertzel = new Goertzel((float)audioBundle.getInt(AudioSettings.AUDIO_BUNDLE_KEYS[1]), (float)candidateFreq, recordScan);
                 goertzel.initGoertzel();
                 // get its magnitude
                 candidateMag = goertzel.getOptimisedMagnitude();
                 // check if above threshold
-                if (candidateMag >= minMagnitude) {
+                if (candidateMag >= audioBundle.getInt(AudioSettings.AUDIO_BUNDLE_KEYS[17])) {
                     // saved here for later analysis
                     bufferStorage.add(tempBuffer);
                     // draw on view
                     publishProgress(candidateFreq, (int)candidateMag);
                 }
                 // next freq for loop
-                candidateFreq += freqStepper;
+                candidateFreq += audioBundle.getInt(AudioSettings.AUDIO_BUNDLE_KEYS[16]);
             }
         }
         else {
