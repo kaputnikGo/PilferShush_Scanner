@@ -317,10 +317,9 @@ public class MainActivity extends AppCompatActivity
 
         IntentFilter filter = new IntentFilter(Intent.ACTION_HEADSET_PLUG);
         registerReceiver(headsetReceiver, filter);
+        audioManager = (AudioManager)getSystemService(Context.AUDIO_SERVICE);
         // refocus app, ready for fresh scanner run
         toggleHeadset(false); // default state at init
-
-        audioManager = (AudioManager)getSystemService(Context.AUDIO_SERVICE);
         int status = audioFocusCheck();
 
         if (IRQ_TELEPHONY && PASSIVE_RUNNING) {
@@ -441,7 +440,6 @@ public class MainActivity extends AppCompatActivity
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.main, menu);
         MenuCompat.setGroupDividerEnabled(menu, true);
-
         return true;
     }
 

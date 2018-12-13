@@ -24,25 +24,25 @@ public class AudioSettings {
     public static final int SECOND_FREQUENCY_MIN = 19000;
     public static final int SECOND_FREQUENCY_MAX = 22000;
 
-    // below are added but are very sensitive
-    // public static final double MAGNITUDE_50 = 500; // ~= 53.9794 dB
-    // public static final double MAGNITUDE_60 = 1200; // ~= 61.5836 dB
-    // public static final double MAGNITUDE_70 = 3000; // ~= 69.5425 dB
-
     public static final double[] MAGNITUDES = new double[] {
             500, 1200, 3000, 10000, 30000, 50000, 80000
     };
     public static final int DEFAULT_MAGNITUDE = 50000; // was 80000
     // using dB SPL (sound pressure level) without distance
     // db = 20 log10(goertzel_magnitude).
-    // 50000 ~= 93.9794
-    // 80000 ~= 98.0618
+    // 500   ~= 53.9794 dB
+    // 1200  ~= 61.5836 dB
+    // 3000  ~= 69.5425 dB
+    // 10000 ~= 80 dB
+    // 30000 ~= 89.5425 dB
+    // 50000 ~= 93.9794 dB
+    // 80000 ~= 98.0618 dB
+
     public static final int[] DECIBELS = new int[] {
             50, 60, 70, 80, 89, 93, 98
     };
 
     // steps in the frequencies to consider as a coded signal and not noise
-    // public static final int FREQ_STEP_5 = 5;
     public static final int[] FREQ_STEPS = new int[] {
             10, 25, 50, 75, 100
     };
@@ -59,13 +59,7 @@ public class AudioSettings {
     public static final int DEFAULT_WINDOW_TYPE = 2;
 
     //public static final int MICRO_DELAY = 1; // for modulated code
-    /*
-    public static final int[] POLLING_DELAY = new int[] {
-            1000, 2000, 3000, 4000, 5000, 6000
-    };
-    */
 
-    //public static final int CARRIER_NUHF_FREQUENCY = 21000;
     //public static final int MAXIMUM_NUHF_FREQUENCY = 24000;
     public static final int MINIMUM_NUHF_FREQUENCY = 18000;
     public static final int DEFAULT_NUHF_FREQUENCY = 19000;
