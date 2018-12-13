@@ -27,7 +27,6 @@ public class WriteProcessor {
     private Context context;
     private Bundle audioBundle;
     private File extDirectory;
-    private String sessionFilename;
 
     private File AUDIO_OUTPUT_FILE;
     private File WAV_OUTPUT_FILE;
@@ -49,9 +48,8 @@ public class WriteProcessor {
     // nospace: 20180122-123729-capture
     private static final SimpleDateFormat TIMESTAMP_FORMAT = new SimpleDateFormat("yyyyMMdd-HH:mm:ss", Locale.ENGLISH);
 
-    public WriteProcessor(Context context, String sessionName, Bundle audioBundle) {
+    public WriteProcessor(Context context, Bundle audioBundle) {
         this.context = context;
-        setSessionName(sessionName);
         this.audioBundle = audioBundle;
 
         log(context.getString(R.string.writer_state_1));
@@ -62,15 +60,6 @@ public class WriteProcessor {
         }
         else {
             log(context.getString(R.string.writer_state_4));
-        }
-    }
-
-    public void setSessionName(String sessionName) {
-        if (sessionName == null || sessionName.equals("")) {
-            sessionFilename = DEFAULT_SESSION_NAME;
-        }
-        else {
-            sessionFilename = sessionName;
         }
     }
 
@@ -107,8 +96,8 @@ public class WriteProcessor {
         // add the extension and timestamp
         // eg: 20151218-10:14:32-capture.pcm(.wav)
         String timestamp = getTimestamp();
-        String audioFilename = timestamp + "-" + sessionFilename + AUDIO_FILE_EXTENSION_RAW;
-        String waveFilename = timestamp + "-" + sessionFilename + AUDIO_FILE_EXTENSION_WAV;
+        String audioFilename = timestamp + "-" + DEFAULT_SESSION_NAME + AUDIO_FILE_EXTENSION_RAW;
+        String waveFilename = timestamp + "-" + DEFAULT_SESSION_NAME + AUDIO_FILE_EXTENSION_WAV;
         // file save will overwrite unless new name is used...
         try {
             AUDIO_OUTPUT_FILE = new File(location, audioFilename);

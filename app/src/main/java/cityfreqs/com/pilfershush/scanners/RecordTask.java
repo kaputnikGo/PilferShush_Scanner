@@ -49,17 +49,17 @@ public class RecordTask extends AsyncTask<Void, Integer, String> {
         }
     }
 
-    public void setOnResultsListener(RecordTaskListener recordTaskListener) {
+    void setOnResultsListener(RecordTaskListener recordTaskListener) {
         this.recordTaskListener = recordTaskListener;
     }
 
     /********************************************************************/
 
-    protected boolean hasBufferStorage() {
+    boolean hasBufferStorage() {
         return (bufferStorage != null && !bufferStorage.isEmpty());
     }
 
-    protected ArrayList<Integer[]> getBufferStorage() {
+    ArrayList<Integer[]> getBufferStorage() {
         return bufferStorage;
     }
 

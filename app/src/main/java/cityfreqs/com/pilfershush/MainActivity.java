@@ -53,10 +53,10 @@ public class MainActivity extends AppCompatActivity
     private static final boolean DEBUG = true;
 
     private static final int REQUEST_MULTIPLE_PERMISSIONS = 123;
-    private static final String CHANNEL_ID = "PS";
-    private static final String CHANNEL_NAME = "PilferShush";
 
     public static final String VERSION = "3.0.1";
+
+    // TODO fix the STATE nightmare of the scanner and the audioBundle
 
     private ViewSwitcher viewSwitcher;
     private boolean mainView;
@@ -78,10 +78,6 @@ public class MainActivity extends AppCompatActivity
     private String[] windowTypes;
     private String[] dbLevel;
     private String[] storageAdmins;
-
-    // USB
-    //private static final String ACTION_USB_PERMISSION = "pilfershush.USB_PERMISSION";
-    //private UsbManager usbManager;
 
     private boolean SCANNING;
 
@@ -243,10 +239,6 @@ public class MainActivity extends AppCompatActivity
                 switchViews();
             }
         });
-
-        //usbManager = (UsbManager) getSystemService(Context.USB_SERVICE);
-        //permissionIntent = PendingIntent.getBroadcast(this, 0, new Intent(ACTION_USB_PERMISSION), 0);
-        //IntentFilter filter = new IntentFilter(ACTION_USB_PERMISSION);
 
         // permissions ask:
         // check API version, above 23 permissions are asked at runtime
@@ -475,9 +467,6 @@ public class MainActivity extends AppCompatActivity
             case R.id.action_write_file:
                 changeWriteFile();
                 return true;
-            case R.id.action_session_name:
-                setSessionName();
-                return true;
             case R.id.action_storage_admin:
                 performStorageAdmin();
                 return true;
@@ -559,9 +548,7 @@ public class MainActivity extends AppCompatActivity
         };
 
         // apply audio checker settings to bundle for services
-        AudioChecker audioChecker = new AudioChecker(this);
-        audioBundle = audioChecker.getAudioBundle();
-        //TODO BUNDLE
+        audioBundle = new Bundle();
         audioBundle.putBoolean(AudioSettings.AUDIO_BUNDLE_KEYS[7], false);
         audioBundle.putInt(AudioSettings.AUDIO_BUNDLE_KEYS[8], AudioSettings.JAMMER_TYPE_TEST);
         audioBundle.putInt(AudioSettings.AUDIO_BUNDLE_KEYS[9], AudioSettings.CARRIER_TEST_FREQUENCY);
@@ -570,11 +557,19 @@ public class MainActivity extends AppCompatActivity
         // set defaults
         audioBundle.putInt(AudioSettings.AUDIO_BUNDLE_KEYS[18], AudioSettings.DEFAULT_WINDOW_TYPE);
         audioBundle.putBoolean(AudioSettings.AUDIO_BUNDLE_KEYS[19], true); //write audio files for scanner
+        audioBundle.putInt(AudioSettings.AUDIO_BUNDLE_KEYS[16], AudioSettings.DEFAULT_FREQ_STEP);
+        audioBundle.putInt(AudioSettings.AUDIO_BUNDLE_KEYS[17], AudioSettings.DEFAULT_MAGNITUDE);
+        setFreqMinMax(1); // NUHF freq range
 
-        pilferShushScanner = new PilferShushScanner(audioChecker);
+        AudioChecker audioChecker = new AudioChecker(this, audioBundle);
+        pilferShushScanner = new PilferShushScanner(this, audioChecker);
 
-        if (pilferShushScanner.initScanner(this, audioBundle, getResources().getString(R.string.session_default_name))) {
+        if (pilferShushScanner.initScanner()) {
+            // get latest bundle updates bundle
+            audioBundle = audioChecker.getAudioBundle();
+
             pilferShushScanner.checkScanner();
+
             toggleHeadset(false); // default state at init
             audioFocusCheck();
             initAudioFocusListener();
@@ -585,14 +580,6 @@ public class MainActivity extends AppCompatActivity
             mainScanLogger(getResources().getString(R.string.init_state_12), true);
             logger(getResources().getString(R.string.init_state_13));
         }
-        PASSIVE_RUNNING = false;
-        IRQ_TELEPHONY = false;
-
-        sharedPrefs = getPreferences(Context.MODE_PRIVATE);
-        sharedPrefsEditor = sharedPrefs.edit();
-        sharedPrefsEditor.putBoolean("passive_running", PASSIVE_RUNNING);
-        sharedPrefsEditor.putBoolean("irq_telephony", IRQ_TELEPHONY);
-        sharedPrefsEditor.apply();
     }
 
     private void reportInitialState() {
@@ -627,7 +614,19 @@ public class MainActivity extends AppCompatActivity
                 getResources().getString(R.string.init_state_10_2), false);
 
         mainScanLogger(getResources().getString(R.string.init_state_11) + "\n", true);
+
+        if (DEBUG) Log.d(TAG, "audioBundle: " + bundlePrint(audioBundle));
     }
+
+    private String bundlePrint(Bundle b) {
+        if (b == null) {
+            return "";
+        }
+        Bundle bundle = new Bundle();
+        bundle.putAll(b);
+        return bundle.toString();
+    }
+
 
     private void populateMenuItems() {
         freqSteps = new String[5];
@@ -682,34 +681,6 @@ public class MainActivity extends AppCompatActivity
 
         alertDialog = dialogBuilder.create();
         alertDialog.show();
-    }
-
-    private void setSessionName() {
-        dialogBuilder = new AlertDialog.Builder(this);
-        LayoutInflater inflater = this.getLayoutInflater();
-        View inputView = inflater.inflate(R.layout.session_form, null);
-        dialogBuilder.setView(inputView);
-        final EditText userInput = inputView.findViewById(R.id.session_input);
-
-        dialogBuilder
-                .setCancelable(false)
-                .setPositiveButton(R.string.dialog_button_save, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int id) {
-                        // reset WriteProcessor via scanner
-                        pilferShushScanner.renameSessionWrites(userInput.getText().toString());
-                    }
-                })
-                .setNegativeButton(R.string.dialog_button_cancel, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int id) {
-                        // dismissed
-                        alertDialog.cancel();
-                    }
-                });
-        alertDialog = dialogBuilder.create();
-        alertDialog.show();
-
     }
 
     private void performStorageAdmin() {
@@ -780,11 +751,11 @@ public class MainActivity extends AppCompatActivity
             public void onClick(DialogInterface dialogInterface, int which) {
                 switch(which) {
                     case 0:
-                        pilferShushScanner.setFreqMinMax(1);
+                        setFreqMinMax(1);
                         mainScanLogger(getResources().getString(R.string.option_dialog_10), false);
                         break;
                     case 1:
-                        pilferShushScanner.setFreqMinMax(2);
+                        setFreqMinMax(2);
                         mainScanLogger(getResources().getString(R.string.option_dialog_11), false);
                 }
             }
@@ -1017,6 +988,19 @@ public class MainActivity extends AppCompatActivity
         return false;
     }
 
+    private void setFreqMinMax(int pair) {
+        // at the moment stick to ranges of 3kHz as DEFAULT or SECOND pair
+        // use int as may get more ranges than the 2 presently used
+        if (pair == 1) {
+            audioBundle.putInt(AudioSettings.AUDIO_BUNDLE_KEYS[14], AudioSettings.DEFAULT_FREQUENCY_MIN);
+            audioBundle.putInt(AudioSettings.AUDIO_BUNDLE_KEYS[15], AudioSettings.DEFAULT_FREQUENCY_MAX);
+        }
+        else if (pair == 2) {
+            audioBundle.putInt(AudioSettings.AUDIO_BUNDLE_KEYS[14], AudioSettings.SECOND_FREQUENCY_MIN);
+            audioBundle.putInt(AudioSettings.AUDIO_BUNDLE_KEYS[15], AudioSettings.SECOND_FREQUENCY_MAX);
+        }
+    }
+
 
     /********************************************************************/
     /*
@@ -1079,6 +1063,9 @@ public class MainActivity extends AppCompatActivity
         if (wakeLock == null) {
             wakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, TAG + ":wakelock");
         }
+
+        // update scanner's audioBundle from UI changes if any
+        pilferShushScanner.updateAudioBundle(audioBundle);
 
         SCANNING = true;
         startTime = System.currentTimeMillis();
@@ -1235,35 +1222,6 @@ public class MainActivity extends AppCompatActivity
                     AudioManager.FLAG_SHOW_UI);
         }
     }
-
-    /*
-    private void toggleEq(boolean eqOn) {
-        if (!audioBundle.getBoolean(AudioSettings.AUDIO_BUNDLE_KEYS[12])) {
-            // failure when testing onboard audiofx/equalizer, device specific
-            mainScanLogger(getResources().getString(R.string.app_status_7), false);
-            if (eqOn) {
-                // if togglebutton pressed on, reset to off
-                eqSwitch.toggle();
-            }
-            return;
-        }
-
-        if (pilferShushJammer.hasActiveJammer()) {
-            // need to stop so eq change can take effect
-            if (ACTIVE_RUNNING) {
-                stopActive();
-                activeJammerButton.toggle();
-            }
-            pilferShushJammer.setEqOn(eqOn);
-        }
-
-        if (eqOn)
-            mainScanLogger(getResources().getString(R.string.app_status_6), false);
-        else
-            mainScanLogger(getResources().getString(R.string.app_status_5), false);
-
-    }
-    */
 
     private void initAudioFocusListener() {
         audioFocusListener = new AudioManager.OnAudioFocusChangeListener() {

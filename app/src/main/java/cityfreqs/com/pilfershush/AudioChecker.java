@@ -17,10 +17,10 @@ public class AudioChecker {
     private Bundle audioBundle;
     private int channelInCount;
 
-    public AudioChecker(Context context) {
+    public AudioChecker(Context context, Bundle audioBundle) {
         //
         this.context = context;
-        audioBundle = new Bundle();
+        this.audioBundle = audioBundle;
     }
 
     void destroy() {

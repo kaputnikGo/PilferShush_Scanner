@@ -65,8 +65,8 @@ public class AudioSettings {
     };
     */
 
-    public static final int CARRIER_NUHF_FREQUENCY = 21000;
-    public static final int MAXIMUM_NUHF_FREQUENCY = 24000;
+    //public static final int CARRIER_NUHF_FREQUENCY = 21000;
+    //public static final int MAXIMUM_NUHF_FREQUENCY = 24000;
     public static final int MINIMUM_NUHF_FREQUENCY = 18000;
     public static final int DEFAULT_NUHF_FREQUENCY = 19000;
 
@@ -75,7 +75,7 @@ public class AudioSettings {
     public static final int MINIMUM_TEST_FREQUENCY = CARRIER_TEST_FREQUENCY - (int)(CARRIER_TEST_FREQUENCY * 0.5);
 
     public static final int DEFAULT_RANGE_DRIFT_LIMIT = 1000;
-    public static final int DEFAULT_DRIFT_SPEED = 1000;
+    //public static final int DEFAULT_DRIFT_SPEED = 1000;
     public static final int MINIMUM_DRIFT_LIMIT = 10;
     public static final int DRIFT_SPEED_MULTIPLIER = 1000;
 
@@ -95,141 +95,6 @@ public class AudioSettings {
             "maxFreq", "scanMinFreq", "scanMaxFreq", "scanFreqStep",  //16
             "ScanMagnitude", "scanWindow", "writeFiles", "bitDepth" //20
     };
-
-    // vars for AudioRecord creation and use
-    private int sampleRate;
-    private int bufferOutSize; // in bytes
-    private int bufferInSize; // in bytes
-    private int encoding;
-    private int channelInConfig;
-    private int channelOutConfig;
-    private int channelInCount;
-    private int audioSource;
-    private boolean hasEQ;
-
-    private int minFreq;
-    private int maxFreq;
-    private int freqStep;
-
-    private double magnitude;
-
-    private boolean writeFiles;
-    private int USER_WINDOW_TYPE = DEFAULT_WINDOW_TYPE;
-
-    public AudioSettings(boolean writeFiles) {
-        // convenience class to hold values for audio recording
-        // and useful vars for audio processing
-        this.writeFiles = writeFiles;
-        minFreq = DEFAULT_FREQUENCY_MIN;
-        maxFreq = DEFAULT_FREQUENCY_MAX;
-        freqStep = DEFAULT_FREQ_STEP;
-        magnitude = DEFAULT_MAGNITUDE;
-    }
-
-    public void setBasicAudioSettings(int sampleRate, int bufferInSize, int encoding, int channelInConfig, int channelInCount) {
-        this.sampleRate = sampleRate;
-        this.bufferInSize = bufferInSize;
-        this.encoding = encoding;
-        this.channelInConfig = channelInConfig;
-        this.channelInCount = channelInCount;
-    }
-
-    public void setEncoding(int encoding) {
-        this.encoding = encoding;
-    }
-    public void setAudioSource(int audioSource) {
-        this.audioSource = audioSource;
-    }
-
-    public void setChannelOutConfig(int channelOutConfig) {
-        this.channelOutConfig = channelOutConfig;
-    }
-
-    public void setBufferOutSize(int bufferOutSize) {
-        this.bufferOutSize = bufferOutSize;
-    }
-
-    public int getSampleRate() {
-        return sampleRate;
-    }
-    public int getBufferInSize() {
-        return bufferInSize;
-    }
-    public int getBufferOutSize() {
-        return bufferOutSize;
-    }
-    public int getEncoding() {
-        return encoding;
-    }
-
-    public int getChannelInConfig() {
-        return channelInConfig;
-    }
-
-    public int getChannelOutConfig() {
-        return channelOutConfig;
-    }
-
-    /*
-    public int getChannelInCount() {
-        return channelInCount;
-    }
-    */
-
-    public int getAudioSource() {
-        return audioSource;
-    }
-
-    public void setHasEQ(boolean hasEQ) {
-        this.hasEQ = hasEQ;
-    }
-    public boolean getHasEQ() {
-        return hasEQ;
-    }
-
-    public void setMinFreq(int minFreq) {
-        this.minFreq = minFreq;
-    }
-    public void setMaxFreq(int maxFreq) {
-        this.maxFreq = maxFreq;
-    }
-
-    public int getMinFreq() {
-        return minFreq;
-    }
-    public int getMaxFreq() {
-        return maxFreq;
-    }
-
-    public void setFreqStep(int freqStep) {
-        this.freqStep = freqStep;
-    }
-    public int getFreqStep() {
-        return freqStep;
-    }
-
-    public void setMagnitude(double magnitude) {
-        this.magnitude = magnitude;
-    }
-    public double getMagnitude() {
-        return magnitude;
-    }
-
-    public void setWriteFiles(boolean writeFiles) {
-        this.writeFiles = writeFiles;
-    }
-    public boolean getWriteFiles() {
-        return writeFiles;
-    }
-
-    public void setUserWindowType(int userWindow) {
-        USER_WINDOW_TYPE = userWindow;
-    }
-    public int getUserWindowType() {
-        return USER_WINDOW_TYPE;
-    }
-
-
 
 /*
  * Utilities, that may be useful...

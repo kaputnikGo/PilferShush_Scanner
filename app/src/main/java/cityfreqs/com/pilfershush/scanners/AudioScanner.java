@@ -11,10 +11,11 @@ import cityfreqs.com.pilfershush.assist.AudioSettings;
 import cityfreqs.com.pilfershush.scanners.FreqDetector.RecordTaskListener;
 
 public class AudioScanner {
+    //TODO make this the service
+
     private Context context;
     private FreqDetector freqDetector;
     private ProcessAudio processAudio;
-    //private AudioSettings audioSettings;
     private Bundle audioBundle;
 
     private ArrayList<Integer> frequencySequence;

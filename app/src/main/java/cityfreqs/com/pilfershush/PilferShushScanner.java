@@ -17,8 +17,10 @@ class PilferShushScanner {
 
     private int scanBufferSize;
 
-    public PilferShushScanner(AudioChecker audioChecker) {
+    public PilferShushScanner(Context context, AudioChecker audioChecker) {
+        this.context = context;
         this.audioChecker = audioChecker;
+        this.audioBundle = audioChecker.getAudioBundle();
     }
 
     void onDestroy() {
@@ -30,40 +32,32 @@ class PilferShushScanner {
 /*
 *
 */
-    boolean initScanner(Context context, Bundle audioBundle, String sessionName) {
-        this.context = context;
-        this.audioBundle = audioBundle;
-        writeProcessor = new WriteProcessor(context, sessionName, audioBundle);
+    boolean initScanner() {
         scanBufferSize = 0;
 
         entryLogger(context.getString(R.string.audio_check_pre_1), false);
         if (audioChecker.determineRecordAudioType()) {
             entryLogger(getAudioCheckerReport(), false);
-            audioScanner = new AudioScanner(context, audioBundle);
             // get output settings here.
             entryLogger(context.getString(R.string.audio_check_pre_2), false);
             if (!audioChecker.determineOutputAudioType()) {
                 // have a setup error getting the audio for output
                 entryLogger(context.getString(R.string.audio_check_pre_3), true);
             }
-
+            writeProcessor = new WriteProcessor(context, audioBundle);
+            audioScanner = new AudioScanner(context, audioBundle);
             initBackgroundChecks();
             return true;
         }
         return false;
     }
 
-    void setFreqMinMax(int pair) {
-        // at the moment stick to ranges of 3kHz as DEFAULT or SECOND pair
-        // use int as may get more ranges than the 2 presently used
-        if (pair == 1) {
-            audioBundle.putInt(AudioSettings.AUDIO_BUNDLE_KEYS[14], AudioSettings.DEFAULT_FREQUENCY_MIN);
-            audioBundle.putInt(AudioSettings.AUDIO_BUNDLE_KEYS[15], AudioSettings.DEFAULT_FREQUENCY_MAX);
-        }
-        else if (pair == 2) {
-            audioBundle.putInt(AudioSettings.AUDIO_BUNDLE_KEYS[14], AudioSettings.SECOND_FREQUENCY_MIN);
-            audioBundle.putInt(AudioSettings.AUDIO_BUNDLE_KEYS[15], AudioSettings.SECOND_FREQUENCY_MAX);
-        }
+    void updateAudioBundle(Bundle audioBundle) {
+        this.audioBundle = audioBundle;
+    }
+
+    Bundle getAudioBundle() {
+        return audioBundle;
     }
 
     String getSaveFileType() {
@@ -101,15 +95,6 @@ class PilferShushScanner {
                 ", " + audioBundle.getInt(AudioSettings.AUDIO_BUNDLE_KEYS[3]) +
                 ", " + audioBundle.getInt(AudioSettings.AUDIO_BUNDLE_KEYS[2]) +
                 ", " + audioBundle.getInt(AudioSettings.AUDIO_BUNDLE_KEYS[0]));
-    }
-
-    void renameSessionWrites(String sessionName) {
-        writeProcessor.closeWriteFile();
-        writeProcessor.setSessionName(sessionName);
-        // attempt to reopen
-        if (!audioBundle.getBoolean(AudioSettings.AUDIO_BUNDLE_KEYS[19])) {
-            entryLogger(context.getString(R.string.init_state_14), true);
-        }
     }
 
     boolean checkScanner() {
