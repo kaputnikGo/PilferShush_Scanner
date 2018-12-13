@@ -3,28 +3,30 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     tools:context="com.cityfreqs.pilfershush.MainActivity">
 
-    <item
-        android:id="@+id/action_audio_scan_settings"
-        android:orderInCategory="20"
-        app:showAsAction="never"
-        android:title="@string/action_audio_scan_settings"/>
-    <item
-        android:id="@+id/action_audio_scan_range"
-        android:orderInCategory="25"
-        app:showAsAction="never"
-        android:title="@string/action_audio_scan_ranges"/>
+    <group android:id="@+id/scanner_group">
+        <item
+            android:id="@+id/action_audio_scan_settings"
+            android:orderInCategory="20"
+            app:showAsAction="never"
+            android:title="@string/action_audio_scan_settings"/>
+        <item
+            android:id="@+id/action_audio_scan_range"
+            android:orderInCategory="25"
+            app:showAsAction="never"
+            android:title="@string/action_audio_scan_ranges"/>
 
-    <item
-        android:id="@+id/action_sensitivity_settings"
-        android:orderInCategory="30"
-        app:showAsAction="never"
-        android:title="@string/action_sensitivity_settings"/>
+        <item
+            android:id="@+id/action_sensitivity_settings"
+            android:orderInCategory="30"
+            app:showAsAction="never"
+            android:title="@string/action_sensitivity_settings"/>
 
-    <item
-        android:id="@+id/action_fft_window_settings"
-        android:orderInCategory="40"
-        app:showAsAction="never"
-        android:title="@string/action_window_settings"/>
+        <item
+            android:id="@+id/action_fft_window_settings"
+            android:orderInCategory="40"
+            app:showAsAction="never"
+            android:title="@string/action_window_settings"/>
+    </group>
 
     <item
         android:id="@+id/action_jammer"
@@ -38,16 +40,18 @@
         android:title="@string/action_drift_speed"
         app:showAsAction="never" />
 
-    <item
-        android:id="@+id/action_write_file"
-        android:orderInCategory="70"
-        app:showAsAction="never"
-        android:title="@string/action_write_file"/>
+    <group android:id="@+id/files_group">
+        <item
+            android:id="@+id/action_write_file"
+            android:orderInCategory="70"
+            app:showAsAction="never"
+            android:title="@string/action_write_file"/>
 
-    <item
-        android:id="@+id/action_storage_admin"
-        android:orderInCategory="70"
-        app:showAsAction="never"
-        android:title="@string/action_storage_admin"/>
+        <item
+            android:id="@+id/action_storage_admin"
+            android:orderInCategory="70"
+            app:showAsAction="never"
+            android:title="@string/action_storage_admin"/>
+    </group>
 
 </menu>

@@ -10,7 +10,7 @@
     <string name="dialog_storage_warn_title">Caution</string>
     <string name="dialog_storage_warn_text">limited storage space for recording.</string>
 
-    <string name="action_audio_scan_settings">Audio Scan steps</string>
+    <string name="action_audio_scan_settings">NUHF Scan steps</string>
     <string name="dialog_freq_step">Frequency steps</string>
     <string name="freq_step_10_text" translatable="false">10 Hz</string>
     <string name="freq_step_25_text" translatable="false">25 Hz (default)</string>
@@ -18,7 +18,7 @@
     <string name="freq_step_75_text" translatable="false">75 Hz</string>
     <string name="freq_step_100_text" translatable="false">100 Hz</string>
 
-    <string name="action_audio_scan_ranges">Audio Scan range</string>
+    <string name="action_audio_scan_ranges">NUHF Scan range</string>
     <string name="dialog_freq_range">Frequency range</string>
     <string name="freq_range_one" translatable="false">18kHz - 21kHz (default)</string>
     <string name="freq_range_two" translatable="false">19kHz - 22kHz</string>
@@ -52,11 +52,11 @@
     <string name="action_receivers">get Receivers</string>
     <string name="dialog_receivers">User Apps with Receivers</string>
 
-    <string name="focus_text">Detailed View (scrollable): </string>
+    <string name="focus_text">Expert View (scrollable): </string>
     <string name="debug_text">loading PilferShush.</string>
 
-    <string name="debug_view_button_text">detailed view</string>
-    <string name="main_view_button_text">Simple View</string>
+    <string name="debug_view_button_text">expert</string>
+    <string name="main_view_button_text">basic</string>
     <string name="main_scan_text">PilferShush scanner initialising.</string>
     <string name="timer_text">timer - 00:00</string>
 

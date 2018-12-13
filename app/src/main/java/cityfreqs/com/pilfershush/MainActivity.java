@@ -42,6 +42,7 @@ import java.util.Map;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
+import androidx.core.view.MenuCompat;
 import cityfreqs.com.pilfershush.assist.AudioSettings;
 import cityfreqs.com.pilfershush.jammers.ActiveJammerService;
 import cityfreqs.com.pilfershush.jammers.PassiveJammerService;
@@ -299,18 +300,18 @@ public class MainActivity extends AppCompatActivity
         // override check for return from system destroy
         if (checkServiceRunning(PassiveJammerService.class)) {
             // jammer is running
-            if (DEBUG) entryLogger(getResources().getString(R.string.resume_status_1), false);
+            if (DEBUG) mainScanLogger(getResources().getString(R.string.resume_status_1), false);
         }
         else {
-            if (DEBUG) entryLogger(getResources().getString(R.string.resume_status_2), false);
+            if (DEBUG) mainScanLogger(getResources().getString(R.string.resume_status_2), false);
             PASSIVE_RUNNING = false;
         }
         if (checkServiceRunning(ActiveJammerService.class)) {
             // jammer is running
-            if (DEBUG) entryLogger(getResources().getString(R.string.resume_status_3), false);
+            if (DEBUG) mainScanLogger(getResources().getString(R.string.resume_status_3), false);
         }
         else {
-            if (DEBUG) entryLogger(getResources().getString(R.string.resume_status_4), false);
+            if (DEBUG) mainScanLogger(getResources().getString(R.string.resume_status_4), false);
             ACTIVE_RUNNING = false;
         }
 
@@ -333,19 +334,19 @@ public class MainActivity extends AppCompatActivity
             else if (status == AudioManager.AUDIOFOCUS_LOSS) {
                 // possible music player etc that has speaker focus but no need of microphone,
                 // can end up fighting for focus with music player,
-                if (DEBUG) entryLogger(getResources().getString(R.string.resume_status_6), false);
+                if (DEBUG) mainScanLogger(getResources().getString(R.string.resume_status_6), false);
             }
         }
         else if (PASSIVE_RUNNING) {
             // return from background without irq_telephony
-            entryLogger(getResources().getString(R.string.app_status_1), true);
+            mainScanLogger(getResources().getString(R.string.app_status_1), true);
             // check button state on
             if (!passiveJammerButton.isChecked()) {
                 passiveJammerButton.toggle();
             }
         }
         else {
-            entryLogger(getResources().getString(R.string.app_status_2), true);
+            mainScanLogger(getResources().getString(R.string.app_status_2), true);
             // check button state off
             if (passiveJammerButton.isChecked()) {
                 passiveJammerButton.toggle();
@@ -354,14 +355,14 @@ public class MainActivity extends AppCompatActivity
 
         if (ACTIVE_RUNNING) {
             // return from background without irq_telephony
-            entryLogger(getResources().getString(R.string.app_status_3), true);
+            mainScanLogger(getResources().getString(R.string.app_status_3), true);
             // check button state on
             if (!activeJammerButton.isChecked()) {
                 activeJammerButton.toggle();
             }
         }
         else {
-            entryLogger(getResources().getString(R.string.app_status_4), true);
+            mainScanLogger(getResources().getString(R.string.app_status_4), true);
             // check button state off
             if (activeJammerButton.isChecked()) {
                 activeJammerButton.toggle();
@@ -439,6 +440,8 @@ public class MainActivity extends AppCompatActivity
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.main, menu);
+        MenuCompat.setGroupDividerEnabled(menu, true);
+
         return true;
     }
 
@@ -1016,7 +1019,7 @@ public class MainActivity extends AppCompatActivity
             startIntent.putExtras(audioBundle);
             startService(startIntent);
             PASSIVE_RUNNING = true;
-            entryLogger(getResources().getString(R.string.main_scanner_26), true);
+            mainScanLogger(getResources().getString(R.string.main_scanner_26), true);
         }
     }
     private void stopPassive() {
@@ -1024,7 +1027,7 @@ public class MainActivity extends AppCompatActivity
         stopIntent.setAction(PassiveJammerService.ACTION_STOP_PASSIVE);
         startService(stopIntent);
         PASSIVE_RUNNING = false;
-        entryLogger(getResources().getString(R.string.main_scanner_29), true);
+        mainScanLogger(getResources().getString(R.string.main_scanner_29), true);
     }
 
     private void runActive() {
@@ -1037,7 +1040,7 @@ public class MainActivity extends AppCompatActivity
             startIntent.putExtras(audioBundle);
             startService(startIntent);
             ACTIVE_RUNNING = true;
-            entryLogger(getResources().getString(R.string.main_scanner_27), true);
+            mainScanLogger(getResources().getString(R.string.main_scanner_27), true);
         }
     }
 
@@ -1046,7 +1049,7 @@ public class MainActivity extends AppCompatActivity
         stopIntent.setAction(ActiveJammerService.ACTION_STOP_ACTIVE);
         startService(stopIntent);
         ACTIVE_RUNNING = false;
-        entryLogger(getResources().getString(R.string.main_scanner_28), true);
+        mainScanLogger(getResources().getString(R.string.main_scanner_28), true);
     }
 
     /********************************************************************/
@@ -1356,7 +1359,7 @@ public class MainActivity extends AppCompatActivity
     }
 
     public static void entryLogger(String entry, boolean caution) {
-        // this prints to console.log and DetailedView.log
+        // this prints ExpertView.log (detailed)
         int start = debugText.getText().length();
         debugText.append("\n" + entry);
         int end = debugText.getText().length();
