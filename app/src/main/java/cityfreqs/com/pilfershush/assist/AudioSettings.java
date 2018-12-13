@@ -96,6 +96,30 @@ public class AudioSettings {
             "ScanMagnitude", "scanWindow", "writeFiles", "bitDepth" //20
     };
 
+    // alphabetical list of package names
+    public static final String[] SDK_NAMES = {
+                    "alphonso",
+                    "bitsound",
+                    "copsonic",
+                    "cueaudio",
+                    "dv",
+                    "fidzup",
+                    "fluzo",
+                    "hotstar",
+                    "intrasonics",
+                    "lisnr",
+                    "prontoly",
+                    "redbricklane",
+                    "shopkick",
+                    "signal360",
+                    "silverpush",
+                    "sonarax",
+                    "soniccode",
+                    "sonicnotify",
+                    "trillbit",
+                    "zapr"
+    };
+
 /*
  * Utilities, that may be useful...
  *

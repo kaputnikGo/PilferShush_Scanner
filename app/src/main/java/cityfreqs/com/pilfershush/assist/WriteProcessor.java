@@ -216,19 +216,19 @@ public class WriteProcessor {
             output = new FileOutputStream(waveFile);
             fileChannel = output.getChannel();
             // WAVE header
-            writeString(fileChannel, "RIFF", ByteOrder.BIG_ENDIAN); // chunk id
-            writeInt(fileChannel, 36 + rawData.length, ByteOrder.LITTLE_ENDIAN); // chunk size
-            writeString(fileChannel, "WAVE", ByteOrder.BIG_ENDIAN); // format
-            writeString(fileChannel, "fmt ", ByteOrder.BIG_ENDIAN); // subchunk 1 id
-            writeInt(fileChannel, 16, ByteOrder.LITTLE_ENDIAN); // subchunk 1 size
-            writeShort(fileChannel, (short) 1, ByteOrder.LITTLE_ENDIAN); // audio format (1 = PCM)
-            writeShort(fileChannel, (short) 1, ByteOrder.LITTLE_ENDIAN); // number of channels
-            writeInt(fileChannel, audioBundle.getInt(AudioSettings.AUDIO_BUNDLE_KEYS[1]), ByteOrder.LITTLE_ENDIAN); // sample rate
-            writeInt(fileChannel, audioBundle.getInt(AudioSettings.AUDIO_BUNDLE_KEYS[1]) * 2, ByteOrder.LITTLE_ENDIAN); // byte rate
-            writeShort(fileChannel, (short) 2, ByteOrder.LITTLE_ENDIAN); // block align
-            writeShort(fileChannel, (short) audioBundle.getInt(AudioSettings.AUDIO_BUNDLE_KEYS[20]), ByteOrder.LITTLE_ENDIAN); // bits per sample
-            writeString(fileChannel, "data", ByteOrder.BIG_ENDIAN); // subchunk 2 id
-            writeInt(fileChannel, rawData.length, ByteOrder.LITTLE_ENDIAN); // subchunk 2 size
+            writeString(fileChannel, "RIFF"); // chunk id
+            writeInt(fileChannel, 36 + rawData.length); // chunk size
+            writeString(fileChannel, "WAVE"); // format
+            writeString(fileChannel, "fmt "); // subchunk 1 id
+            writeInt(fileChannel, 16); // subchunk 1 size
+            writeShort(fileChannel, (short) 1); // audio format (1 = PCM)
+            writeShort(fileChannel, (short) 1); // number of channels
+            writeInt(fileChannel, audioBundle.getInt(AudioSettings.AUDIO_BUNDLE_KEYS[1])); // sample rate
+            writeInt(fileChannel, audioBundle.getInt(AudioSettings.AUDIO_BUNDLE_KEYS[1]) * 2); // byte rate
+            writeShort(fileChannel, (short) 2); // block align
+            writeShort(fileChannel, (short) audioBundle.getInt(AudioSettings.AUDIO_BUNDLE_KEYS[20])); // bits per sample
+            writeString(fileChannel, "data"); // subchunk 2 id
+            writeInt(fileChannel, rawData.length); // subchunk 2 size
 
             short[] shorts = new short[rawData.length / 2];
             ByteBuffer.wrap(rawData).order(ByteOrder.LITTLE_ENDIAN).asShortBuffer().get(shorts);
@@ -244,26 +244,26 @@ public class WriteProcessor {
             }
         }
     }
-    private void writeInt(final FileChannel fc, final int value, ByteOrder order) throws IOException {
+    private void writeInt(final FileChannel fc, final int value) throws IOException {
         ByteBuffer bb = ByteBuffer.allocate(INT_BYTES);
-        bb.order(order);
+        bb.order(ByteOrder.LITTLE_ENDIAN);
         bb.putInt(value);
         bb.flip();
         fc.write(bb);
     }
 
-    private void writeShort(final FileChannel fc, final short value, ByteOrder order) throws IOException {
+    private void writeShort(final FileChannel fc, final short value) throws IOException {
         ByteBuffer bb = ByteBuffer.allocate(SHORT_BYTES);
-        bb.order(order);
+        bb.order(ByteOrder.LITTLE_ENDIAN);
         bb.putShort(value);
         bb.flip();
         fc.write(bb);
     }
 
-    private void writeString(final FileChannel fc, final String value, ByteOrder order) throws IOException {
+    private void writeString(final FileChannel fc, final String value) throws IOException {
         byte[] cc = value.getBytes(Charset.defaultCharset());
         ByteBuffer bb = ByteBuffer.allocate(cc.length);
-        bb.order(order);
+        bb.order(ByteOrder.BIG_ENDIAN);
         bb.put(cc);
         bb.flip();
         fc.write(bb);

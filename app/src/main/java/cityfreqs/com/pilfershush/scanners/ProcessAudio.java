@@ -27,16 +27,16 @@ public class ProcessAudio {
 
     /********************************************************************/
 
-    public boolean checkFrequency(int freq) {
+    boolean checkFrequency(int freq) {
         return ((freq >= AudioSettings.DEFAULT_FREQUENCY_MIN) &&
                 (freq <= AudioSettings.DEFAULT_FREQUENCY_MAX));
     }
 
-    public boolean hasFreqSequenceDuplicates(ArrayList<Integer> freqList) {
+    boolean hasFreqSequenceDuplicates(ArrayList<Integer> freqList) {
         return checkSequenceDuplicates(freqList);
     }
 
-    public String getLogicEntries() {
+    String getLogicEntries() {
         StringBuilder sb = new StringBuilder();
 
         for (Map.Entry<Integer, Integer> e : entries) {
@@ -49,7 +49,7 @@ public class ProcessAudio {
         return sb.toString();
     }
 
-    public String getLogicZero() {
+    String getLogicZero() {
         if (logicZero != null) {
             return context.getString(R.string.process_audio_2) + logicZero.getKey() + " : " + logicZero.getValue();
         }
@@ -58,7 +58,7 @@ public class ProcessAudio {
         }
     }
 
-    public String getLogicOne() {
+    String getLogicOne() {
         if (logicOne != null) {
             return context.getString(R.string.process_audio_4) + logicOne.getKey() + " : " + logicOne.getValue();
         }

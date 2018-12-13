@@ -18,7 +18,7 @@ public class PassiveJammer {
         this.audioBundle = audioBundle;
     }
 
-    public boolean startPassiveJammer() {
+    boolean startPassiveJammer() {
         try {
             audioRecord = new AudioRecord(
                     audioBundle.getInt(AudioSettings.AUDIO_BUNDLE_KEYS[0]),
@@ -37,7 +37,7 @@ public class PassiveJammer {
         }
     }
 
-    public boolean runPassiveJammer() {
+    boolean runPassiveJammer() {
         if (audioRecord != null) {
             if (audioRecord.getState() == AudioRecord.STATE_INITIALIZED) {
                 try {
@@ -108,7 +108,7 @@ public class PassiveJammer {
         return false;
     }
 
-    public void stopPassiveJammer() {
+    void stopPassiveJammer() {
         // get AudioRecord object, null it, clean up
         if (audioRecord != null) {
             audioRecord.stop();

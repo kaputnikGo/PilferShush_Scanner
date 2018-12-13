@@ -195,22 +195,6 @@ class PilferShushScanner {
         return context.getString(R.string.audio_scan_1) + "\n" + audioScanner.getFrequencySequenceLogic();
     }
 
-    // MainActivity.stopScanner() debug type outputs
-    // currently rem'd out
-    /*
-    protected String getFrequencySequence() {
-        // get original sequence as transmitted...
-        StringBuilder sb = new StringBuilder();
-        for (Integer freq : audioScanner.getFreqSequence()) {
-            sb.append(freq.toString());
-            // add a space
-            sb.append(" ");
-
-        }
-        return sb.toString();
-    }
-    */
-
     String getFreqSeqLogicEntries() {
         return audioScanner.getFreqSeqLogicEntries();
     }
@@ -250,7 +234,6 @@ class PilferShushScanner {
 
             logAppEntryInfo(backgroundChecker.getAudioBeaconAppEntry(selectedIndex).getBeaconServiceNames());
         }
-        //TODO
         // add a call for any receiver names too
         if (backgroundChecker.getAudioBeaconAppEntry(selectedIndex).checkBeaconReceiverNames()) {
             entryLogger(context.getString(R.string.background_scan_5)

@@ -96,33 +96,34 @@ public class RecordTask extends AsyncTask<Void, Integer, String> {
             return "isCancelled()";
         }
         // check audioRecord object first
-        if ((audioRecord != null) || (audioRecord.getState() == AudioRecord.STATE_INITIALIZED)) {
-            try {
-                audioRecord.startRecording();
-                logger("audioRecord started...");
-                audioRecord.setPositionNotificationPeriod(audioBundle.getInt(AudioSettings.AUDIO_BUNDLE_KEYS[4]));// / 2);
-                audioRecord.setRecordPositionUpdateListener(new AudioRecord.OnRecordPositionUpdateListener() {
-                    public void onMarkerReached(AudioRecord audioRecord) {
-                        logger("marker reached");
-                    }
+        if (audioRecord != null) {
+            if (audioRecord.getState() == AudioRecord.STATE_INITIALIZED) {
+                try {
+                    audioRecord.startRecording();
+                    logger("audioRecord started...");
+                    audioRecord.setPositionNotificationPeriod(audioBundle.getInt(AudioSettings.AUDIO_BUNDLE_KEYS[4]));// / 2);
+                    audioRecord.setRecordPositionUpdateListener(new AudioRecord.OnRecordPositionUpdateListener() {
+                        public void onMarkerReached(AudioRecord audioRecord) {
+                            logger("marker reached");
+                        }
 
-                    public void onPeriodicNotification(AudioRecord audioRecord) {
-                        magnitudeRecordScan(audioBundle.getInt(AudioSettings.AUDIO_BUNDLE_KEYS[18]));
+                        public void onPeriodicNotification(AudioRecord audioRecord) {
+                            magnitudeRecordScan(audioBundle.getInt(AudioSettings.AUDIO_BUNDLE_KEYS[18]));
 
-                        MainActivity.visualiserView.updateVisualiser(bufferArray); //byteBuffer
-                    }
-                });
+                            MainActivity.visualiserView.updateVisualiser(bufferArray); //byteBuffer
+                        }
+                    });
 
-                do {
-                    bufferRead = audioRecord.read(bufferArray, 0, audioBundle.getInt(AudioSettings.AUDIO_BUNDLE_KEYS[4]));
-                    if (audioBundle.getBoolean(AudioSettings.AUDIO_BUNDLE_KEYS[19])) {
-                        WriteProcessor.writeAudioFile(bufferArray, bufferRead);
-                    }
-                } while (!isCancelled());
-            }
-            catch (IllegalStateException exState) {
-                exState.printStackTrace();
-                logger("AudioRecord start recording failed.");
+                    do {
+                        bufferRead = audioRecord.read(bufferArray, 0, audioBundle.getInt(AudioSettings.AUDIO_BUNDLE_KEYS[4]));
+                        if (audioBundle.getBoolean(AudioSettings.AUDIO_BUNDLE_KEYS[19])) {
+                            WriteProcessor.writeAudioFile(bufferArray, bufferRead);
+                        }
+                    } while (!isCancelled());
+                } catch (IllegalStateException exState) {
+                    exState.printStackTrace();
+                    logger("AudioRecord start recording failed.");
+                }
             }
         }
         return "RecordTask finished";

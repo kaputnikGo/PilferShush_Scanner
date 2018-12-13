@@ -9,8 +9,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 import cityfreqs.com.pilfershush.assist.AppEntry;
+import cityfreqs.com.pilfershush.assist.AudioSettings;
 
-public class BackgroundChecker {
+class BackgroundChecker {
     private PackageManager packageManager;
     private List<ApplicationInfo> packages;
     private PackageInfo packageInfo;
@@ -27,31 +28,6 @@ public class BackgroundChecker {
 
     private static final String RECORD_PERMISSION = "RECORD_AUDIO";
     private static final String BOOT_PERMISSION = "RECEIVE_BOOT_COMPLETED";
-
-    // alphabetical list of package names
-    private static final String[] SDK_NAMES =
-            {
-                    "alphonso",
-                    "bitsound",
-                    "copsonic",
-                    "cueaudio",
-                    "dv",
-                    "fidzup",
-                    "fluzo",
-                    "hotstar",
-                    "intrasonics",
-                    "lisnr",
-                    "prontoly",
-                    "redbricklane",
-                    "shopkick",
-                    "signal360",
-                    "silverpush",
-                    "sonarax",
-                    "soniccode",
-                    "sonicnotify",
-                    "trillbit",
-                    "zapr"
-            };
 
     boolean initChecker(PackageManager packageManager) {
         // need a user updatable SDK_NAMES list insert...
@@ -72,18 +48,6 @@ public class BackgroundChecker {
     }
 
     /********************************************************************/
-/*
- *
- */
-    public static boolean isSdkName(String nameQuery) {
-        for (String name : SDK_NAMES) {
-            if (nameQuery.contains(name))
-                return true;
-        }
-        return false;
-    }
-
-    /********************************************************************/
 
     int getUserRecordNumApps() {
         if (audioAppEntries != null) {
@@ -96,47 +60,10 @@ public class BackgroundChecker {
     void audioAppEntryLog() {
         if (appEntries.size() > 0) {
             for (AppEntry appEntry : appEntries) {
-                MainActivity.entryLogger(appEntry.toString(), appEntry.checkForCaution());
+                MainActivity.entryLogger(appEntry.entryPrint(), appEntry.checkForCaution());
             }
         }
     }
-
-    /*
-    protected boolean checkCautionedApps() {
-        int counter = 0;
-        if (appEntries.size() > 0) {
-            for (AppEntry appEntry : appEntries) {
-                if (appEntry.getCaution()) {
-                    counter++;
-                }
-            }
-        }
-        return (counter > 0);
-    }
-    */
-
-    /*
-    protected String[] getCautionedAppNames() {
-        String[] appNames = new String[appEntries.size()];
-        int i = 0;
-        if (appEntries.size() > 0) {
-            for (AppEntry appEntry : appEntries) {
-                if (appEntry.getCaution()) {
-                    appNames[i] = appEntry.getActivityName();
-                    i++;
-                }
-            }
-        }
-        return appNames;
-    }
-    */
-
-    /*
-    protected AppEntry getCautionedAppEntry(int appEntryIndex) {
-        // base on name..
-        return appEntries.get(appEntryIndex);
-    }
-    */
 
     boolean checkAudioBeaconApps() {
         // while we check, populate audioBeaconAppEntries list for later use
@@ -147,7 +74,11 @@ public class BackgroundChecker {
                     // have services, check for audioBeacon names
                     if (checkForAudioBeaconService(appEntry.getServiceNames())) {
                         // have a substring match
+                        appEntry.setAudioBeacon(true);
                         audioBeaconAppEntries.add(appEntry);
+                    }
+                    else {
+                        appEntry.setAudioBeacon(false);
                     }
                 }
             }
@@ -171,9 +102,9 @@ public class BackgroundChecker {
 
     String displayAudioSdkNames() {
         // return a string of names + \n
-        if (SDK_NAMES != null) {
+        if (AudioSettings.SDK_NAMES != null) {
             StringBuilder sb = new StringBuilder();
-            for (String name : SDK_NAMES) {
+            for (String name : AudioSettings.SDK_NAMES) {
                 sb.append(name).append("\n");
             }
             return sb.toString();
@@ -187,7 +118,7 @@ public class BackgroundChecker {
 // if find one instance return true
     private boolean checkForAudioBeaconService(String[] serviceNames) {
         for (String name: serviceNames) {
-            for (String sdkName : SDK_NAMES) {
+            for (String sdkName : AudioSettings.SDK_NAMES) {
                 if (name.contains(sdkName)){
                     return true;
                 }
@@ -277,49 +208,5 @@ public class BackgroundChecker {
             }
         }
     }
-
-    /*
-    // remm'ed for now - probably not useful
-    protected void auditLogAsync() {
-        // this may not work for logic reasons, and
-        // cos in JB (API 16) up can only access this activity's log entries... ??
-        // therefore, it can only find when we provoke the exception
-        // and even then its up to specific device implementations to allow logcat
-
-        new AsyncTask<Void, String, Void>() {
-
-            @Override
-            protected Void doInBackground(Void... params) {
-                try {
-                    String seekerEx = "java.lang.IllegalStateException";
-                    String seekerType = "AudioRecord";
-
-
-                    Process process = Runtime.getRuntime().exec("logcat -v threadtime");
-                    BufferedReader bufferedReader = new BufferedReader(
-                            new InputStreamReader(process.getInputStream()));
-
-                    String line = "";
-                    while ((line = bufferedReader.readLine()) != null) {
-                        if (line.contains(seekerEx)) {
-                            if (line.contains(seekerType)) {
-                                publishProgress(line);
-                            }
-                        }
-                    }
-                }
-                catch (IOException e) {
-                    //
-                }
-                return null;
-            }
-
-            @Override
-            protected void onProgressUpdate(String... values) {
-                MainActivity.entryLogger("logcat match:\n\n " + Arrays.toString(values) + "\n", false);
-            }
-        }.execute();
-    }
-    */
 }
 

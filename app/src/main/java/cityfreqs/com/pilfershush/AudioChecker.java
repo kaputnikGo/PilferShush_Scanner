@@ -310,7 +310,7 @@ public static final int HOTWORD = 1999; //  always-on software hotword detection
         }
     }
 
-    public String saveFormatToString() {
+    String saveFormatToString() {
         return (audioBundle.getInt(AudioSettings.AUDIO_BUNDLE_KEYS[1]) + " Hz, "
                 + audioBundle.getInt(AudioSettings.AUDIO_BUNDLE_KEYS[20]) + " bits, "
                 + channelInCount + " channel");

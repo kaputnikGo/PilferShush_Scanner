@@ -5,7 +5,7 @@ import android.os.Bundle;
 
 import java.util.ArrayList;
 
-public class FreqDetector {
+class FreqDetector {
     private RecordTask recordTask;
     private Bundle audioBundle;
 
@@ -14,17 +14,17 @@ public class FreqDetector {
         void onSuccess(int paramInt, int magnitude);
     }
 
-    protected FreqDetector(Bundle audioBundle) {
+    FreqDetector(Bundle audioBundle) {
         this.audioBundle = audioBundle;
     }
 
     /********************************************************************/
 
-    protected void init() {
+    void init() {
         recordTask = new RecordTask(audioBundle);
     }
 
-    protected void startRecording(RecordTaskListener recordTaskListener) {
+    void startRecording(RecordTaskListener recordTaskListener) {
         if (recordTask == null) {
             recordTask = new RecordTask(audioBundle);
         }
@@ -38,12 +38,12 @@ public class FreqDetector {
         }
     }
 
-    protected boolean hasBufferStorage() {
+    boolean hasBufferStorage() {
         return (recordTask != null && recordTask.hasBufferStorage());
     }
 
 
-    protected ArrayList<Integer[]> getBufferStorage() {
+    ArrayList<Integer[]> getBufferStorage() {
         if (recordTask != null) {
             return recordTask.getBufferStorage();
         }
@@ -51,13 +51,13 @@ public class FreqDetector {
     }
 
     /********************************************************************/
-    protected void stopRecording() {
+    void stopRecording() {
         if (recordTask != null) {
             recordTask.cancel(true);
         }
     }
 
-    protected void cleanup() {
+    void cleanup() {
         if (recordTask != null) recordTask = null;
     }
 }

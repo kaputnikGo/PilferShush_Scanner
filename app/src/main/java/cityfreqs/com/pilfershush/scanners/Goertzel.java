@@ -2,7 +2,7 @@ package cityfreqs.com.pilfershush.scanners;
 
 import cityfreqs.com.pilfershush.assist.AudioSettings;
 
-public class Goertzel {
+class Goertzel {
     private float sampleRate;
     private float targetFreq;
     private int length;
@@ -13,7 +13,7 @@ public class Goertzel {
     //private double sine;
     private double cosine;
 
-    public Goertzel(float sampleRate, float targetFreq, double[] data) {
+    Goertzel(float sampleRate, float targetFreq, double[] data) {
         this.sampleRate = sampleRate;
         this.targetFreq = targetFreq;
         this.data = data;
@@ -28,7 +28,7 @@ public class Goertzel {
         Q1 = 0.0d;
     }
 
-    public void initGoertzel() {
+    void initGoertzel() {
         float f = (float)length;
         double omega = (AudioSettings.PI2 * ((double) ((int) (0.5d + ((double) ((targetFreq * f) / sampleRate)))))) / ((double) f);
         //sine = Math.sin(omega);
@@ -37,7 +37,7 @@ public class Goertzel {
         resetGoertzel();
     }
 
-    public double getOptimisedMagnitude() {
+    double getOptimisedMagnitude() {
         for (int i = 0; i < length; i++) {
             processSample(data[i]);
         }

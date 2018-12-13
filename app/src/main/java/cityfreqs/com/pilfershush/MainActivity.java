@@ -57,7 +57,6 @@ public class MainActivity extends AppCompatActivity
     public static final String VERSION = "3.0.1";
 
     // TODO fix the STATE nightmare of the scanner and the audioBundle
-
     private ViewSwitcher viewSwitcher;
     private boolean mainView;
     private static TextView debugText;
@@ -619,6 +618,7 @@ public class MainActivity extends AppCompatActivity
     }
 
     private String bundlePrint(Bundle b) {
+        // debug printout to check vars in audioBundle
         if (b == null) {
             return "";
         }
