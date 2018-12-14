@@ -93,8 +93,10 @@ public class AudioSettings {
     // alphabetical list of package names
     public static final String[] SDK_NAMES = {
             "acrcloud",
+            "actv8",
             "alphonso",
             "bitsound",
+            "cifrasoft",
             "copsonic",
             "cueaudio",
             "dv",
