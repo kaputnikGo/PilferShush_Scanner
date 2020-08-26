@@ -3,14 +3,12 @@ Android near-ultra high frequency (NUHF) listener with microphone polling and NU
 
 Test application for researching methods of discovering use of audio beacons.
 - compile API 28 (Pie, 9.0), Android Studio 3.2.1 stable, AndroidX libs
-- Added full passive and active jammers run as a foreground service.
-- Conform to PilferShush Jammer app release version 3.0.1
 - rewrite AudioSettings and deps for use with Bundle
 
-   vers. 3.0.1
+   vers. 4.0.0
    - min API 18 (4.3)
-   - target API 26 (8.x)
-   - compiled API 26 (8.x)
+   - target API 29 (10.x)
+   - compiled API 29 (10.x)
 
    testing devices
    - LOW : s4 I9195 (deprecated) 4.3.1 (18)(CyanogenMod 10.2, F-Droid)
@@ -18,11 +16,16 @@ Test application for researching methods of discovering use of audio beacons.
    - DEV : s5 G900I (tainted) 7.1.2 (25)(LineageOS 14.1, GApps)
    - HIGH : s5 G900P (user) 7.1.2 (25)(LineageOS 14.1, F-Droid)
  
- TODO:
+ **Changes:**
+ - upgrade to scanner only
+ - remove jammer components, refer to PilferShush Jammer
+ 
+ **TODO**
+ - change name to Scanner?
  - scanner as a foreground service
  - rebuild scanner to allow different methods of scanning
 
-# 2018 Kaputnik Go
+# 2020 Kaputnik Go
 
 
 Screenshots

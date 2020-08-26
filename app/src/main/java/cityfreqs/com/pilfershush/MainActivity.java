@@ -8,7 +8,6 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.media.AudioManager;
@@ -20,18 +19,20 @@ import android.text.method.ScrollingMovementMethod;
 import android.text.style.ForegroundColorSpan;
 import android.util.Log;
 import android.view.Gravity;
-import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.CompoundButton;
-import android.widget.EditText;
-import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ToggleButton;
 import android.widget.ViewSwitcher;
+
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
+import androidx.core.view.MenuCompat;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -39,13 +40,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
-import androidx.annotation.NonNull;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.app.ActivityCompat;
-import androidx.core.view.MenuCompat;
 import cityfreqs.com.pilfershush.assist.AudioSettings;
-import cityfreqs.com.pilfershush.jammers.ActiveJammerService;
-import cityfreqs.com.pilfershush.jammers.PassiveJammerService;
 
 public class MainActivity extends AppCompatActivity
         implements ActivityCompat.OnRequestPermissionsResultCallback {
@@ -55,7 +50,7 @@ public class MainActivity extends AppCompatActivity
 
     private static final int REQUEST_MULTIPLE_PERMISSIONS = 123;
 
-    public static final String VERSION = "3.0.1";
+    public static final String VERSION = "4.0.0";
 
     // TODO fix the STATE nightmare of the scanner and the audioBundle
     private ViewSwitcher viewSwitcher;
@@ -69,8 +64,6 @@ public class MainActivity extends AppCompatActivity
     private TextView focusText;
 
     private ToggleButton runScansButton;
-    private ToggleButton passiveJammerButton;
-    private ToggleButton activeJammerButton;
     private TextView mainScanText;
 
     private String[] freqSteps;
@@ -92,13 +85,6 @@ public class MainActivity extends AppCompatActivity
     private AlertDialog.Builder dialogBuilder;
     private AlertDialog alertDialog;
 
-    private SharedPreferences sharedPrefs;
-    private SharedPreferences.Editor sharedPrefsEditor;
-    private boolean PASSIVE_RUNNING;
-    private boolean ACTIVE_RUNNING;
-    private boolean IRQ_TELEPHONY;
-    private String[] jammerTypes;
-
     private Bundle audioBundle;
 
 
@@ -118,74 +104,11 @@ public class MainActivity extends AppCompatActivity
         runScansButton = findViewById(R.id.run_scans_button);
         runScansButton.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                // first check for jammers running
-                if (ACTIVE_RUNNING) {
-                    mainScanLogger(getResources().getString(R.string.main_scanner_25), true);
-                    stopActive();
-                    activeJammerButton.toggle();
-                }
-                if (PASSIVE_RUNNING) {
-                    mainScanLogger(getResources().getString(R.string.main_scanner_25), true);
-                    stopPassive();
-                    passiveJammerButton.toggle();
-                }
-
                 if (isChecked) {
                     runScanner();
                 }
                 else {
                     stopScanner();
-                }
-            }
-        });
-
-        passiveJammerButton = findViewById(R.id.run_passive_button);
-        passiveJammerButton.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                if (SCANNING) {
-                    // stopScanner first to allow mic to free up
-                    stopScanner();
-                    runScansButton.toggle();
-                    passiveJammerButton.toggle();
-                    mainScanLogger(getResources().getString(R.string.main_scanner_32), true);
-                    return;
-                }
-                if (isChecked) {
-                    runPassive();
-                }
-                else {
-                   stopPassive();
-                }
-            }
-        });
-
-
-        activeJammerButton = findViewById(R.id.run_active_button);
-        activeJammerButton.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                if (isChecked) {
-                    if (SCANNING) {
-                        mainScanLogger(getResources().getString(R.string.main_scanner_24), true);
-                        stopScanner();
-                        runScansButton.toggle();
-                    }
-                    runActive();
-                }
-                else {
-                    stopActive();
-                }
-            }
-        });
-
-        Switch activeTypeSwitch = findViewById(R.id.active_type_switch);
-        activeTypeSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                audioBundle.putBoolean(AudioSettings.AUDIO_BUNDLE_KEYS[7], isChecked);
-                if (isChecked) {
-                    entryLogger(getResources().getString(R.string.app_status_8), false);
-                }
-                else {
-                    entryLogger(getResources().getString(R.string.app_status_9), false);
                 }
             }
         });
@@ -291,29 +214,6 @@ public class MainActivity extends AppCompatActivity
     @Override
     protected void onResume() {
         super.onResume();
-        sharedPrefs = getPreferences(Context.MODE_PRIVATE);
-        // work out if need to restart jamming
-        PASSIVE_RUNNING = sharedPrefs.getBoolean("passive_running", false);
-        ACTIVE_RUNNING = sharedPrefs.getBoolean("active_running", false);
-        IRQ_TELEPHONY = sharedPrefs.getBoolean("irq_telephony", false);
-
-        // override check for return from system destroy
-        if (checkServiceRunning(PassiveJammerService.class)) {
-            // jammer is running
-            if (DEBUG) mainScanLogger(getResources().getString(R.string.resume_status_1), false);
-        }
-        else {
-            if (DEBUG) mainScanLogger(getResources().getString(R.string.resume_status_2), false);
-            PASSIVE_RUNNING = false;
-        }
-        if (checkServiceRunning(ActiveJammerService.class)) {
-            // jammer is running
-            if (DEBUG) mainScanLogger(getResources().getString(R.string.resume_status_3), false);
-        }
-        else {
-            if (DEBUG) mainScanLogger(getResources().getString(R.string.resume_status_4), false);
-            ACTIVE_RUNNING = false;
-        }
 
         IntentFilter filter = new IntentFilter(Intent.ACTION_HEADSET_PLUG);
         registerReceiver(headsetReceiver, filter);
@@ -321,52 +221,6 @@ public class MainActivity extends AppCompatActivity
         // refocus app, ready for fresh scanner run
         toggleHeadset(false); // default state at init
         int status = audioFocusCheck();
-
-        if (IRQ_TELEPHONY && PASSIVE_RUNNING) {
-            // return from background with state irq_telephony and passive_running
-            // check audio focus status
-            if (status == AudioManager.AUDIOFOCUS_REQUEST_GRANTED) {
-                // reset booleans to init state
-                PASSIVE_RUNNING = false;
-                IRQ_TELEPHONY = false;
-            }
-            else if (status == AudioManager.AUDIOFOCUS_LOSS) {
-                // possible music player etc that has speaker focus but no need of microphone,
-                // can end up fighting for focus with music player,
-                if (DEBUG) mainScanLogger(getResources().getString(R.string.resume_status_6), false);
-            }
-        }
-        else if (PASSIVE_RUNNING) {
-            // return from background without irq_telephony
-            mainScanLogger(getResources().getString(R.string.app_status_1), true);
-            // check button state on
-            if (!passiveJammerButton.isChecked()) {
-                passiveJammerButton.toggle();
-            }
-        }
-        else {
-            mainScanLogger(getResources().getString(R.string.app_status_2), true);
-            // check button state off
-            if (passiveJammerButton.isChecked()) {
-                passiveJammerButton.toggle();
-            }
-        }
-
-        if (ACTIVE_RUNNING) {
-            // return from background without irq_telephony
-            mainScanLogger(getResources().getString(R.string.app_status_3), true);
-            // check button state on
-            if (!activeJammerButton.isChecked()) {
-                activeJammerButton.toggle();
-            }
-        }
-        else {
-            mainScanLogger(getResources().getString(R.string.app_status_4), true);
-            // check button state off
-            if (activeJammerButton.isChecked()) {
-                activeJammerButton.toggle();
-            }
-        }
     }
 
     @Override
@@ -374,36 +228,12 @@ public class MainActivity extends AppCompatActivity
         super.onPause();
         // backgrounded, stop recording, possible audio_focus loss due to telephony...
         unregisterReceiver(headsetReceiver);
-
-        // save state first
-        sharedPrefs = getPreferences(Context.MODE_PRIVATE);
-        sharedPrefsEditor = sharedPrefs.edit();
-        sharedPrefsEditor.putBoolean("passive_running", PASSIVE_RUNNING);
-        sharedPrefsEditor.putBoolean("active_running", ACTIVE_RUNNING);
-        sharedPrefsEditor.putBoolean("irq_telephony", IRQ_TELEPHONY);
-        sharedPrefsEditor.apply();
-        // then work out if need to toggle jammer off (UI) due to irq_telephony
-        if (PASSIVE_RUNNING && IRQ_TELEPHONY) {
-            // make UI conform to jammer override by system telephony
-            stopPassive();
-        }
-        if (ACTIVE_RUNNING && IRQ_TELEPHONY) {
-            // make UI conform
-            stopActive();
-        }
     }
 
     @Override
     protected void onStop() {
         super.onStop();
         // called from back button press
-        // save state
-        sharedPrefs = getPreferences(Context.MODE_PRIVATE);
-        sharedPrefsEditor = sharedPrefs.edit();
-        sharedPrefsEditor.putBoolean("passive_running", PASSIVE_RUNNING);
-        sharedPrefsEditor.putBoolean("active_running", ACTIVE_RUNNING);
-        sharedPrefsEditor.putBoolean("irq_telephony", IRQ_TELEPHONY);
-        sharedPrefsEditor.apply();
     }
 
     @Override
@@ -457,12 +287,6 @@ public class MainActivity extends AppCompatActivity
                 return true;
             case R.id.action_fft_window_settings:
                 changeFFTWindowSettings();
-                return true;
-            case R.id.action_jammer:
-                jammerDialog();
-                return true;
-            case R.id.action_drift_speed:
-                speedDriftDialog();
                 return true;
             case R.id.action_write_file:
                 changeWriteFile();
@@ -657,12 +481,6 @@ public class MainActivity extends AppCompatActivity
         dbLevel[5] = getResources().getString(R.string.magnitude_93_text);
         dbLevel[6] = getResources().getString(R.string.magnitude_100_text);
 
-        jammerTypes = new String[4];
-        jammerTypes[0] = getResources().getString(R.string.jammer_dialog_2);
-        jammerTypes[1] = getResources().getString(R.string.jammer_dialog_3);
-        jammerTypes[2] = getResources().getString(R.string.jammer_dialog_4);
-        jammerTypes[3] = getResources().getString(R.string.jammer_dialog_5);
-
         storageAdmins = new String[3];
         storageAdmins[0] = getResources().getString(R.string.dialog_storage_size);
         storageAdmins[1] = getResources().getString(R.string.dialog_delete_all_files);
@@ -794,164 +612,6 @@ public class MainActivity extends AppCompatActivity
         alertDialog.show();
     }
 
-    private void jammerDialog() {
-        dialogBuilder = new AlertDialog.Builder(this);
-        dialogBuilder.setItems(jammerTypes, new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialogInterface, int which) {
-                // types listing as above
-                // other user input needed for the below options
-                switch(which) {
-                    case 0:
-                        audioBundle.putInt("jammerType", AudioSettings.JAMMER_TYPE_TEST);
-                        entryLogger(getResources().getString(R.string.jammer_dialog_13)
-                                + jammerTypes[which], false);
-                        break;
-                    case 1:
-                        audioBundle.putInt("jammerType", AudioSettings.JAMMER_TYPE_NUHF);
-                        entryLogger(getResources().getString(R.string.jammer_dialog_13)
-                                + jammerTypes[which], false);
-                        break;
-                    case 2:
-                        defaultRangedDialog();
-                        break;
-                    case 3:
-                        userRangedDialog();
-                        break;
-                    default:
-                        break;
-
-                }
-            }
-        });
-        dialogBuilder.setTitle(R.string.jammer_dialog_1);
-        alertDialog = dialogBuilder.create();
-        alertDialog.show();
-    }
-    private void defaultRangedDialog() {
-        // open dialog with field for carrierfrequency
-        dialogBuilder = new AlertDialog.Builder(this);
-
-        LayoutInflater inflater = this.getLayoutInflater();
-        View inputView = inflater.inflate(R.layout.default_ranged_form, null);
-        dialogBuilder.setView(inputView);
-        final EditText userCarrierInput = inputView.findViewById(R.id.carrier_input);
-
-        dialogBuilder.setTitle(R.string.jammer_dialog_4);
-
-        dialogBuilder
-                .setPositiveButton(R.string.dialog_button_okay, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int id) {
-                        int userInputCarrier = AudioSettings.DEFAULT_NUHF_FREQUENCY;
-                        if (userCarrierInput.getText().length() != 0) {
-                            userInputCarrier = Integer.parseInt(userCarrierInput.getText().toString());
-                        }
-
-                        userInputCarrier = checkCarrierFrequency(userInputCarrier);
-                        audioBundle.putInt("userCarrier", userInputCarrier);
-                        audioBundle.putInt("jammerType", AudioSettings.JAMMER_TYPE_DEFAULT_RANGED);
-
-                        entryLogger(getResources().getString(R.string.jammer_dialog_14)
-                                + userInputCarrier, false);
-                    }
-                })
-                .setNegativeButton(R.string.dialog_button_cancel, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int id) {
-                        // dismissed
-                        alertDialog.cancel();
-                    }
-                });
-
-        alertDialog = dialogBuilder.create();
-        alertDialog.show();
-    }
-    private void userRangedDialog() {
-        // open dialog with 2 fields - carrier and limit
-        dialogBuilder = new AlertDialog.Builder(this);
-
-        LayoutInflater inflater = this.getLayoutInflater();
-        View inputView = inflater.inflate(R.layout.user_ranged_form, null);
-        dialogBuilder.setView(inputView);
-
-        final EditText userCarrierInput = inputView.findViewById(R.id.carrier_input);
-        final EditText userLimitInput = inputView.findViewById(R.id.limit_input);
-
-        dialogBuilder.setTitle(R.string.jammer_dialog_5);
-
-        dialogBuilder
-                .setPositiveButton(R.string.dialog_button_okay, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int id) {
-                        int userInputCarrier = AudioSettings.DEFAULT_NUHF_FREQUENCY;
-                        if (userCarrierInput.getText().length() != 0) {
-                            userInputCarrier = Integer.parseInt(userCarrierInput.getText().toString());
-                        }
-                        int userInputLimit = AudioSettings.DEFAULT_RANGE_DRIFT_LIMIT;
-                        if (userLimitInput.getText().length() != 0) {
-                            userInputLimit = Integer.parseInt(userCarrierInput.getText().toString());
-                        }
-
-                        userInputCarrier = checkCarrierFrequency(userInputCarrier);
-                        userInputLimit = checkDriftLimit(userInputLimit);
-                        audioBundle.putInt("userCarrier", userInputCarrier);
-                        audioBundle.putInt("userLimit", userInputLimit);
-                        audioBundle.putInt("jammerType", AudioSettings.JAMMER_TYPE_USER_RANGED);
-
-                        entryLogger("Jammer type changed to " + userInputLimit
-                                + " Hz drift with carrier at " + userInputCarrier, false);
-
-                    }
-                })
-                .setNegativeButton(R.string.dialog_button_cancel, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int id) {
-                        // dismissed
-                        alertDialog.cancel();
-                    }
-                });
-
-        alertDialog = dialogBuilder.create();
-        alertDialog.show();
-    }
-
-    private void speedDriftDialog() {
-        dialogBuilder = new AlertDialog.Builder(this);
-
-        LayoutInflater inflater = this.getLayoutInflater();
-        View inputView = inflater.inflate(R.layout.drift_speed_form, null);
-        dialogBuilder.setView(inputView);
-
-        final EditText userDriftInput = inputView.findViewById(R.id.drift_input);
-
-        dialogBuilder.setTitle(R.string.drift_dialog_1);
-        dialogBuilder.setMessage("");
-        dialogBuilder
-                .setPositiveButton(R.string.dialog_button_okay, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int id) {
-                        // set a default and check edit text field
-                        int userInputSpeed = 1;
-                        if (userDriftInput.getText().length() != 0) {
-                            userInputSpeed = Integer.parseInt(userDriftInput.getText().toString());
-                        }
-                        userInputSpeed = checkDriftSpeed(userInputSpeed);
-                        audioBundle.putInt("userSpeed", userInputSpeed);
-                        entryLogger("Jammer drift speed changed to " + userInputSpeed, false);
-                    }
-                })
-                .setNegativeButton(R.string.dialog_button_cancel, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int id) {
-                        // dismissed
-                        alertDialog.cancel();
-                    }
-                });
-        alertDialog = dialogBuilder.create();
-        alertDialog.show();
-    }
-
-
     private String printUsedSize() {
         return android.text.format.Formatter.formatShortFileSize(this, pilferShushScanner.getLogStorageSize());
     }
@@ -969,11 +629,9 @@ public class MainActivity extends AppCompatActivity
         }
         if (focusChange == AudioManager.AUDIOFOCUS_LOSS) {
             // total loss, focus abandoned, need to confirm this behaviour
-            IRQ_TELEPHONY = true;
         }
         else if (focusChange == AudioManager.AUDIOFOCUS_LOSS_TRANSIENT) {
             // system forced loss, assuming telephony
-            IRQ_TELEPHONY = true;
         }
     }
 
@@ -1000,54 +658,6 @@ public class MainActivity extends AppCompatActivity
             audioBundle.putInt(AudioSettings.AUDIO_BUNDLE_KEYS[14], AudioSettings.SECOND_FREQUENCY_MIN);
             audioBundle.putInt(AudioSettings.AUDIO_BUNDLE_KEYS[15], AudioSettings.SECOND_FREQUENCY_MAX);
         }
-    }
-
-
-    /********************************************************************/
-    /*
-     *      JAMMERS
-     */
-    private void runPassive() {
-        if (PASSIVE_RUNNING) {
-            if (DEBUG) entryLogger(getResources().getString(R.string.resume_status_7), false);
-        }
-        else {
-            Intent startIntent = new Intent(MainActivity.this, PassiveJammerService.class);
-            startIntent.setAction(PassiveJammerService.ACTION_START_PASSIVE);
-            startIntent.putExtras(audioBundle);
-            startService(startIntent);
-            PASSIVE_RUNNING = true;
-            mainScanLogger(getResources().getString(R.string.main_scanner_26), true);
-        }
-    }
-    private void stopPassive() {
-        Intent stopIntent = new Intent(MainActivity.this, PassiveJammerService.class);
-        stopIntent.setAction(PassiveJammerService.ACTION_STOP_PASSIVE);
-        startService(stopIntent);
-        PASSIVE_RUNNING = false;
-        mainScanLogger(getResources().getString(R.string.main_scanner_29), true);
-    }
-
-    private void runActive() {
-        if (ACTIVE_RUNNING) {
-            if (DEBUG) entryLogger(getResources().getString(R.string.resume_status_8), false);
-        }
-        else {
-            Intent startIntent = new Intent(MainActivity.this, ActiveJammerService.class);
-            startIntent.setAction(ActiveJammerService.ACTION_START_ACTIVE);
-            startIntent.putExtras(audioBundle);
-            startService(startIntent);
-            ACTIVE_RUNNING = true;
-            mainScanLogger(getResources().getString(R.string.main_scanner_27), true);
-        }
-    }
-
-    private void stopActive() {
-        Intent stopIntent = new Intent(MainActivity.this, ActiveJammerService.class);
-        stopIntent.setAction(ActiveJammerService.ACTION_STOP_ACTIVE);
-        startService(stopIntent);
-        ACTIVE_RUNNING = false;
-        mainScanLogger(getResources().getString(R.string.main_scanner_28), true);
     }
 
     /********************************************************************/
@@ -1299,32 +909,6 @@ public class MainActivity extends AppCompatActivity
                 }
             }
         }
-    }
-
-    /*
-
-    CONFORM CHECKS FOR USER INPUT
-*/
-    private int checkCarrierFrequency(int carrierFrequency) {
-        if (carrierFrequency > audioBundle.getInt(AudioSettings.AUDIO_BUNDLE_KEYS[13]))
-            return audioBundle.getInt(AudioSettings.AUDIO_BUNDLE_KEYS[13]);
-
-        else if (carrierFrequency < AudioSettings.MINIMUM_NUHF_FREQUENCY)
-            return AudioSettings.MINIMUM_NUHF_FREQUENCY;
-
-        else
-            return carrierFrequency;
-    }
-
-    private int checkDriftLimit(int driftLimit) {
-        if (driftLimit > AudioSettings.DEFAULT_RANGE_DRIFT_LIMIT)
-            return AudioSettings.DEFAULT_RANGE_DRIFT_LIMIT;
-
-        else if (driftLimit < AudioSettings.MINIMUM_DRIFT_LIMIT)
-            return AudioSettings.MINIMUM_DRIFT_LIMIT;
-
-        else
-            return driftLimit;
     }
 
     private int checkDriftSpeed(int driftSpeed) {

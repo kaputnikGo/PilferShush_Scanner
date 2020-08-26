@@ -91,6 +91,7 @@ public class AudioSettings {
     };
 
     // alphabetical list of package names
+    // move to raw/audio_sdk_names.txt
     public static final String[] SDK_NAMES = {
             "acrcloud",
             "actv8",
@@ -99,6 +100,7 @@ public class AudioSettings {
             "cifrasoft",
             "copsonic",
             "cueaudio",
+            "digimarc",
             "dv",
             "fidzup",
             "fluzo",
