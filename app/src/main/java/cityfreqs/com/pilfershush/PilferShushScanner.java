@@ -3,7 +3,9 @@ package cityfreqs.com.pilfershush;
 import android.content.Context;
 import android.os.Bundle;
 
+import cityfreqs.com.pilfershush.assist.AudioChecker;
 import cityfreqs.com.pilfershush.assist.AudioSettings;
+import cityfreqs.com.pilfershush.assist.BackgroundChecker;
 import cityfreqs.com.pilfershush.assist.WriteProcessor;
 import cityfreqs.com.pilfershush.scanners.AudioScanner;
 
@@ -24,8 +26,7 @@ class PilferShushScanner {
     }
 
     void onDestroy() {
-        audioChecker.destroy();
-        backgroundChecker.destroy();
+        //
     }
 
     /********************************************************************/
@@ -56,9 +57,11 @@ class PilferShushScanner {
         this.audioBundle = audioBundle;
     }
 
+    /*
     Bundle getAudioBundle() {
         return audioBundle;
     }
+    */
 
     String getSaveFileType() {
         return audioChecker.saveFormatToString();
@@ -159,9 +162,11 @@ class PilferShushScanner {
         return backgroundChecker.checkAudioBeaconApps();
     }
 
+    /*
     String displayAudioSdkList() {
         return backgroundChecker.displayAudioSdkNames();
     }
+    */
 
     int getAudioBeaconAppNumber() {
         return backgroundChecker.getAudioBeaconAppNames().length;
@@ -175,9 +180,11 @@ class PilferShushScanner {
         return backgroundChecker.getOverrideScanAppNames();
     }
 
+    /*
     void listBeaconDetails(int appNumber) {
         listAppAudioBeaconDetails(appNumber);
     }
+    */
 
     void listScanDetails(int appNumber) {
         listAppOverrideScanDetails(appNumber);
@@ -202,7 +209,7 @@ class PilferShushScanner {
     /********************************************************************/
 
     private void initBackgroundChecks() {
-        backgroundChecker = new BackgroundChecker();
+        backgroundChecker = new BackgroundChecker(context, false);
         if (backgroundChecker.initChecker(context.getPackageManager())) {
             // is good
             auditBackgroundChecks();
@@ -226,6 +233,7 @@ class PilferShushScanner {
         backgroundChecker.audioAppEntryLog();
     }
 
+    /*
     private void listAppAudioBeaconDetails(int selectedIndex) {
         if (backgroundChecker.getAudioBeaconAppEntry(selectedIndex).checkBeaconServiceNames()) {
             entryLogger(context.getString(R.string.background_scan_4)
@@ -243,6 +251,7 @@ class PilferShushScanner {
             logAppEntryInfo(backgroundChecker.getAudioBeaconAppEntry(selectedIndex).getBeaconReceiverNames());
         }
     }
+    */
 
     private void listAppOverrideScanDetails(int selectedIndex) {
         // check for receivers too?

@@ -267,6 +267,38 @@
     <string name="audio_scan_1">Found possible binary logic:\u0020</string>
 
     <!--
+    background userapp checker
+    -->
+    <string name="dialog_userapps">Scan Apps List</string>
+
+    <string name="userapp_scan_1">Userapp Checker fail.</string>
+    <string name="userapp_scan_2">run user app checks\u2026</string>
+    <string name="userapp_scan_3">User Apps with RECORD AUDIO:\u0020</string>
+
+    <string name="userapp_scan_4">NO USER APPS FOUND FOR CHECKER.</string>
+    <string name="userapp_scan_5">Found User App services for\u0020</string>
+    <string name="userapp_scan_6">Found User App receivers for\u0020</string>
+    <string name="userapp_scan_7">AppEntry list:\u0020</string>
+
+    <string name="userapp_scan_8">Record audio apps found:\u0020</string>
+    <string name="userapp_scan_9">No record audio apps found.</string>
+    <string name="userapp_scan_10">\u0020possible NUHF/ACR SDK names detected. Check the User Apps Summary for more information.</string>
+    <string name="userapp_scan_11">No NUHF/ACR SDK package names detected.</string>
+    <string name="userapp_scan_12">No user apps found.</string>
+    <string name="userapp_scan_13">USER APP SUMMARY.</string>
+    <string name="userapp_scan_14">Error in background app checker.</string>
+
+    <string name="userapp_scan_intro_1">Audio tracker SDKs may have TRUE in at least three categories.</string>
+    <string name="userapp_scan_intro_2">This is not a proof of audio tracker behaviour or presence.</string>
+    <string name="userapp_scan_intro_3">User App Name</string>
+    <string name="userapp_scan_intro_4">User App package name</string>
+    <string name="userapp_scan_intro_5">RECORD - use the microphone</string>
+    <string name="userapp_scan_intro_6">BOOT - app can auto restart after the device is rebooted</string>
+    <string name="userapp_scan_intro_7">SERVICE - long-running background operation</string>
+    <string name="userapp_scan_intro_8">RECEIVER -  send or receive messages from the system or other apps</string>
+    <string name="userapp_scan_intro_9">NUHF/ACR SDK - package name match found from current SDK list</string>
+    <string name="userapp_scan_intro_10">ACCESSIBILITY - special functions about state of device</string>
+    <!--
     AudioChecker.java
     -->
     <string name="audio_check_1">determine internal audio failure.</string>
@@ -281,6 +313,15 @@
     <string name="audio_check_10">Stopping all audio.</string>
     <string name="audio_check_11">Audio record stopped and released.</string>
     <string name="audio_check_12">audioRecord is null.</string>
+
+    <string name="eq_check_1">Testing for device audiofx equalizer.</string>
+    <string name="eq_check_2">Device audiofx equalizer test passed.</string>
+    <string name="eq_check_3">Device audiofx equalizer test failed.</string>
+    <string name="eq_check_4">Number of EQ bands:\u0020</string>
+    <string name="eq_check_5">adjust EQ minimum milliBels:\u0020</string>
+    <string name="eq_check_6">adjust EQ maximum milliBels:\u0020</string>
+    <string name="eq_check_7">HPF test to reduce EQ twice by minEQ value:\u0020</string>
+    <string name="eq_check_8">testEQ Exception, possibly device specific implementation.</string>
 
     <!--
     AudioScanner.java

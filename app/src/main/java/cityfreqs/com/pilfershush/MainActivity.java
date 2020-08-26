@@ -1,7 +1,6 @@
 package cityfreqs.com.pilfershush;
 
 import android.Manifest;
-import android.app.ActivityManager;
 import android.app.AlertDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -40,6 +39,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
+import cityfreqs.com.pilfershush.assist.AudioChecker;
 import cityfreqs.com.pilfershush.assist.AudioSettings;
 
 public class MainActivity extends AppCompatActivity
@@ -635,18 +635,6 @@ public class MainActivity extends AppCompatActivity
         }
     }
 
-    // As of Build.VERSION_CODES.O, this method is no longer available to third party applications.
-    // For backwards compatibility, it will still return the caller's own services.
-    private boolean checkServiceRunning(Class<?> serviceClass) {
-        ActivityManager manager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
-        for (ActivityManager.RunningServiceInfo service : manager.getRunningServices(Integer.MAX_VALUE)) {
-            if (serviceClass.getName().equals(service.service.getClassName())) {
-                return true;
-            }
-        }
-        return false;
-    }
-
     private void setFreqMinMax(int pair) {
         // at the moment stick to ranges of 3kHz as DEFAULT or SECOND pair
         // use int as may get more ranges than the 2 presently used
@@ -748,28 +736,28 @@ public class MainActivity extends AppCompatActivity
     }
 
     private void hasAudioBeaconAppsList() {
-        // first publish list of names searched:
-        entryLogger("\n" + getResources().getString(R.string.sdk_names_list) + "\n"
-                + pilferShushScanner.displayAudioSdkList(), false);
+        if (pilferShushScanner != null) {
+            String[] appNames = pilferShushScanner.getAudioBeaconAppList();
 
-        String[] appNames = pilferShushScanner.getAudioBeaconAppList();
-
-        if (appNames != null && appNames.length > 0) {
-            // proceed to list
-            dialogBuilder = new AlertDialog.Builder(this);
-            dialogBuilder.setItems(appNames, new DialogInterface.OnClickListener() {
-                public void onClick(DialogInterface dialogInterface, int which) {
-                    // index position of clicked app name
-                    pilferShushScanner.listBeaconDetails(which);
-                }
-            });
-            dialogBuilder.setTitle(R.string.dialog_audio_beacon_apps);
-            alertDialog = dialogBuilder.create();
-            alertDialog.show();
+            if (appNames != null && appNames.length > 0) {
+                AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(this);
+                dialogBuilder.setItems(appNames, new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialogInterface, int which) {
+                        // index position of clicked app name
+                        pilferShushScanner.listScanDetails(which);
+                    }
+                });
+                dialogBuilder.setTitle(R.string.dialog_userapps);
+                AlertDialog alertDialog = dialogBuilder.create();
+                alertDialog.show();
+            }
+            else {
+                entryLogger(getResources().getString(R.string.userapp_scan_4), true);
+            }
         }
         else {
-            // none found, inform user
-            entryLogger(getResources().getString(R.string.audio_apps_check_1), true);
+            if (DEBUG) Log.d(TAG, "backgroundChecker is NULL at userApp check.");
+            entryLogger("Background Checker not initialised.", true);
         }
     }
 
