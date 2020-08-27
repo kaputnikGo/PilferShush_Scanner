@@ -1,6 +1,7 @@
 package cityfreqs.com.pilfershush.assist;
 
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.os.Bundle;
 import android.os.Environment;
@@ -10,6 +11,7 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -100,14 +102,20 @@ public class WriteProcessor {
         String waveFilename = timestamp + "-" + DEFAULT_SESSION_NAME + AUDIO_FILE_EXTENSION_WAV;
         // file save will overwrite unless new name is used...
         try {
+            // has extDirectory : /storage/emulated/0/Download/PilferShush
+            // then says no storage folder found
             AUDIO_OUTPUT_FILE = new File(location, audioFilename);
             if (!AUDIO_OUTPUT_FILE.exists()) {
-                AUDIO_OUTPUT_FILE.createNewFile();
+                if (!AUDIO_OUTPUT_FILE.createNewFile()) {
+                    log("error creating audio out file.");
+                }
             }
 
             WAV_OUTPUT_FILE = new File(location, waveFilename);
             if (!WAV_OUTPUT_FILE.exists()) {
-                WAV_OUTPUT_FILE.createNewFile();
+                if (!WAV_OUTPUT_FILE.createNewFile()) {
+                    log("error creating output wav file.");
+                }
             }
 
             AUDIO_OUTPUT_STREAM = null;
@@ -159,8 +167,13 @@ public class WriteProcessor {
             return;
         }
         if (convertToWav()) {
-            AUDIO_OUTPUT_FILE.delete();
-            log(context.getString(R.string.writer_state_21));
+            boolean isDelete = AUDIO_OUTPUT_FILE.delete();
+            if (isDelete) {
+                log(context.getString(R.string.writer_state_21));
+            }
+            else {
+                log("error in audio output file delete.");
+            }
         }
     }
 
@@ -201,7 +214,13 @@ public class WriteProcessor {
         DataInputStream input = null;
         try {
             input = new DataInputStream(new FileInputStream(rawFile));
-            input.read(rawData);
+            int reader = input.read(rawData);
+        }
+        catch (FileNotFoundException ex) {
+            log("rawToWave inputStream File exception catch.");
+        }
+        catch (IOException ex) {
+            log("rawToWave inputStream IO exception catch.");
         }
         finally {
             if (input != null) {
@@ -237,6 +256,12 @@ public class WriteProcessor {
                 bytes.putShort(s);
             }
             output.write(bytes.array());
+        }
+        catch (FileNotFoundException ex) {
+            log("rawToWave outputStream File exception catch.");
+        }
+        catch (IOException ex) {
+            log("rawToWave outputStream IO exception catch.");
         }
         finally {
             if (output != null) {
@@ -276,50 +301,64 @@ public class WriteProcessor {
         extDirectory = new File(Environment.getExternalStoragePublicDirectory(
                 Environment.DIRECTORY_DOWNLOADS), APP_DIRECTORY_NAME);
         if (!extDirectory.exists()) {
-            extDirectory.mkdirs();
-            log(context.getString(R.string.writer_state_23));
+            if (extDirectory.mkdirs()) {
+                log(context.getString(R.string.writer_state_23));
+            }
+            else {
+                log("error creating extDirectory.");
+            }
+        }
+        else {
+            // already exists
+            log("extDirectory already exists.");
         }
     }
 
     private void deleteAllStorageFiles() {
         // assume MainActivity has cautioned first.
         if (!extDirectory.exists()) {
-            log(context.getString(R.string.writer_state_16));
+            log(context.getString(R.string.writer_state_16_1));
             return;
         }
         log(context.getString(R.string.writer_state_18));
-        for (File file : extDirectory.listFiles()) {
-            file.delete();
+        boolean deleteSuccess = false;
+        if (extDirectory.listFiles() != null) {
+            for (File file : extDirectory.listFiles()) {
+                deleteSuccess = file.delete();
+            }
         }
-        log(context.getString(R.string.writer_state_19));
+        if (deleteSuccess) {
+            log(context.getString(R.string.writer_state_19));
+        }
+        else {
+            log("Error deleting extDirectory files.");
+        }
     }
 
     private long calculateStorageSize() {
         // returns long size in bytes
         if (!extDirectory.exists()) {
-            log(context.getString(R.string.writer_state_16));
+            log(context.getString(R.string.writer_state_16_2));
             return 0;
         }
         long length = 0;
-        for (File file : extDirectory.listFiles()) {
-            if (file.isFile()) {
-                length += file.length();
+        if (extDirectory.listFiles() != null) {
+            for (File file : extDirectory.listFiles()) {
+                if (file.isFile()) {
+                    length += file.length();
+                }
             }
         }
         return length;
     }
 
+    @SuppressLint("UsableSpace")
     private long calculateFreeStorageSpace() {
         // returns long size in bytes
-        int storageSize = 0;
+        //TODO gets the extDirectory !exists
         if (!extDirectory.exists()) {
-            log(context.getString(R.string.writer_state_16));
+            log(context.getString(R.string.writer_state_16_3));
             return 0;
-        }
-        // getFreeSpace == unallocated
-        storageSize = (int)extDirectory.getUsableSpace();
-        if (storageSize == 0 ) {
-
         }
         return extDirectory.getUsableSpace();
     }

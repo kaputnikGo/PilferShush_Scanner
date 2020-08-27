@@ -1,9 +1,8 @@
 # PilferShush_Scanner
-Android near-ultra high frequency (NUHF) listener with microphone polling and NUHF/ACR SDK detector  
+Android near-ultra high frequency (NUHF) scanner  
 
-Test application for researching methods of discovering use of audio beacons.
-- compile API 28 (Pie, 9.0), Android Studio 3.2.1 stable, AndroidX libs
-- rewrite AudioSettings and deps for use with Bundle
+Test application for researching methods of discovering use of NUHF audio beacons.
+- compile API 29 (Q, 10.0), Android Studio 4.0.1 stable, AndroidX libs
 
    vers. 4.0.0
    - min API 18 (4.3)
@@ -11,19 +10,29 @@ Test application for researching methods of discovering use of audio beacons.
    - compiled API 29 (10.x)
 
    testing devices
-   - LOW : s4 I9195 (deprecated) 4.3.1 (18)(CyanogenMod 10.2, F-Droid)
-   - SLO : Mts 5045D (fail, tainted) 6.0.1 (23) (CyanogenMod 13.0, GApps)
-   - DEV : s5 G900I (tainted) 7.1.2 (25)(LineageOS 14.1, GApps)
-   - HIGH : s5 G900P (user) 7.1.2 (25)(LineageOS 14.1, F-Droid)
+    - EMU : Galaxy Nexus 4.3 (18) (Android Studio AVD, no GApps)
+    - EMU : Nexus 4 5.1 (22) (Android Studio AVD, no GApps)
+    - EMU : Nexus 5X 7.0 (24) (Android Studio AVD, GApps)
+    - EMU : Galaxy Nexus Oreo (27) (Android Studio AVD, GApps)
+    - EMU : Pixel 3a 10.0 (29) (Android Studio AVD, GApps)
+    - LOW : s4 I9195 (deprecated) 4.3.1 (18)(CyanogenMod 10.2, F-Droid)
+    - SLO : Mts 5045D (tainted) 6.0.1 (23) (CyanogenMod 13.0, GApps)
+    - DEV : s5 G900I (tainted) 10.0 (29)(LineageOS 17.1, GApps)
+    - PROD: s5 G900P 7.1.2 (25) (LineageOS 14.1, F-Droid)
  
  **Changes:**
  - upgrade to scanner only
- - remove jammer components, refer to PilferShush Jammer
+ - remove jammer components, refer to PilferShush Jammer app
+ - name changed to PilferShush_Scanner (not root module)
  
  **TODO**
- - change name to Scanner?
+ - simplify activity.java and scanner.java
+ - fix WriteProcessor (ext/emulated storage etc)
+ - check AudioSettings and deps for use with AudioBundle
+ - check AudioBundle fields, rem jammer types
  - scanner as a foreground service
- - rebuild scanner to allow different methods of scanning
+ - analysis view for spectrogram wav file?
+ - rebuild scanner to allow different methods of scanning (more than goertzel)
 
 # 2020 Kaputnik Go
 

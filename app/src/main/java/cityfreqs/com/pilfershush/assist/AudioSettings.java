@@ -59,27 +59,14 @@ public class AudioSettings {
     public static final int DEFAULT_WINDOW_TYPE = 2;
 
     //public static final int MICRO_DELAY = 1; // for modulated code
-
     //public static final int MAXIMUM_NUHF_FREQUENCY = 24000;
-    public static final int MINIMUM_NUHF_FREQUENCY = 18000;
-    public static final int DEFAULT_NUHF_FREQUENCY = 19000;
 
     public static final int CARRIER_TEST_FREQUENCY = 440;
-    public static final int MAXIMUM_TEST_FREQUENCY = CARRIER_TEST_FREQUENCY + (int)(CARRIER_TEST_FREQUENCY * 0.5);
-    public static final int MINIMUM_TEST_FREQUENCY = CARRIER_TEST_FREQUENCY - (int)(CARRIER_TEST_FREQUENCY * 0.5);
 
     public static final int DEFAULT_RANGE_DRIFT_LIMIT = 1000;
     //public static final int DEFAULT_DRIFT_SPEED = 1000;
     public static final int MINIMUM_DRIFT_LIMIT = 10;
-    public static final int DRIFT_SPEED_MULTIPLIER = 1000;
-
-    public static final int JAMMER_TONE = 0;
-    public static final int JAMMER_WHITE = 1;
-
     public static final int JAMMER_TYPE_TEST = 0; // only test tone drift
-    public static final int JAMMER_TYPE_NUHF = 1;
-    public static final int JAMMER_TYPE_DEFAULT_RANGED = 2;
-    public static final int JAMMER_TYPE_USER_RANGED = 3;
 
     // Bundle keys string names
     public static final String[] AUDIO_BUNDLE_KEYS = new String[] {
@@ -87,36 +74,8 @@ public class AudioSettings {
             "bufferInSize", "channelOutConfig", "bufferOutSize", "activeType", //7
             "jammerType", "userCarrier", "userLimit", "userSpeed", "hasEQ", //12
             "maxFreq", "scanMinFreq", "scanMaxFreq", "scanFreqStep",  //16
-            "ScanMagnitude", "scanWindow", "writeFiles", "bitDepth" //20
-    };
-
-    // alphabetical list of package names
-    // move to raw/audio_sdk_names.txt
-    public static final String[] SDK_NAMES = {
-            "acrcloud",
-            "actv8",
-            "alphonso",
-            "bitsound",
-            "cifrasoft",
-            "copsonic",
-            "cueaudio",
-            "digimarc",
-            "dv",
-            "fidzup",
-            "fluzo",
-            "hotstar",
-            "intrasonics",
-            "lisnr",
-            "prontoly",
-            "redbricklane",
-            "shopkick",
-            "signal360",
-            "silverpush",
-            "sonarax",
-            "soniccode",
-            "sonicnotify",
-            "trillbit",
-            "zapr"
+            "ScanMagnitude", "scanWindow", "writeFiles", "bitDepth", //20
+            "debug" //21
     };
 
 /*

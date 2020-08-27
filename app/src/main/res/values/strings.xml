@@ -361,6 +361,10 @@
     <string name="writer_state_14">Error writing pcm file to wav file.</string>
     <string name="writer_state_15">Finished saving to wav file.</string>
     <string name="writer_state_16">No storage folder found.</string>
+    <string name="writer_state_16_1">No storage folder found to delete.</string>
+    <string name="writer_state_16_2">No storage folder found to calculate size.</string>
+    <string name="writer_state_16_3">No storage folder found to check free size.</string>
+
     <string name="writer_state_17">Deleting empty files\u2026</string>
     <string name="writer_state_18">Deleting files from storage\u2026</string>
     <string name="writer_state_19">Storage folder now empty.</string>
