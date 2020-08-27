@@ -1,4 +1,4 @@
-# PilferShush_prod
+# PilferShush_Scanner
 Android near-ultra high frequency (NUHF) listener with microphone polling and NUHF/ACR SDK detector  
 
 Test application for researching methods of discovering use of audio beacons.
