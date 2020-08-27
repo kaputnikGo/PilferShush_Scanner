@@ -397,7 +397,7 @@ public class MainActivity extends AppCompatActivity
         mainScanText.setText(startText);
         mainScanLogger("\n" + getResources().getString(R.string.init_state_2) + pilferShushScanner.getAudioCheckerReport(), false);
         mainScanLogger("\n" + getResources().getString(R.string.init_state_3), true);
-        mainScanLogger("\n" + getResources().getString(R.string.init_state_4) + getResources().getString(R.string.init_state_5), false);
+        mainScanLogger("\n" + getResources().getString(R.string.init_state_4), false);
         mainScanLogger("\n" + getResources().getString(R.string.init_state_6) + pilferShushScanner.canWriteFiles(), false);
 
         if (pilferShushScanner.canWriteFiles()) {

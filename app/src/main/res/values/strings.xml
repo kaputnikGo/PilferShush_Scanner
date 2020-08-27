@@ -23,16 +23,6 @@
     <string name="freq_range_one" translatable="false">18kHz - 21kHz (default)</string>
     <string name="freq_range_two" translatable="false">19kHz - 22kHz</string>
 
-    <string name="sdk_names_list">List of NUHF/ACR SDK names searched:\u0020</string>
-    <string name="action_audio_beacons">Check Beacon Apps</string>
-    <string name="dialog_audio_beacon_apps">NUHF/ACR List</string>
-
-    <string name="action_override_scan">Scan User App</string>
-    <string name="dialog_override_scan_apps">Scan Apps List</string>
-
-    <string name="action_jammer">Active Jammer Settings</string>
-    <string name="action_drift_speed">Drift Speed Settings</string>
-
     <string name="action_write_file">Write to file option</string>
     <string name="dialog_write_file">Allow write to file?</string>
     <string name="dialog_write_message">saved to Download(s)/PilferShush/</string>
@@ -45,18 +35,11 @@
     <string name="dialog_delete_all_files">Delete all audio files</string>
     <string name="dialog_free_storage_size">Free storage space</string>
 
-    <string name="dialog_cautioned">Cautioned List</string>
-    <string name="action_services">get Services</string>
-    <string name="dialog_services">User Apps with Services</string>
-
-    <string name="action_receivers">get Receivers</string>
-    <string name="dialog_receivers">User Apps with Receivers</string>
-
-    <string name="focus_text">Expert View (scrollable): </string>
+    <string name="focus_text">Debug View (scrollable): </string>
     <string name="debug_text">loading PilferShush.</string>
 
-    <string name="debug_view_button_text">expert</string>
-    <string name="main_view_button_text">basic</string>
+    <string name="debug_view_button_text">DEBUG</string>
+    <string name="main_view_button_text">MAIN</string>
     <string name="main_scan_text">PilferShush scanner initialising.</string>
     <string name="timer_text">timer - 00:00</string>
 
@@ -104,26 +87,15 @@
     <string name="audiofocus_6">Audio Focus Listener: GAIN_TRANSIENT.</string>
     <string name="audiofocus_7">Audio Focus Listener: GAIN_TRANSIENT_DUCK.</string>
     <string name="audiofocus_8">Audio Focus Listener: UNKNOWN STATE.</string>
-
-    <string name="beacon_check_1">NUHF/ACR</string>
-    <string name="userapp_check_1">User App Scan</string>
-
-    <string name="audio_apps_check_1">NO NUHF/ACR APPS FOUND.</string>
-    <string name="user_apps_check_1">NO USER APPS FOUND FOR SCAN.</string>
-
-    <string name="main_scanner_1">SCANNING</string>
-    <string name="main_scanner_2">Running scans on user installed apps\u2026</string>
-    <string name="main_scanner_3">Record audio apps found:\u0020</string>
-    <string name="main_scanner_4">No record audio apps found.</string>
-    <string name="main_scanner_5">\u0020NUHF/ACR SDKs detected.</string>
-    <string name="main_scanner_6">No NUHF/ACR SDKs detected.</string>
     <!--
     <string name="main_scanner_7">Microphone check...</string>
     <string name="main_scanner_8">Microphone use detected.</string>
     <string name="main_scanner_9">No microphone use detected.</string>
     -->
+    <string name="main_scanner_1">SCANNING</string>
+
     <string name="main_scanner_10">Listening for near-ultra high audio\u2026</string>
-    <string name="main_scanner_11" translatable="false">scanner</string>
+    <string name="main_scanner_11" translatable="false">SCANNER</string>
     <string name="main_scanner_12">Stop listening for audio.</string>
     <string name="main_scanner_13">Detected possible NUHF audio.</string>
     <string name="main_scanner_14">Frequency list size:\u0020</string>
@@ -134,12 +106,6 @@
     <string name="main_scanner_23" translatable="false">passive</string>
     <string name="main_scanner_24">Stopping scanner when jamming.</string>
     <string name="main_scanner_25">Stopping jamming when scanning.</string>
-    <string name="main_scanner_26">Running passive jamming\u2026</string>
-    <string name="main_scanner_27">Running active jamming\u2026</string>
-    <string name="main_scanner_28">Stop active jamming.</string>
-    <string name="main_scanner_29">Stop passive jamming.</string>
-    <string name="main_scanner_30">PASSIVE</string>
-    <string name="main_scanner_31">ACTIVE</string>
     <string name="main_scanner_32">Stop scanner to free the microphone.</string>
 
     <string name="option_dialog_1">Limited storage space found.</string>
@@ -158,8 +124,7 @@
     <string name="init_state_1">PilferShush Scanner version\u0020</string>
     <string name="init_state_2">Using\u0020</string>
     <string name="init_state_3">Settings can be changed via the Options menu.</string>
-    <string name="init_state_4">The Detailed View has logging and more information from scans.</string>
-    <string name="init_state_5">It also has a user app scan for services and receivers.</string>
+    <string name="init_state_4">The Debug View has logging and more information from scans.</string>
     <string name="init_state_6">Save scanner audio to file:\u0020</string>
     <string name="init_state_7_1">Wav audio:\u0020</string>
     <string name="init_state_7_2">, little-endian.</string>
@@ -188,54 +153,14 @@
     <string name="dialog_button_save">Save</string>
     <string name="dialog_button_cancel">Cancel</string>
     <string name="dialog_button_okay">OK</string>
-
-    <string name="button_noise" translatable="false">Noise</string>
-    <string name="button_eq" translatable="false">EQ</string>
-
-    <string name="app_status_1">passive jammer running.</string>
-    <string name="app_status_2">passive jammer not running.</string>
-    <string name="app_status_3">active jammer running.</string>
-    <string name="app_status_4">active jammer not running.</string>
     <string name="app_status_5">EQ is turned off.</string>
     <string name="app_status_6">EQ is turned on.</string>
     <string name="app_status_7">EQ is not available.</string>
 
-    <string name="app_status_8">Active jammer switched to tones.</string>
-    <string name="app_status_9">Active jammer switched to whitenoise.</string>
-
-    <string name="app_status_10">Passive jammer running.</string>
-    <string name="app_status_11">Active jammer running.</string>
     <string name="app_status_12">Tap to return to app.</string>
 
-    <string name="jammer_dialog_1">Change active jammer signal type.</string>
-    <string name="jammer_dialog_2">Audible tone drift (~440Hz)</string>
-    <string name="jammer_dialog_3">Full NUHF drift (18kHz-24kHz)</string>
-    <string name="jammer_dialog_4">1000Hz NUHF drift with user carrier</string>
-    <string name="jammer_dialog_5">User NUHF drift with user carrier</string>
-
-    <string name="jammer_dialog_6">Carrier frequency (18kHz - 24kHz):</string>
-    <string name="jammer_dialog_7">Jammer output within 1000 Hz either side of carrier.</string>
-    <string name="jammer_dialog_8">19000</string>
-    <string name="jammer_dialog_9">Range limit (Hz) either side of the carrier.</string>
-    <string name="jammer_dialog_10">1000</string>
-    <string name="jammer_dialog_11">(All frequencies constrained to NUHF)</string>
-
-    <string name="jammer_dialog_12">Tone / Noise switch</string>
-    <string name="jammer_dialog_13">Jammer type changed to\u0020</string>
-    <string name="jammer_dialog_14">Jammer type changed to 1000Hz drift with carrier at\u0020</string>
-
-    <string name="drift_dialog_1">Drift speed (1 to 10)</string>
-    <string name="drift_dialog_2">1</string>
-    <string name="drift_dialog_3">(1 = fast, 10 = slow)</string>
-
-    <string name="resume_status_1">PASSIVE SERVICE FOUND</string>
-    <string name="resume_status_2">PASSIVE SERVICE NOT FOUND</string>
-    <string name="resume_status_3">ACTIVE SERVICE FOUND</string>
-    <string name="resume_status_4">ACTIVE SERVICE NOT FOUND</string>
     <string name="resume_status_5">RESUME AUDIOFOCUS GRANT</string>
     <string name="resume_status_6">RESUME AUDIOFOCUS LOSS</string>
-    <string name="resume_status_7">runPassive() when PASSIVE_RUNNING</string>
-    <string name="resume_status_8">runActive() when ACTIVE_RUNNING</string>
 
     <!--
     PilferShushScanner.java
@@ -255,49 +180,7 @@
     <string name="main_scanner_20">Buffer storage size:\u0020</string>
     <string name="main_scanner_21">Buffer storage empty</string>
 
-    <string name="background_scan_1">Background scanner fail.</string>
-    <string name="background_scan_2">run background checks\u2026</string>
-    <string name="background_scan_3">User Apps with RECORD AUDIO:\u0020</string>
-    <string name="background_scan_4">Found NUHF/ACR services for\u0020</string>
-    <string name="background_scan_5">Found NUHF/ACR receivers for\u0020</string>
-    <string name="background_scan_6">Found User App services for\u0020</string>
-    <string name="background_scan_7">Found User App receivers for\u0020</string>
-    <string name="background_scan_8">AppEntry list:\u0020</string>
-
     <string name="audio_scan_1">Found possible binary logic:\u0020</string>
-
-    <!--
-    background userapp checker
-    -->
-    <string name="dialog_userapps">Scan Apps List</string>
-
-    <string name="userapp_scan_1">Userapp Checker fail.</string>
-    <string name="userapp_scan_2">run user app checks\u2026</string>
-    <string name="userapp_scan_3">User Apps with RECORD AUDIO:\u0020</string>
-
-    <string name="userapp_scan_4">NO USER APPS FOUND FOR CHECKER.</string>
-    <string name="userapp_scan_5">Found User App services for\u0020</string>
-    <string name="userapp_scan_6">Found User App receivers for\u0020</string>
-    <string name="userapp_scan_7">AppEntry list:\u0020</string>
-
-    <string name="userapp_scan_8">Record audio apps found:\u0020</string>
-    <string name="userapp_scan_9">No record audio apps found.</string>
-    <string name="userapp_scan_10">\u0020possible NUHF/ACR SDK names detected. Check the User Apps Summary for more information.</string>
-    <string name="userapp_scan_11">No NUHF/ACR SDK package names detected.</string>
-    <string name="userapp_scan_12">No user apps found.</string>
-    <string name="userapp_scan_13">USER APP SUMMARY.</string>
-    <string name="userapp_scan_14">Error in background app checker.</string>
-
-    <string name="userapp_scan_intro_1">Audio tracker SDKs may have TRUE in at least three categories.</string>
-    <string name="userapp_scan_intro_2">This is not a proof of audio tracker behaviour or presence.</string>
-    <string name="userapp_scan_intro_3">User App Name</string>
-    <string name="userapp_scan_intro_4">User App package name</string>
-    <string name="userapp_scan_intro_5">RECORD - use the microphone</string>
-    <string name="userapp_scan_intro_6">BOOT - app can auto restart after the device is rebooted</string>
-    <string name="userapp_scan_intro_7">SERVICE - long-running background operation</string>
-    <string name="userapp_scan_intro_8">RECEIVER -  send or receive messages from the system or other apps</string>
-    <string name="userapp_scan_intro_9">NUHF/ACR SDK - package name match found from current SDK list</string>
-    <string name="userapp_scan_intro_10">ACCESSIBILITY - special functions about state of device</string>
     <!--
     AudioChecker.java
     -->
@@ -372,36 +255,5 @@
     <string name="writer_state_21">temp raw audio file deleted.</string>
     <string name="writer_state_22">Error creating storage directory.</string>
     <string name="writer_state_23">Creating storage directory.</string>
-
-    <!--
-PassiveJammer.java
--->
-    <string name="passive_state_1">Passive Jammer init.</string>
-    <string name="passive_state_2">Passive Jammer failed to init.</string>
-    <string name="passive_state_3">Passive Jammer start.</string>
-    <string name="passive_state_4">Passive Jammer audio status error: invalid operation.</string>
-    <string name="passive_state_5_1">Passive Jammer audio status error: uninitialized.</string>
-    <string name="passive_state_5_2">Possible cause: microphone already in use.</string>
-    <string name="passive_state_6">Passive Jammer get recording state = false.</string>
-    <string name="passive_state_7">Passive Jammer exception, failed to run.</string>
-    <string name="passive_state_8">Passive Jammer audio record failed to init.</string>
-    <string name="passive_state_9">Passive Jammer stop and release.</string>
-    <string name="passive_state_10">Passive Jammer not running.</string>
-
-    <!--
-    ActiveJammer.java
-    -->
-    <string name="active_state_1">threadPlay run exception.</string>
-    <string name="active_state_2">stopPlayer thread exception.</string>
-    <string name="active_state_3">stopPlayer audioTrack exception.</string>
-
-    <!--
-    ~ JammerService.java
-    -->
-    <string name="service_state_1">PilferShush Jammer notifications</string>
-    <string name="service_state_2">Active Jammer service started.</string>
-    <string name="service_state_3">Active Jammer service stopped.</string>
-    <string name="service_state_4">Passive Jammer service started.</string>
-    <string name="service_state_5">Passive Jammer service stopped.</string>
 
 </resources>
