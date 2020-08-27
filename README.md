@@ -26,10 +26,12 @@ Test application for researching methods of discovering use of NUHF audio beacon
  - name changed to PilferShush_Scanner (not root module)
  
  **TODO**
+ - update images
  - simplify activity.java and scanner.java
  - fix WriteProcessor (ext/emulated storage etc)
  - check AudioSettings and deps for use with AudioBundle
  - check AudioBundle fields, rem jammer types
+ - make for FDroid
  - scanner as a foreground service
  - analysis view for spectrogram wav file?
  - rebuild scanner to allow different methods of scanning (more than goertzel)
