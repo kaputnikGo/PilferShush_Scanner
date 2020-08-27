@@ -39,7 +39,7 @@ public class WriteProcessor {
     private static final String AUDIO_FILE_EXTENSION_RAW = ".pcm";
     private static final String AUDIO_FILE_EXTENSION_WAV = ".wav";
 
-    private static final long MINIMUM_STORAGE_SIZE_BYTES = 2048; // approx 2 mins pcm audio
+    public static final long MINIMUM_STORAGE_SIZE_BYTES = 2048; // approx 2 mins pcm audio
     private static final int INT_BYTES = Integer.SIZE / Byte.SIZE;
     private static final int SHORT_BYTES = Short.SIZE / Byte.SIZE;
 
@@ -77,8 +77,8 @@ public class WriteProcessor {
         }
     }
 
-    public boolean cautionFreeSpace() {
-        return (calculateFreeStorageSpace() <= MINIMUM_STORAGE_SIZE_BYTES);
+    public int cautionFreeSpace() {
+        return (int)calculateFreeStorageSpace();
     }
 
     /**************************************************************/
@@ -311,11 +311,16 @@ public class WriteProcessor {
 
     private long calculateFreeStorageSpace() {
         // returns long size in bytes
+        int storageSize = 0;
         if (!extDirectory.exists()) {
             log(context.getString(R.string.writer_state_16));
             return 0;
         }
         // getFreeSpace == unallocated
+        storageSize = (int)extDirectory.getUsableSpace();
+        if (storageSize == 0 ) {
+
+        }
         return extDirectory.getUsableSpace();
     }
 

@@ -94,25 +94,6 @@
                 android:layout_marginBottom="@dimen/activity_vertical_margin"
                 android:text="@string/main_view_button_text" />
 
-            <Button
-                android:id="@+id/beacon_check_button"
-                android:layout_width="@dimen/static_button_width"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="@dimen/activity_vertical_margin"
-                android:layout_centerHorizontal="true"
-                android:layout_alignParentTop="true"
-                android:textAllCaps="false"
-                android:text="@string/beacon_check_1" />
-
-            <Button
-                android:id="@+id/userapp_check_button"
-                android:layout_width="@dimen/static_button_width"
-                android:layout_height="wrap_content"
-                android:layout_alignParentEnd="true"
-                android:layout_marginBottom="@dimen/activity_vertical_margin"
-                android:textAllCaps="false"
-                android:text="@string/userapp_check_1" />
-
             <TextView
                 android:id="@+id/focus_text"
                 android:layout_width="match_parent"

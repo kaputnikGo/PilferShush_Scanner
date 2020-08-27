@@ -42,6 +42,8 @@ import java.util.Map;
 import cityfreqs.com.pilfershush.assist.AudioChecker;
 import cityfreqs.com.pilfershush.assist.AudioSettings;
 
+import static cityfreqs.com.pilfershush.assist.WriteProcessor.MINIMUM_STORAGE_SIZE_BYTES;
+
 public class MainActivity extends AppCompatActivity
         implements ActivityCompat.OnRequestPermissionsResultCallback {
 
@@ -128,22 +130,6 @@ public class MainActivity extends AppCompatActivity
         });
 
         // DEBUG VIEW
-
-        Button beaconCheckButton = findViewById(R.id.beacon_check_button);
-        beaconCheckButton.setOnClickListener(new View.OnClickListener() {
-             public void onClick(View v) {
-                 hasAudioBeaconAppsList();
-             }
-         });
-
-
-        Button userAppCheckButton = findViewById(R.id.userapp_check_button);
-        userAppCheckButton.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View v) {
-                hasUserAppsList();
-            }
-        });
-
         debugText = findViewById(R.id.debug_text);
         debugText.setTextColor(Color.parseColor("#00ff00"));
         debugText.setMovementMethod(new ScrollingMovementMethod());
@@ -412,7 +398,7 @@ public class MainActivity extends AppCompatActivity
         mainScanLogger("\n" + getResources().getString(R.string.init_state_2) + pilferShushScanner.getAudioCheckerReport(), false);
         mainScanLogger("\n" + getResources().getString(R.string.init_state_3), true);
         mainScanLogger("\n" + getResources().getString(R.string.init_state_4) + getResources().getString(R.string.init_state_5), false);
-        mainScanLogger("\n" + getResources().getString(R.string.init_state_6) + Boolean.toString(pilferShushScanner.canWriteFiles()), false);
+        mainScanLogger("\n" + getResources().getString(R.string.init_state_6) + pilferShushScanner.canWriteFiles(), false);
 
         if (pilferShushScanner.canWriteFiles()) {
             mainScanLogger(getResources().getString(R.string.init_state_7_1) +
@@ -428,9 +414,18 @@ public class MainActivity extends AppCompatActivity
 
         // run at init for awareness
         mainScanLogger(getResources().getString(R.string.init_state_9) + printFreeSize(), true);
-        if (pilferShushScanner.cautionFreeSpace()) {
+
+        int storageSize = pilferShushScanner.cautionFreeSpace();
+        if (storageSize <= MINIMUM_STORAGE_SIZE_BYTES) {
             // has under a minimum of 2048 bytes , pop a toast.
-            cautionStorageSize();
+            if (storageSize == 0 ) {
+                // have no ext storage or some error maybe
+                Log.d(TAG, " Storage size reported as 0 bytes in size.");
+                mainScanLogger("Storage size reported as 0 bytes in size.", true);
+            }
+            else {
+                cautionStorageSize();
+            }
         }
 
         mainScanLogger("\n" + getResources().getString(R.string.init_state_10_1) +
@@ -629,9 +624,11 @@ public class MainActivity extends AppCompatActivity
         }
         if (focusChange == AudioManager.AUDIOFOCUS_LOSS) {
             // total loss, focus abandoned, need to confirm this behaviour
+            mainScanLogger("Audio Focus LOSS.", true);
         }
         else if (focusChange == AudioManager.AUDIOFOCUS_LOSS_TRANSIENT) {
             // system forced loss, assuming telephony
+            mainScanLogger("Audio Focus LOSS TRANSIENT.", true);
         }
     }
 
@@ -671,24 +668,9 @@ public class MainActivity extends AppCompatActivity
         timerHandler.postDelayed(timerRunnable, 0);
         // clear any caution lines from previous session
         visualiserView.clearFrequencyCaution();
+        //TODO wakelock remove
         wakeLock.acquire(600000); // timeout in ms (10 mins)
 
-        mainScanLogger(getResources().getString(R.string.main_scanner_2), false);
-
-        int audioNum = pilferShushScanner.getAudioRecordAppsNumber();
-        if (audioNum > 0) {
-            mainScanLogger(getResources().getString(R.string.main_scanner_3) + audioNum, true);
-        }
-        else {
-            mainScanLogger(getResources().getString(R.string.main_scanner_4), false);
-        }
-        if (pilferShushScanner.hasAudioBeaconApps()) {
-            mainScanLogger(pilferShushScanner.getAudioBeaconAppNumber()
-                    + getResources().getString(R.string.main_scanner_5), true);
-        }
-        else {
-            mainScanLogger(getResources().getString(R.string.main_scanner_6), false);
-        }
         mainScanLogger(getResources().getString(R.string.main_scanner_10), false);
         pilferShushScanner.runAudioScanner();
     }
@@ -734,53 +716,6 @@ public class MainActivity extends AppCompatActivity
         mainScanLogger("\n" + getResources().getString(R.string.main_scanner_17) + "\n\n", false);
 
     }
-
-    private void hasAudioBeaconAppsList() {
-        if (pilferShushScanner != null) {
-            String[] appNames = pilferShushScanner.getAudioBeaconAppList();
-
-            if (appNames != null && appNames.length > 0) {
-                AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(this);
-                dialogBuilder.setItems(appNames, new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialogInterface, int which) {
-                        // index position of clicked app name
-                        pilferShushScanner.listScanDetails(which);
-                    }
-                });
-                dialogBuilder.setTitle(R.string.dialog_userapps);
-                AlertDialog alertDialog = dialogBuilder.create();
-                alertDialog.show();
-            }
-            else {
-                entryLogger(getResources().getString(R.string.userapp_scan_4), true);
-            }
-        }
-        else {
-            if (DEBUG) Log.d(TAG, "backgroundChecker is NULL at userApp check.");
-            entryLogger("Background Checker not initialised.", true);
-        }
-    }
-
-    private void hasUserAppsList() {
-        String[] appNames = pilferShushScanner.getScanAppList();
-
-        if (appNames != null && appNames.length > 0) {
-            dialogBuilder = new AlertDialog.Builder(this);
-            dialogBuilder.setItems(appNames, new DialogInterface.OnClickListener() {
-                public void onClick(DialogInterface dialogInterface, int which) {
-                    // index position of clicked app name
-                    pilferShushScanner.listScanDetails(which);
-                }
-            });
-            dialogBuilder.setTitle(R.string.dialog_override_scan_apps);
-            alertDialog = dialogBuilder.create();
-            alertDialog.show();
-        }
-        else {
-            entryLogger(getResources().getString(R.string.user_apps_check_1), true);
-        }
-    }
-
 
     /********************************************************************/
 /*
@@ -897,16 +832,6 @@ public class MainActivity extends AppCompatActivity
                 }
             }
         }
-    }
-
-    private int checkDriftSpeed(int driftSpeed) {
-        // is 1 - 10, then * 1000
-        if (driftSpeed < 1)
-            return 1;
-        else if (driftSpeed > 10)
-            return 10;
-        else
-            return driftSpeed;
     }
 
     /********************************************************************/
