@@ -7,6 +7,13 @@ Test application for researching methods of discovering use of NUHF audio beacon
 ** Notes**
 - getExternalStorageDirectory method is deprecated in API 29 use getExternalFilesDir(String type)
 
+- audioBundle debug print::
+channelOutConfig=4, ScanMagnitude=50000, scanMaxFreq=21000, scanWindow=2, jammerType=0, 
+scanMinFreq=18000, writeFiles=true, channelInConfig=1, scanFreqStep=25, hasEQ=false, 
+sampleRate=48000, userCarrier=440, userLimit=1000, userSpeed=10, audioSource=0, maxFreq=24000, 
+bufferOutSize=7688, encoding=2, bufferInSize=4096, activeType=false
+
+
    vers. 4.0.1
    - min API 18 (4.3)
    - target API 29 (10.x)
@@ -24,9 +31,9 @@ Test application for researching methods of discovering use of NUHF audio beacon
     - PROD: s5 G900P 7.1.2 (25) (LineageOS 14.1, F-Droid)
     
  **TODO**
+ - check AudioBundle fields, rem jammer types etc
  - fix permissions check functions
  - check AudioSettings and deps for use with AudioBundle
- - check AudioBundle fields, rem jammer types
  - make for FDroid
  - scanner as a foreground service
  - analysis view for spectrogram wav file?

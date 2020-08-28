@@ -1,7 +1,12 @@
 package cityfreqs.com.pilfershush.scanners;
 
+import android.app.Activity;
 import android.content.Context;
+import android.graphics.Color;
 import android.os.Bundle;
+import android.text.Spannable;
+import android.text.style.ForegroundColorSpan;
+import android.widget.TextView;
 
 import java.util.ArrayList;
 
@@ -24,6 +29,8 @@ public class AudioScanner {
     public AudioScanner(Context context, Bundle audioBundle) {
         this.context = context;
         this.audioBundle = audioBundle;
+
+
 
         freqDetector = new FreqDetector(this.audioBundle);
         freqDetector.init();
@@ -50,7 +57,7 @@ public class AudioScanner {
             }
 
             public void onFailure(String paramString) {
-                MainActivity.entryLogger(context.getString(R.string.audio_scan_2) + paramString, false);
+                entryLogger(context.getString(R.string.audio_scan_2) + paramString, true);
             }
         });
     }
@@ -65,7 +72,7 @@ public class AudioScanner {
             freqDetector.cleanup();
         }
         catch (Exception ex) {
-            MainActivity.entryLogger(context.getString(R.string.audio_scan_3), false);
+            entryLogger(context.getString(R.string.audio_scan_3), false);
         }
     }
 
@@ -107,5 +114,18 @@ public class AudioScanner {
         return frequencySequence;
     }
     */
+    private void entryLogger(String entry, boolean caution) {
+        TextView debugText = ((Activity)context).findViewById(R.id.debug_text);
+        int start = debugText.getText().length();
+        debugText.append("\n" + entry);
+        int end = debugText.getText().length();
+        Spannable spannableText = (Spannable) debugText.getText();
+        if (caution) {
+            spannableText.setSpan(new ForegroundColorSpan(Color.YELLOW), start, end, 0);
+        }
+        else {
+            spannableText.setSpan(new ForegroundColorSpan(Color.GREEN), start, end, 0);
+        }
+    }
 }
 

@@ -2,9 +2,14 @@ package cityfreqs.com.pilfershush.assist;
 
 
 import android.annotation.SuppressLint;
+import android.app.Activity;
 import android.content.Context;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Environment;
+import android.text.Spannable;
+import android.text.style.ForegroundColorSpan;
+import android.widget.TextView;
 
 import java.io.BufferedOutputStream;
 import java.io.DataInputStream;
@@ -22,7 +27,6 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
 
-import cityfreqs.com.pilfershush.MainActivity;
 import cityfreqs.com.pilfershush.R;
 
 public class WriteProcessor {
@@ -54,16 +58,14 @@ public class WriteProcessor {
         this.context = context;
         this.audioBundle = audioBundle;
 
-        log(context.getString(R.string.writer_state_1));
+        entryLogger(context.getString(R.string.writer_state_1), false);
         // TODO change for int/ext directory. checks for read/write state
-
-
         if (Environment.MEDIA_MOUNTED.equals(Environment.getExternalStorageState())) {
             createDirectory();
-            log(context.getString(R.string.writer_state_2) + "\n" + extDirectory.toString() + "\n");
+            entryLogger(context.getString(R.string.writer_state_2) + "\n" + extDirectory.toString() + "\n", false);
         }
         else {
-            log(context.getString(R.string.writer_state_4));
+            entryLogger(context.getString(R.string.writer_state_4), true);
         }
     }
 
@@ -93,7 +95,7 @@ public class WriteProcessor {
     public boolean prepareWriteAudioFile() {
         // need to build the filename AND path
         if (extDirectory == null) {
-            log(context.getString(R.string.writer_state_4));
+            entryLogger(context.getString(R.string.writer_state_4), true);
             return false;
         }
         // add the extension and timestamp
@@ -103,19 +105,17 @@ public class WriteProcessor {
         String waveFilename = timestamp + "-" + DEFAULT_SESSION_NAME + AUDIO_FILE_EXTENSION_WAV;
         // file save will overwrite unless new name is used...
         try {
-            // has extDirectory : /storage/emulated/0/Download/PilferShush
-            // then says no storage folder found
             AUDIO_OUTPUT_FILE = new File(extDirectory, audioFilename);
             if (!AUDIO_OUTPUT_FILE.exists()) {
                 if (!AUDIO_OUTPUT_FILE.createNewFile()) {
-                    log("error creating audio out file.");
+                    entryLogger("error creating audio out file.", true);
                 }
             }
 
             WAV_OUTPUT_FILE = new File(extDirectory, waveFilename);
             if (!WAV_OUTPUT_FILE.exists()) {
                 if (!WAV_OUTPUT_FILE.createNewFile()) {
-                    log("error creating output wav file.");
+                    entryLogger("error creating output wav file.", true);
                 }
             }
 
@@ -126,8 +126,8 @@ public class WriteProcessor {
         }
         catch (IOException ex) {
             ex.printStackTrace();
-            log(context.getString(R.string.writer_state_5));
-            log(context.getString(R.string.writer_state_9));
+            entryLogger(context.getString(R.string.writer_state_5), true);
+            entryLogger(context.getString(R.string.writer_state_9), true);
             return false;
         }
     }
@@ -158,7 +158,7 @@ public class WriteProcessor {
         }
         catch (IOException e) {
             e.printStackTrace();
-            log(context.getString(R.string.writer_state_10));
+            entryLogger(context.getString(R.string.writer_state_10), true);
         }
     }
 
@@ -170,10 +170,10 @@ public class WriteProcessor {
         if (convertToWav()) {
             boolean isDelete = AUDIO_OUTPUT_FILE.delete();
             if (isDelete) {
-                log(context.getString(R.string.writer_state_21));
+                entryLogger(context.getString(R.string.writer_state_21), false);
             }
             else {
-                log("error in audio output file delete.");
+                entryLogger("error in audio output file delete.", true);
             }
         }
     }
@@ -185,25 +185,25 @@ public class WriteProcessor {
     private boolean convertToWav() {
         // raw file is recent pcm save
         if (!AUDIO_OUTPUT_FILE.exists()) {
-            log(context.getString(R.string.writer_state_11));
+            entryLogger(context.getString(R.string.writer_state_11), false);
             return false;
         }
         if (!WAV_OUTPUT_FILE.exists()) {
-            log(context.getString(R.string.writer_state_12));
+            entryLogger(context.getString(R.string.writer_state_12), false);
             return false;
         }
         // send to converter
         try {
-            log(context.getString(R.string.writer_state_13));
+            entryLogger(context.getString(R.string.writer_state_13), false);
             rawToWave(AUDIO_OUTPUT_FILE, WAV_OUTPUT_FILE);
 
         }
         catch (IOException ex) {
             //
-            log(context.getString(R.string.writer_state_14));
+            entryLogger(context.getString(R.string.writer_state_14), true);
             return false;
         }
-        log(context.getString(R.string.writer_state_15));
+        entryLogger(context.getString(R.string.writer_state_15), false);
         return true;
     }
 
@@ -218,10 +218,10 @@ public class WriteProcessor {
             int reader = input.read(rawData);
         }
         catch (FileNotFoundException ex) {
-            log("rawToWave inputStream File exception catch.");
+            entryLogger("rawToWave inputStream File exception catch.", true);
         }
         catch (IOException ex) {
-            log("rawToWave inputStream IO exception catch.");
+            entryLogger("rawToWave inputStream IO exception catch.", true);
         }
         finally {
             if (input != null) {
@@ -259,10 +259,10 @@ public class WriteProcessor {
             output.write(bytes.array());
         }
         catch (FileNotFoundException ex) {
-            log("rawToWave outputStream File exception catch.");
+            entryLogger("rawToWave outputStream File exception catch.", true);
         }
         catch (IOException ex) {
-            log("rawToWave outputStream IO exception catch.");
+            entryLogger("rawToWave outputStream IO exception catch.", true);
         }
         finally {
             if (output != null) {
@@ -300,16 +300,13 @@ public class WriteProcessor {
     private void createDirectory() {
         // may not be writable if no permissions granted
         extDirectory = context.getExternalFilesDir(null);
-        /*
-        extDirectory = new File(Environment.getExternalStoragePublicDirectory(
-                Environment.DIRECTORY_DOWNLOADS), APP_DIRECTORY_NAME);
-        */
+
         assert extDirectory != null;
         if (extDirectory.exists()) {
-            log(context.getString(R.string.writer_state_23));
+            entryLogger(context.getString(R.string.writer_state_23), false);
         }
         else {
-            log("error creating extDirectory.");
+            entryLogger("error creating extDirectory.", true);
         }
     }
 
@@ -317,10 +314,10 @@ public class WriteProcessor {
         // assume MainActivity has cautioned first.
         assert extDirectory != null;
         if (!extDirectory.exists()) {
-            log(context.getString(R.string.writer_state_16_1));
+            entryLogger(context.getString(R.string.writer_state_16_1), false);
             return;
         }
-        log(context.getString(R.string.writer_state_18));
+        entryLogger(context.getString(R.string.writer_state_18), false);
         boolean deleteSuccess = false;
 
         if (extDirectory.listFiles() != null) {
@@ -329,10 +326,10 @@ public class WriteProcessor {
             }
         }
         if (deleteSuccess) {
-            log(context.getString(R.string.writer_state_19));
+            entryLogger(context.getString(R.string.writer_state_19), false);
         }
         else {
-            log("Error deleting extDirectory files.");
+            entryLogger("Error deleting extDirectory files.", true);
         }
     }
 
@@ -340,7 +337,7 @@ public class WriteProcessor {
         // returns long size in bytes
         assert extDirectory != null;
         if (!extDirectory.exists()) {
-            log(context.getString(R.string.writer_state_16_2));
+            entryLogger(context.getString(R.string.writer_state_16_2), true);
             return 0;
         }
         long length = 0;
@@ -359,7 +356,7 @@ public class WriteProcessor {
         // returns long size in bytes
         //TODO gets the extDirectory !exists
         if (!extDirectory.exists()) {
-            log(context.getString(R.string.writer_state_16_3));
+            entryLogger(context.getString(R.string.writer_state_16_3), true);
             return 0;
         }
         return extDirectory.getUsableSpace();
@@ -371,8 +368,18 @@ public class WriteProcessor {
         return TIMESTAMP_FORMAT.format(new Date());
     }
 
-    private void log(String message) {
-        MainActivity.entryLogger(message, false);
+    private void entryLogger(String entry, boolean caution) {
+        TextView debugText = ((Activity)context).findViewById(R.id.debug_text);
+        int start = debugText.getText().length();
+        debugText.append("\n" + entry);
+        int end = debugText.getText().length();
+        Spannable spannableText = (Spannable) debugText.getText();
+        if (caution) {
+            spannableText.setSpan(new ForegroundColorSpan(Color.YELLOW), start, end, 0);
+        }
+        else {
+            spannableText.setSpan(new ForegroundColorSpan(Color.GREEN), start, end, 0);
+        }
     }
 }
 

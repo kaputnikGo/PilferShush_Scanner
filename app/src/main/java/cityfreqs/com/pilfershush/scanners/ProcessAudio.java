@@ -1,7 +1,12 @@
 package cityfreqs.com.pilfershush.scanners;
 
 import android.annotation.SuppressLint;
+import android.app.Activity;
 import android.content.Context;
+import android.graphics.Color;
+import android.text.Spannable;
+import android.text.style.ForegroundColorSpan;
+import android.widget.TextView;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -11,7 +16,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import cityfreqs.com.pilfershush.MainActivity;
 import cityfreqs.com.pilfershush.R;
 import cityfreqs.com.pilfershush.assist.AudioSettings;
 
@@ -80,7 +84,7 @@ public class ProcessAudio {
         // looking for two prominent freqs that may be thought of as logic 0 and logic 1
         // break for no audio:
         if (freqList.isEmpty()) {
-            debugProcessAudio(context.getString(R.string.process_audio_6));
+            entryLogger(context.getString(R.string.process_audio_6), true);
             return false;
         }
 
@@ -109,7 +113,7 @@ public class ProcessAudio {
         if (entries != null && !entries.isEmpty()) {
             // this is proving more useful for determining and debug
             for (Map.Entry<Integer, Integer> e : entries) {
-                debugProcessAudio(context.getString(R.string.process_audio_1) + e.getKey() + " : " + e.getValue());
+                entryLogger(context.getString(R.string.process_audio_1) + e.getKey() + " : " + e.getValue(), false);
             }
 
             if (entries.get(0) != null) {
@@ -126,8 +130,18 @@ public class ProcessAudio {
         return false;
     }
 
-    private void debugProcessAudio(String message) {
-        MainActivity.entryLogger(message, false);
+    private void entryLogger(String entry, boolean caution) {
+        TextView debugText = ((Activity)context).findViewById(R.id.debug_text);
+        int start = debugText.getText().length();
+        debugText.append("\n" + entry);
+        int end = debugText.getText().length();
+        Spannable spannableText = (Spannable) debugText.getText();
+        if (caution) {
+            spannableText.setSpan(new ForegroundColorSpan(Color.YELLOW), start, end, 0);
+        }
+        else {
+            spannableText.setSpan(new ForegroundColorSpan(Color.GREEN), start, end, 0);
+        }
     }
 }
 

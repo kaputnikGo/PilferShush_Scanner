@@ -380,7 +380,6 @@ public class MainActivity extends AppCompatActivity
             // has under a minimum of 2048 bytes , pop a toast.
             if (storageSize == 0 ) {
                 // have no ext storage or some error maybe
-                Log.d(TAG, " Storage size reported as 0 bytes in size.");
                 entryLogger("Storage size reported as 0 bytes in size.", true);
             }
             else {
@@ -572,7 +571,7 @@ public class MainActivity extends AppCompatActivity
     }
 
     private String printFreeSize() {
-        return android.text.format.Formatter.formatShortFileSize(this, writeProcessor.getStorageSize());
+        return android.text.format.Formatter.formatShortFileSize(this, writeProcessor.getFreeStorageSpace());
     }
 
     private void interruptRequestAudio(int focusChange) {
@@ -851,7 +850,7 @@ public class MainActivity extends AppCompatActivity
 /*
  * 	LOGGERS
  */
-    public static void entryLogger(String entry, boolean caution) {
+    public void entryLogger(String entry, boolean caution) {
         // this prints ExpertView.log (detailed)
         int start = debugText.getText().length();
         debugText.append("\n" + entry);
@@ -864,13 +863,4 @@ public class MainActivity extends AppCompatActivity
             spannableText.setSpan(new ForegroundColorSpan(Color.GREEN), start, end, 0);
         }
     }
-
-    /*
-    public static void logger(String message) {
-        if (DEBUG) {
-            Log.d(TAG, message);
-        }
-    }
-    */
-
 }
