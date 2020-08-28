@@ -1,12 +1,7 @@
 package cityfreqs.com.pilfershush.scanners;
 
-import android.app.Activity;
 import android.content.Context;
-import android.graphics.Color;
 import android.os.Bundle;
-import android.text.Spannable;
-import android.text.style.ForegroundColorSpan;
-import android.widget.TextView;
 
 import java.util.ArrayList;
 
@@ -115,17 +110,7 @@ public class AudioScanner {
     }
     */
     private void entryLogger(String entry, boolean caution) {
-        TextView debugText = ((Activity)context).findViewById(R.id.debug_text);
-        int start = debugText.getText().length();
-        debugText.append("\n" + entry);
-        int end = debugText.getText().length();
-        Spannable spannableText = (Spannable) debugText.getText();
-        if (caution) {
-            spannableText.setSpan(new ForegroundColorSpan(Color.YELLOW), start, end, 0);
-        }
-        else {
-            spannableText.setSpan(new ForegroundColorSpan(Color.GREEN), start, end, 0);
-        }
+        MainActivity.entryLogger(entry, caution);
     }
 }
 

@@ -1,8 +1,6 @@
 package cityfreqs.com.pilfershush.assist;
 
-import android.app.Activity;
 import android.content.Context;
-import android.graphics.Color;
 import android.media.AudioFormat;
 import android.media.AudioManager;
 import android.media.AudioRecord;
@@ -10,11 +8,12 @@ import android.media.AudioTrack;
 import android.media.MediaRecorder;
 import android.media.audiofx.Equalizer;
 import android.os.Bundle;
-import android.text.Spannable;
-import android.text.style.ForegroundColorSpan;
-import android.widget.TextView;
 
+import cityfreqs.com.pilfershush.MainActivity;
 import cityfreqs.com.pilfershush.R;
+
+import static cityfreqs.com.pilfershush.assist.AudioSettings.AUDIO_BUNDLE_KEYS;
+import static cityfreqs.com.pilfershush.assist.AudioSettings.AUDIO_ENCODING;
 
 public class AudioChecker {
     private Context context;
@@ -25,7 +24,7 @@ public class AudioChecker {
     public AudioChecker(Context context, Bundle audioBundle) {
         this.context = context;
         this.audioBundle = audioBundle;
-        DEBUG = audioBundle.getBoolean(AudioSettings.AUDIO_BUNDLE_KEYS[16], false);
+        DEBUG = audioBundle.getBoolean(AUDIO_BUNDLE_KEYS[16], false);
     }
 
     public Bundle getAudioBundle() {
@@ -107,11 +106,11 @@ public class AudioChecker {
                                 }
                                 // set found values
                                 channelInCount = recorder.getChannelCount();
-                                audioBundle.putInt(AudioSettings.AUDIO_BUNDLE_KEYS[0], audioSource);
-                                audioBundle.putInt(AudioSettings.AUDIO_BUNDLE_KEYS[1], rate);
-                                audioBundle.putInt(AudioSettings.AUDIO_BUNDLE_KEYS[2], channelInConfig);
-                                audioBundle.putInt(AudioSettings.AUDIO_BUNDLE_KEYS[3], audioFormat);
-                                audioBundle.putInt(AudioSettings.AUDIO_BUNDLE_KEYS[4], buffSize);
+                                audioBundle.putInt(AUDIO_BUNDLE_KEYS[0], audioSource);
+                                audioBundle.putInt(AUDIO_BUNDLE_KEYS[1], rate);
+                                audioBundle.putInt(AUDIO_BUNDLE_KEYS[2], channelInConfig);
+                                audioBundle.putInt(AUDIO_BUNDLE_KEYS[3], audioFormat);
+                                audioBundle.putInt(AUDIO_BUNDLE_KEYS[4], buffSize);
 
                                 recorder.release();
                                 return true;
@@ -166,22 +165,22 @@ public class AudioChecker {
                             }
                             // set output values
                             // buffOutSize may not be same as buffInSize conformed to powersOfTwo
-                            audioBundle.putInt(AudioSettings.AUDIO_BUNDLE_KEYS[5], channelOutConfig);
-                            audioBundle.putInt(AudioSettings.AUDIO_BUNDLE_KEYS[6], buffSize);
-                            audioBundle.putInt(AudioSettings.AUDIO_BUNDLE_KEYS[8], (int)(rate * 0.5f));
+                            audioBundle.putInt(AUDIO_BUNDLE_KEYS[5], channelOutConfig);
+                            audioBundle.putInt(AUDIO_BUNDLE_KEYS[6], buffSize);
+                            audioBundle.putInt(AUDIO_BUNDLE_KEYS[8], (int)(rate * 0.5f));
 
                             // test onboardEQ
                             if (testOnboardEQ(audioTrack.getAudioSessionId())) {
                                 if (DEBUG) {
                                     entryLogger(context.getString(R.string.eq_check_2) + "\n", false);
                                 }
-                                audioBundle.putBoolean(AudioSettings.AUDIO_BUNDLE_KEYS[7], true);
+                                audioBundle.putBoolean(AUDIO_BUNDLE_KEYS[7], true);
                             }
                             else {
                                 if (DEBUG) {
                                     entryLogger(context.getString(R.string.eq_check_3) + "\n", true);
                                 }
-                                audioBundle.putBoolean(AudioSettings.AUDIO_BUNDLE_KEYS[7], false);
+                                audioBundle.putBoolean(AUDIO_BUNDLE_KEYS[7], false);
                             }
                             audioTrack.pause();
                             audioTrack.flush();
@@ -249,16 +248,16 @@ public class AudioChecker {
         AudioRecord audioRecord;
         try {
             audioRecord = new AudioRecord(
-                    audioBundle.getInt(AudioSettings.AUDIO_BUNDLE_KEYS[0]),
-                    audioBundle.getInt(AudioSettings.AUDIO_BUNDLE_KEYS[1]),
-                    audioBundle.getInt(AudioSettings.AUDIO_BUNDLE_KEYS[2]),
-                    audioBundle.getInt(AudioSettings.AUDIO_BUNDLE_KEYS[3]),
-                    audioBundle.getInt(AudioSettings.AUDIO_BUNDLE_KEYS[4]));
+                    audioBundle.getInt(AUDIO_BUNDLE_KEYS[0]),
+                    audioBundle.getInt(AUDIO_BUNDLE_KEYS[1]),
+                    audioBundle.getInt(AUDIO_BUNDLE_KEYS[2]),
+                    audioBundle.getInt(AUDIO_BUNDLE_KEYS[3]),
+                    audioBundle.getInt(AUDIO_BUNDLE_KEYS[4]));
             entryLogger(context.getString(R.string.audio_check_4), false);
             // need to start reading buffer to trigger an exception
             audioRecord.startRecording();
-            short[] buffer = new short[audioBundle.getInt(AudioSettings.AUDIO_BUNDLE_KEYS[4])];
-            int audioStatus = audioRecord.read(buffer, 0, audioBundle.getInt(AudioSettings.AUDIO_BUNDLE_KEYS[4]));
+            short[] buffer = new short[audioBundle.getInt(AUDIO_BUNDLE_KEYS[4])];
+            int audioStatus = audioRecord.read(buffer, 0, audioBundle.getInt(AUDIO_BUNDLE_KEYS[4]));
 
             // check for error on pre 6.x and 6.x API
             if(audioStatus == AudioRecord.ERROR_INVALID_OPERATION
@@ -285,23 +284,13 @@ public class AudioChecker {
 
     /*********************/
     public String saveFormatToString() {
-        return (audioBundle.getInt(AudioSettings.AUDIO_BUNDLE_KEYS[1]) + " Hz, "
-                + audioBundle.getInt(AudioSettings.AUDIO_BUNDLE_KEYS[15]) + " bits, "
+        return (audioBundle.getInt(AUDIO_BUNDLE_KEYS[1]) + " Hz, "
+                + AUDIO_ENCODING[audioBundle.getInt(AUDIO_BUNDLE_KEYS[3])] + ", "
                 + channelInCount + " channel");
     }
 
     private void entryLogger(String entry, boolean caution) {
-        TextView debugText = ((Activity)context).findViewById(R.id.debug_text);
-        int start = debugText.getText().length();
-        debugText.append("\n" + entry);
-        int end = debugText.getText().length();
-        Spannable spannableText = (Spannable) debugText.getText();
-        if (caution) {
-            spannableText.setSpan(new ForegroundColorSpan(Color.YELLOW), start, end, 0);
-        }
-        else {
-            spannableText.setSpan(new ForegroundColorSpan(Color.GREEN), start, end, 0);
-        }
+        MainActivity.entryLogger(entry, caution);
     }
 }
 /*

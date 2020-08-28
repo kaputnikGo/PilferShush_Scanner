@@ -60,6 +60,32 @@ public class AudioSettings {
     //public static final int MICRO_DELAY = 1; // for modulated code
     //public static final int MAXIMUM_NUHF_FREQUENCY = 24000;
 
+    public static final String[] AUDIO_SOURCE = new String[] {
+            "AUDIO_SOURCE_DEFAULT",
+            "AUDIO_SOURCE_MIC",
+            "AUDIO_SOURCE_VOICE_UPLINK",  // 2 system only, requires Manifest.permission#CAPTURE_AUDIO_OUTPUT
+            "AUDIO_SOURCE_VOICE_DOWNLINK",  // system only, requires Manifest.permission#CAPTURE_AUDIO_OUTPUT
+            "AUDIO_SOURCE_VOICE_CALL",  // system only, requires Manifest.permission#CAPTURE_AUDIO_OUTPUT
+            "AUDIO_SOURCE_CAMCORDER",  // for video recording, same orientation as camera
+            "AUDIO_SOURCE_VOICE_RECOGNITION",  // tuned for voice recognition
+            "AUDIO_SOURCE_VOICE_COMMUNICATION"  // 7  tuned for VoIP with echo cancel, auto gain ctrl if available
+    };
+
+    public static final String[] AUDIO_ENCODING = new String[] {
+            "ENCODING_INVALID",
+            "ENCODING_DEFAULT",
+            "ENCODING_PCM_16BIT", // 2 Default on Android
+            "ENCODING_PCM_8BIT",
+            "ENCODING_PCM_FLOAT",
+            "ENCODING_AC3",
+            "ENCODING_E_AC3",
+            "ENCODING_DTS",
+            "ENCODING_DTS_HD",
+            "ENCODING_MP3"
+    };
+
+    //TODO add AUDIO_IN and AUDIO_OUT for channelInConfig and channelOutConfig
+
     // Bundle keys string names
     public static final String[] AUDIO_BUNDLE_KEYS = new String[] {
             "audioSource", // 0

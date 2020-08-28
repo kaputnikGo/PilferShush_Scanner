@@ -2,14 +2,9 @@ package cityfreqs.com.pilfershush.assist;
 
 
 import android.annotation.SuppressLint;
-import android.app.Activity;
 import android.content.Context;
-import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Environment;
-import android.text.Spannable;
-import android.text.style.ForegroundColorSpan;
-import android.widget.TextView;
 
 import java.io.BufferedOutputStream;
 import java.io.DataInputStream;
@@ -27,6 +22,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
 
+import cityfreqs.com.pilfershush.MainActivity;
 import cityfreqs.com.pilfershush.R;
 
 public class WriteProcessor {
@@ -369,17 +365,7 @@ public class WriteProcessor {
     }
 
     private void entryLogger(String entry, boolean caution) {
-        TextView debugText = ((Activity)context).findViewById(R.id.debug_text);
-        int start = debugText.getText().length();
-        debugText.append("\n" + entry);
-        int end = debugText.getText().length();
-        Spannable spannableText = (Spannable) debugText.getText();
-        if (caution) {
-            spannableText.setSpan(new ForegroundColorSpan(Color.YELLOW), start, end, 0);
-        }
-        else {
-            spannableText.setSpan(new ForegroundColorSpan(Color.GREEN), start, end, 0);
-        }
+        MainActivity.entryLogger(entry, caution);
     }
 }
 

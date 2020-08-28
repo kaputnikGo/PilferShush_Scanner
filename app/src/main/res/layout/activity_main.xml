@@ -49,6 +49,8 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_below="@+id/timer_text"
+                android:paddingStart="@dimen/activity_horizontal_margin"
+                android:paddingEnd="@dimen/activity_horizontal_margin"
                 android:background="#404040"
                 android:text="@string/focus_text" />
 
@@ -57,7 +59,8 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_below="@+id/focus_text"
-                android:layout_marginTop="8dp"
+                android:layout_marginTop="@dimen/activity_horizontal_margin"
+                android:padding="@dimen/activity_horizontal_margin"
                 android:background="#000000"
                 android:gravity="bottom"
                 android:scrollbars="vertical"
