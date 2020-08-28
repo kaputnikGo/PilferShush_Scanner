@@ -25,8 +25,6 @@ Test application for researching methods of discovering use of NUHF audio beacon
     
  **TODO**
  - fix permissions check functions
- - update images
- - simplify activity.java and scanner.java
  - check AudioSettings and deps for use with AudioBundle
  - check AudioBundle fields, rem jammer types
  - make for FDroid
@@ -37,6 +35,8 @@ Test application for researching methods of discovering use of NUHF audio beacon
  **Changes:**
  - fix write to storage for API 29
  - combine MAIN and DEBUG views
+ - move scanner.java to mainactivity, prep for proper
+ - update app images
 
 
 
@@ -56,14 +56,8 @@ limitations under the License.
 
 Screenshots
 
-- Update UI
-<img src="https://github.com/kaputnikGo/PilferShush_prod/blob/master/images/updateUI-jammers.jpg" height="612px" />
-
 - App open
 <img src="https://github.com/kaputnikGo/PilferShush_prod/blob/master/images/app-open.jpg" height="612px" />
-
-- Detailed View
-<img src="https://github.com/kaputnikGo/PilferShush_prod/blob/master/images/detailed-view.jpg" height="612px" />
 
 - Capture live
 <img src="https://github.com/kaputnikGo/PilferShush_prod/blob/master/images/capture-live.jpg" height="612px" />

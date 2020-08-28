@@ -1,6 +1,8 @@
 ### 4.0.1 (unreleased)
 * fix external storage write for API 29
 * combine MAIN and DEBUG views
+* move scanner.java to mainactivity in prep for proper
+* update app images
 
 ### 4.0.0 (27 Aug 2020)
 * Reconfigure app to be Scanner only, no jammer components.

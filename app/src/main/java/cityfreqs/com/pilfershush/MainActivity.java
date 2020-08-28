@@ -38,6 +38,8 @@ import java.util.Map;
 
 import cityfreqs.com.pilfershush.assist.AudioChecker;
 import cityfreqs.com.pilfershush.assist.AudioSettings;
+import cityfreqs.com.pilfershush.assist.WriteProcessor;
+import cityfreqs.com.pilfershush.scanners.AudioScanner;
 
 import static cityfreqs.com.pilfershush.assist.WriteProcessor.MINIMUM_STORAGE_SIZE_BYTES;
 
@@ -67,12 +69,16 @@ public class MainActivity extends AppCompatActivity
     private String[] dbLevel;
     private String[] storageAdmins;
 
+    private int scanBufferSize;
+    private AudioChecker audioChecker;
+    private AudioScanner audioScanner;
+    private WriteProcessor writeProcessor;
+
     private boolean SCANNING;
 
     private PowerManager powerManager;
     private PowerManager.WakeLock wakeLock;
     private HeadsetIntentReceiver headsetReceiver;
-    private PilferShushScanner pilferShushScanner;
     private AudioManager audioManager;
     private AudioManager.OnAudioFocusChangeListener audioFocusListener;
     public static AudioVisualiserView visualiserView;
@@ -201,7 +207,6 @@ public class MainActivity extends AppCompatActivity
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        pilferShushScanner.onDestroy();
     }
 
     /********************************************************************/
@@ -329,13 +334,13 @@ public class MainActivity extends AppCompatActivity
         setFreqMinMax(1); // NUHF freq range
 
         AudioChecker audioChecker = new AudioChecker(this, audioBundle);
-        pilferShushScanner = new PilferShushScanner(this, audioChecker);
 
-        if (pilferShushScanner.initScanner()) {
+        if (initScanner()) {
             // get latest bundle updates bundle
             audioBundle = audioChecker.getAudioBundle();
 
-            pilferShushScanner.checkScanner();
+            //TODO run a boolean here?
+            audioChecker.checkAudioRecord();
 
             toggleHeadset(false); // default state at init
             audioFocusCheck();
@@ -351,26 +356,26 @@ public class MainActivity extends AppCompatActivity
     private void reportInitialState() {
         String startText = getResources().getString(R.string.init_state_1) + VERSION;
         debugText.setText(startText);
-        entryLogger("\n" + getResources().getString(R.string.init_state_2) + pilferShushScanner.getAudioCheckerReport(), false);
+        entryLogger("\n" + getResources().getString(R.string.init_state_2) + getAudioCheckerReport(), false);
         entryLogger("\n" + getResources().getString(R.string.init_state_3), true);
-        entryLogger("\n" + getResources().getString(R.string.init_state_6) + pilferShushScanner.canWriteFiles(), false);
+        entryLogger("\n" + getResources().getString(R.string.init_state_6) + audioBundle.getBoolean(AudioSettings.AUDIO_BUNDLE_KEYS[19]), false);
 
-        if (pilferShushScanner.canWriteFiles()) {
+        if (audioBundle.getBoolean(AudioSettings.AUDIO_BUNDLE_KEYS[19])) {
             entryLogger(getResources().getString(R.string.init_state_7_1) +
-                    pilferShushScanner.getSaveFileType() +
+                    audioChecker.saveFormatToString() +
                     getResources().getString(R.string.init_state_7_2), false);
         }
         else {
             // not using raw file saves
             entryLogger("\n" + getResources().getString(R.string.init_state_8_1) +
-                    pilferShushScanner.getSaveFileType() +
+                    audioChecker.saveFormatToString() +
                     getResources().getString(R.string.init_state_8_2), false);
         }
 
         // run at init for awareness
         entryLogger(getResources().getString(R.string.init_state_9) + printFreeSize(), true);
 
-        int storageSize = pilferShushScanner.cautionFreeSpace();
+        int storageSize = writeProcessor.cautionFreeSpace();
         if (storageSize <= MINIMUM_STORAGE_SIZE_BYTES) {
             // has under a minimum of 2048 bytes , pop a toast.
             if (storageSize == 0 ) {
@@ -462,7 +467,7 @@ public class MainActivity extends AppCompatActivity
                         break;
                     case 1:
                         entryLogger(getResources().getString(R.string.option_dialog_4), true);
-                        pilferShushScanner.clearLogStorageFolder();
+                        writeProcessor.deleteStorageFiles();
                         break;
                     case 2:
                         entryLogger(getResources().getString(R.string.option_dialog_5) + printFreeSize(), false);
@@ -485,13 +490,13 @@ public class MainActivity extends AppCompatActivity
         dialogBuilder.setMessage(R.string.dialog_write_message);
         dialogBuilder.setPositiveButton(R.string.dialog_write_file_yes, new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int id) {
-                pilferShushScanner.setWriteFiles(true);
+                audioBundle.putBoolean(AudioSettings.AUDIO_BUNDLE_KEYS[19], true);
                 entryLogger(getResources().getString(R.string.option_dialog_6), false);
             }
         });
         dialogBuilder.setNegativeButton(R.string.dialog_write_file_no, new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int id) {
-                pilferShushScanner.setWriteFiles(false);
+                audioBundle.putBoolean(AudioSettings.AUDIO_BUNDLE_KEYS[19], false);
                 entryLogger(getResources().getString(R.string.option_dialog_7), false);
             }
         });
@@ -504,7 +509,7 @@ public class MainActivity extends AppCompatActivity
         dialogBuilder = new AlertDialog.Builder(this);
         dialogBuilder.setItems(freqSteps, new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialogInterface, int which) {
-                pilferShushScanner.setFrequencyStep(AudioSettings.FREQ_STEPS[which]);
+                audioBundle.putInt(AudioSettings.AUDIO_BUNDLE_KEYS[16], AudioSettings.FREQ_STEPS[which]);
                 entryLogger(getResources().getString(R.string.option_dialog_9) + AudioSettings.FREQ_STEPS[which], false);
             }
         });
@@ -539,7 +544,7 @@ public class MainActivity extends AppCompatActivity
         dialogBuilder = new AlertDialog.Builder(this);
         dialogBuilder.setItems(dbLevel, new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialogInterface, int which) {
-                pilferShushScanner.setMagnitude(AudioSettings.MAGNITUDES[which]);
+                audioScanner.setMagnitude(AudioSettings.MAGNITUDES[which]);
                 entryLogger(getResources().getString(R.string.option_dialog_12) + AudioSettings.DECIBELS[which], false);
             }
         });
@@ -553,7 +558,7 @@ public class MainActivity extends AppCompatActivity
         dialogBuilder.setItems(windowTypes, new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialogInterface, int which) {
                 // numerical values from 1-5
-                pilferShushScanner.setFFTWindowType(which + 1);
+                audioBundle.putInt(AudioSettings.AUDIO_BUNDLE_KEYS[18], which + 1);
                 entryLogger(getResources().getString(R.string.option_dialog_13) + AudioSettings.FFT_WINDOWS[which], false);
             }
         });
@@ -563,11 +568,11 @@ public class MainActivity extends AppCompatActivity
     }
 
     private String printUsedSize() {
-        return android.text.format.Formatter.formatShortFileSize(this, pilferShushScanner.getLogStorageSize());
+        return android.text.format.Formatter.formatShortFileSize(this, writeProcessor.getStorageSize());
     }
 
     private String printFreeSize() {
-        return android.text.format.Formatter.formatShortFileSize(this, pilferShushScanner.getFreeStorageSize());
+        return android.text.format.Formatter.formatShortFileSize(this, writeProcessor.getStorageSize());
     }
 
     private void interruptRequestAudio(int focusChange) {
@@ -605,8 +610,65 @@ public class MainActivity extends AppCompatActivity
      *      SCANNER
      */
 
+    private boolean initScanner() {
+        scanBufferSize = 0;
+        audioChecker = new AudioChecker(this, audioBundle);
+
+        entryLogger(getString(R.string.audio_check_pre_1), false);
+        if (audioChecker.determineRecordAudioType()) {
+            entryLogger(getAudioCheckerReport(), false);
+            // get output settings here.
+            entryLogger(getString(R.string.audio_check_pre_2), false);
+            if (!audioChecker.determineOutputAudioType()) {
+                // have a setup error getting the audio for output
+                entryLogger(getString(R.string.audio_check_pre_3), true);
+            }
+            writeProcessor = new WriteProcessor(this, audioBundle);
+            audioScanner = new AudioScanner(this, audioBundle);
+            return true;
+        }
+        return false;
+    }
+
+    private String getAudioCheckerReport() {
+        return ("audio record format: "
+                + audioBundle.getInt(AudioSettings.AUDIO_BUNDLE_KEYS[1]) +
+                ", " + audioBundle.getInt(AudioSettings.AUDIO_BUNDLE_KEYS[4]) +
+                ", " + audioBundle.getInt(AudioSettings.AUDIO_BUNDLE_KEYS[3]) +
+                ", " + audioBundle.getInt(AudioSettings.AUDIO_BUNDLE_KEYS[2]) +
+                ", " + audioBundle.getInt(AudioSettings.AUDIO_BUNDLE_KEYS[0]));
+    }
+
+    private void runAudioScanner() {
+        entryLogger(getString(R.string.main_scanner_18), false);
+        scanBufferSize = 0;
+        if (audioBundle.getBoolean(AudioSettings.AUDIO_BUNDLE_KEYS[19])) {
+            if (!writeProcessor.prepareWriteAudioFile()) {
+                entryLogger(getString(R.string.init_state_15), true);
+            }
+        }
+        audioScanner.runAudioScanner();
+    }
+
+    private void stopAudioScanner() {
+        if (audioScanner != null) {
+            entryLogger(getString(R.string.main_scanner_19), false);
+            // below nulls the recordTask...
+            audioScanner.stopAudioScanner();
+            writeProcessor.audioFileConvert();
+
+            if (audioScanner.canProcessBufferStorage()) {
+                scanBufferSize = audioScanner.getSizeBufferStorage();
+                entryLogger(getString(R.string.main_scanner_20) + scanBufferSize, false);
+            }
+            else {
+                entryLogger(getString(R.string.main_scanner_21), false);
+            }
+        }
+    }
+
     private void runScanner() {
-        if (!pilferShushScanner.checkScanner()) {
+        if (!audioChecker.checkAudioRecord()) {
             // no mic or audio record capabilities
             entryLogger(getResources().getString(R.string.init_state_17), true);
             return;
@@ -614,9 +676,6 @@ public class MainActivity extends AppCompatActivity
         if (wakeLock == null) {
             wakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, TAG + ":wakelock");
         }
-
-        // update scanner's audioBundle from UI changes if any
-        pilferShushScanner.updateAudioBundle(audioBundle);
 
         SCANNING = true;
         startTime = System.currentTimeMillis();
@@ -627,12 +686,12 @@ public class MainActivity extends AppCompatActivity
         wakeLock.acquire(600000); // timeout in ms (10 mins)
 
         entryLogger(getResources().getString(R.string.main_scanner_10), false);
-        pilferShushScanner.runAudioScanner();
+        runAudioScanner();
     }
 
     private void stopScanner() {
         // do first to free up mic in case of passive jammer interrupt
-        pilferShushScanner.stopAudioScanner();
+        stopAudioScanner();
 
         SCANNING = false;
         timerHandler.removeCallbacks(timerRunnable);
@@ -648,25 +707,25 @@ public class MainActivity extends AppCompatActivity
         // FINISHED, determine type of signal
         entryLogger(getResources().getString(R.string.main_scanner_12), false);
 
-        if (pilferShushScanner.hasAudioScanSequence()) {
+        if (audioScanner.hasFrequencySequence()) {
             entryLogger("\n" + getResources().getString(R.string.main_scanner_13) + "\n", true);
 
             // to main debug view candidate numbers for logic 1,0
-            entryLogger(pilferShushScanner.getModFrequencyLogic(), true);
+            entryLogger(getString(R.string.audio_scan_1) + "\n" + audioScanner.getFrequencySequenceLogic(), true);
 
             // all captures to detailed view:
-            if (pilferShushScanner.getFreqSeqLogicEntries().isEmpty()) {
+            if (audioScanner.getFreqSeqLogicEntries().isEmpty()) {
                 entryLogger("FreqSequence Logic entries empty.", false);
             }
 
             // simple report to main logger
-            entryLogger(getResources().getString(R.string.main_scanner_14) + pilferShushScanner.getFrequencySequenceSize(), true);
+            entryLogger(getResources().getString(R.string.main_scanner_14) + audioScanner.getFrequencySequenceSize(), true);
         }
         else {
             entryLogger(getResources().getString(R.string.main_scanner_16), false);
         }
         // allow freq list processing above first, then
-        pilferShushScanner.resetAudioScanner();
+        audioScanner.resetAudioScanner();
 
         entryLogger("\n" + getResources().getString(R.string.main_scanner_17) + "\n\n", false);
 
