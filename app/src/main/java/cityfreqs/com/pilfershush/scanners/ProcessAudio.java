@@ -127,7 +127,7 @@ public class ProcessAudio {
     }
 
     private void debugProcessAudio(String message) {
-        MainActivity.logger(message);
+        MainActivity.entryLogger(message, false);
     }
 }
 

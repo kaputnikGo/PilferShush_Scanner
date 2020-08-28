@@ -169,6 +169,9 @@ class PilferShushScanner {
 
     /********************************************************************/
 
+
+
+    //TODO need to be able to log to MainActivity
     private static void entryLogger(String entry, boolean caution) {
         MainActivity.entryLogger(entry, caution);
     }

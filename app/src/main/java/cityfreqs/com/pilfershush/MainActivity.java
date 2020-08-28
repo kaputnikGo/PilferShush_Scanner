@@ -17,16 +17,13 @@ import android.text.Spannable;
 import android.text.method.ScrollingMovementMethod;
 import android.text.style.ForegroundColorSpan;
 import android.util.Log;
-import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.Button;
 import android.widget.CompoundButton;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ToggleButton;
-import android.widget.ViewSwitcher;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
@@ -52,11 +49,9 @@ public class MainActivity extends AppCompatActivity
 
     private static final int REQUEST_MULTIPLE_PERMISSIONS = 123;
 
-    public static final String VERSION = "4.0.0";
+    public static final String VERSION = "4.0.1";
 
     // TODO fix the STATE nightmare of the scanner and the audioBundle
-    private ViewSwitcher viewSwitcher;
-    private boolean mainView;
     private static TextView debugText;
     private TextView timerText;
     private long startTime;
@@ -66,8 +61,6 @@ public class MainActivity extends AppCompatActivity
     private TextView focusText;
 
     private ToggleButton runScansButton;
-    private TextView mainScanText;
-
     private String[] freqSteps;
     private String[] freqRanges;
     private String[] windowTypes;
@@ -94,8 +87,6 @@ public class MainActivity extends AppCompatActivity
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        viewSwitcher = findViewById(R.id.main_view_switcher);
-        mainView = true;
 
         headsetReceiver = new HeadsetIntentReceiver();
         powerManager = (PowerManager) this.getSystemService(Context.POWER_SERVICE);
@@ -115,21 +106,6 @@ public class MainActivity extends AppCompatActivity
             }
         });
 
-        mainScanText = findViewById(R.id.main_scan_text);
-        mainScanText.setTextColor(Color.parseColor("#00ff00"));
-        mainScanText.setMovementMethod(new ScrollingMovementMethod());
-        mainScanText.setGravity(Gravity.BOTTOM);
-
-        visualiserView = findViewById(R.id.audio_visualiser_view);
-
-        Button debugViewButton = findViewById(R.id.debug_view_button);
-        debugViewButton.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View v) {
-                switchViews();
-            }
-        });
-
-        // DEBUG VIEW
         debugText = findViewById(R.id.debug_text);
         debugText.setTextColor(Color.parseColor("#00ff00"));
         debugText.setMovementMethod(new ScrollingMovementMethod());
@@ -142,12 +118,7 @@ public class MainActivity extends AppCompatActivity
         focusText = findViewById(R.id.focus_text);
         focusText.setTextColor(Color.parseColor("#ffff00")); // yellow
 
-        Button mainViewButton = findViewById(R.id.main_view_button);
-        mainViewButton.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View v) {
-                switchViews();
-            }
-        });
+        visualiserView = findViewById(R.id.audio_visualiser_view);
 
         // permissions ask:
         // check API version, above 23 permissions are asked at runtime
@@ -206,7 +177,7 @@ public class MainActivity extends AppCompatActivity
         audioManager = (AudioManager)getSystemService(Context.AUDIO_SERVICE);
         // refocus app, ready for fresh scanner run
         toggleHeadset(false); // default state at init
-        int status = audioFocusCheck();
+        audioFocusCheck();
     }
 
     @Override
@@ -232,20 +203,6 @@ public class MainActivity extends AppCompatActivity
         super.onDestroy();
         pilferShushScanner.onDestroy();
     }
-
-
-    /********************************************************************/
-    private void switchViews() {
-        if (mainView) {
-            viewSwitcher.showNext();
-            mainView = false;
-        }
-        else {
-            viewSwitcher.showPrevious();
-            mainView = true;
-        }
-    }
-
 
     /********************************************************************/
 /*
@@ -387,33 +344,31 @@ public class MainActivity extends AppCompatActivity
             reportInitialState();
         }
         else {
-            mainScanLogger(getResources().getString(R.string.init_state_12), true);
-            logger(getResources().getString(R.string.init_state_13));
+            entryLogger(getResources().getString(R.string.init_state_12), true);
         }
     }
 
     private void reportInitialState() {
         String startText = getResources().getString(R.string.init_state_1) + VERSION;
-        mainScanText.setText(startText);
-        mainScanLogger("\n" + getResources().getString(R.string.init_state_2) + pilferShushScanner.getAudioCheckerReport(), false);
-        mainScanLogger("\n" + getResources().getString(R.string.init_state_3), true);
-        mainScanLogger("\n" + getResources().getString(R.string.init_state_4), false);
-        mainScanLogger("\n" + getResources().getString(R.string.init_state_6) + pilferShushScanner.canWriteFiles(), false);
+        debugText.setText(startText);
+        entryLogger("\n" + getResources().getString(R.string.init_state_2) + pilferShushScanner.getAudioCheckerReport(), false);
+        entryLogger("\n" + getResources().getString(R.string.init_state_3), true);
+        entryLogger("\n" + getResources().getString(R.string.init_state_6) + pilferShushScanner.canWriteFiles(), false);
 
         if (pilferShushScanner.canWriteFiles()) {
-            mainScanLogger(getResources().getString(R.string.init_state_7_1) +
+            entryLogger(getResources().getString(R.string.init_state_7_1) +
                     pilferShushScanner.getSaveFileType() +
                     getResources().getString(R.string.init_state_7_2), false);
         }
         else {
             // not using raw file saves
-            mainScanLogger("\n" + getResources().getString(R.string.init_state_8_1) +
+            entryLogger("\n" + getResources().getString(R.string.init_state_8_1) +
                     pilferShushScanner.getSaveFileType() +
                     getResources().getString(R.string.init_state_8_2), false);
         }
 
         // run at init for awareness
-        mainScanLogger(getResources().getString(R.string.init_state_9) + printFreeSize(), true);
+        entryLogger(getResources().getString(R.string.init_state_9) + printFreeSize(), true);
 
         int storageSize = pilferShushScanner.cautionFreeSpace();
         if (storageSize <= MINIMUM_STORAGE_SIZE_BYTES) {
@@ -421,18 +376,18 @@ public class MainActivity extends AppCompatActivity
             if (storageSize == 0 ) {
                 // have no ext storage or some error maybe
                 Log.d(TAG, " Storage size reported as 0 bytes in size.");
-                mainScanLogger("Storage size reported as 0 bytes in size.", true);
+                entryLogger("Storage size reported as 0 bytes in size.", true);
             }
             else {
                 cautionStorageSize();
             }
         }
 
-        mainScanLogger("\n" + getResources().getString(R.string.init_state_10_1) +
+        entryLogger("\n" + getResources().getString(R.string.init_state_10_1) +
                 getResources().getString(R.string.main_scanner_11) +
                 getResources().getString(R.string.init_state_10_2), false);
 
-        mainScanLogger(getResources().getString(R.string.init_state_11) + "\n", true);
+        entryLogger(getResources().getString(R.string.init_state_11) + "\n", true);
 
         if (DEBUG) Log.d(TAG, "audioBundle: " + bundlePrint(audioBundle));
     }
@@ -489,7 +444,7 @@ public class MainActivity extends AppCompatActivity
         dialogBuilder.setMessage(R.string.dialog_storage_warn_text);
         dialogBuilder.setPositiveButton(R.string.dialog_button_okay, new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int id) {
-                mainScanLogger(getResources().getString(R.string.option_dialog_1), true);
+                entryLogger(getResources().getString(R.string.option_dialog_1), true);
             }
         });
 
@@ -503,14 +458,14 @@ public class MainActivity extends AppCompatActivity
             public void onClick(DialogInterface dialogInterface, int which) {
                 switch(which) {
                     case 0:
-                        mainScanLogger(getResources().getString(R.string.option_dialog_2) + printUsedSize(), false);
+                        entryLogger(getResources().getString(R.string.option_dialog_2) + printUsedSize(), false);
                         break;
                     case 1:
-                        mainScanLogger(getResources().getString(R.string.option_dialog_4), true);
+                        entryLogger(getResources().getString(R.string.option_dialog_4), true);
                         pilferShushScanner.clearLogStorageFolder();
                         break;
                     case 2:
-                        mainScanLogger(getResources().getString(R.string.option_dialog_5) + printFreeSize(), false);
+                        entryLogger(getResources().getString(R.string.option_dialog_5) + printFreeSize(), false);
                         break;
                     default:
                         // do nothing, catch dismisses
@@ -531,13 +486,13 @@ public class MainActivity extends AppCompatActivity
         dialogBuilder.setPositiveButton(R.string.dialog_write_file_yes, new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int id) {
                 pilferShushScanner.setWriteFiles(true);
-                mainScanLogger(getResources().getString(R.string.option_dialog_6), false);
+                entryLogger(getResources().getString(R.string.option_dialog_6), false);
             }
         });
         dialogBuilder.setNegativeButton(R.string.dialog_write_file_no, new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int id) {
                 pilferShushScanner.setWriteFiles(false);
-                mainScanLogger(getResources().getString(R.string.option_dialog_7), false);
+                entryLogger(getResources().getString(R.string.option_dialog_7), false);
             }
         });
 
@@ -550,7 +505,7 @@ public class MainActivity extends AppCompatActivity
         dialogBuilder.setItems(freqSteps, new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialogInterface, int which) {
                 pilferShushScanner.setFrequencyStep(AudioSettings.FREQ_STEPS[which]);
-                mainScanLogger(getResources().getString(R.string.option_dialog_9) + AudioSettings.FREQ_STEPS[which], false);
+                entryLogger(getResources().getString(R.string.option_dialog_9) + AudioSettings.FREQ_STEPS[which], false);
             }
         });
 
@@ -566,11 +521,11 @@ public class MainActivity extends AppCompatActivity
                 switch(which) {
                     case 0:
                         setFreqMinMax(1);
-                        mainScanLogger(getResources().getString(R.string.option_dialog_10), false);
+                        entryLogger(getResources().getString(R.string.option_dialog_10), false);
                         break;
                     case 1:
                         setFreqMinMax(2);
-                        mainScanLogger(getResources().getString(R.string.option_dialog_11), false);
+                        entryLogger(getResources().getString(R.string.option_dialog_11), false);
                 }
             }
         });
@@ -585,7 +540,7 @@ public class MainActivity extends AppCompatActivity
         dialogBuilder.setItems(dbLevel, new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialogInterface, int which) {
                 pilferShushScanner.setMagnitude(AudioSettings.MAGNITUDES[which]);
-                mainScanLogger(getResources().getString(R.string.option_dialog_12) + AudioSettings.DECIBELS[which], false);
+                entryLogger(getResources().getString(R.string.option_dialog_12) + AudioSettings.DECIBELS[which], false);
             }
         });
         dialogBuilder.setTitle(R.string.dialog_sensitivity_text);
@@ -599,7 +554,7 @@ public class MainActivity extends AppCompatActivity
             public void onClick(DialogInterface dialogInterface, int which) {
                 // numerical values from 1-5
                 pilferShushScanner.setFFTWindowType(which + 1);
-                mainScanLogger(getResources().getString(R.string.option_dialog_13) + AudioSettings.FFT_WINDOWS[which], false);
+                entryLogger(getResources().getString(R.string.option_dialog_13) + AudioSettings.FFT_WINDOWS[which], false);
             }
         });
         dialogBuilder.setTitle(R.string.dialog_window_text);
@@ -617,18 +572,18 @@ public class MainActivity extends AppCompatActivity
 
     private void interruptRequestAudio(int focusChange) {
         // system app requests audio focus, respond here
-        mainScanLogger(getResources().getString(R.string.audiofocus_check_5), true);
+        entryLogger(getResources().getString(R.string.audiofocus_check_5), true);
         if (SCANNING) {
             stopScanner();
             runScansButton.toggle();
         }
         if (focusChange == AudioManager.AUDIOFOCUS_LOSS) {
             // total loss, focus abandoned, need to confirm this behaviour
-            mainScanLogger("Audio Focus LOSS.", true);
+            entryLogger("Audio Focus LOSS.", true);
         }
         else if (focusChange == AudioManager.AUDIOFOCUS_LOSS_TRANSIENT) {
             // system forced loss, assuming telephony
-            mainScanLogger("Audio Focus LOSS TRANSIENT.", true);
+            entryLogger("Audio Focus LOSS TRANSIENT.", true);
         }
     }
 
@@ -653,7 +608,7 @@ public class MainActivity extends AppCompatActivity
     private void runScanner() {
         if (!pilferShushScanner.checkScanner()) {
             // no mic or audio record capabilities
-            mainScanLogger(getResources().getString(R.string.init_state_17), true);
+            entryLogger(getResources().getString(R.string.init_state_17), true);
             return;
         }
         if (wakeLock == null) {
@@ -671,7 +626,7 @@ public class MainActivity extends AppCompatActivity
         //TODO wakelock remove
         wakeLock.acquire(600000); // timeout in ms (10 mins)
 
-        mainScanLogger(getResources().getString(R.string.main_scanner_10), false);
+        entryLogger(getResources().getString(R.string.main_scanner_10), false);
         pilferShushScanner.runAudioScanner();
     }
 
@@ -691,29 +646,29 @@ public class MainActivity extends AppCompatActivity
         }
 
         // FINISHED, determine type of signal
-        mainScanLogger(getResources().getString(R.string.main_scanner_12), false);
+        entryLogger(getResources().getString(R.string.main_scanner_12), false);
 
         if (pilferShushScanner.hasAudioScanSequence()) {
-            mainScanLogger("\n" + getResources().getString(R.string.main_scanner_13) + "\n", true);
+            entryLogger("\n" + getResources().getString(R.string.main_scanner_13) + "\n", true);
 
             // to main debug view candidate numbers for logic 1,0
-            mainScanLogger(pilferShushScanner.getModFrequencyLogic(), true);
+            entryLogger(pilferShushScanner.getModFrequencyLogic(), true);
 
             // all captures to detailed view:
             if (pilferShushScanner.getFreqSeqLogicEntries().isEmpty()) {
-                mainScanLogger("FreqSequence Logic entries empty.", false);
+                entryLogger("FreqSequence Logic entries empty.", false);
             }
 
             // simple report to main logger
-            mainScanLogger(getResources().getString(R.string.main_scanner_14) + pilferShushScanner.getFrequencySequenceSize(), true);
+            entryLogger(getResources().getString(R.string.main_scanner_14) + pilferShushScanner.getFrequencySequenceSize(), true);
         }
         else {
-            mainScanLogger(getResources().getString(R.string.main_scanner_16), false);
+            entryLogger(getResources().getString(R.string.main_scanner_16), false);
         }
         // allow freq list processing above first, then
         pilferShushScanner.resetAudioScanner();
 
-        mainScanLogger("\n" + getResources().getString(R.string.main_scanner_17) + "\n\n", false);
+        entryLogger("\n" + getResources().getString(R.string.main_scanner_17) + "\n\n", false);
 
     }
 
@@ -721,7 +676,7 @@ public class MainActivity extends AppCompatActivity
 /*
  * 	AUDIO
  */
-    private int audioFocusCheck() {
+    private void audioFocusCheck() {
         // this may not work as SDKs requesting focus may not get it cos we already have it?
         // also: getting MIC access does not require getting AUDIO_FOCUS
         entryLogger(getResources().getString(R.string.audiofocus_check_1), false);
@@ -738,7 +693,6 @@ public class MainActivity extends AppCompatActivity
         else {
             entryLogger(getResources().getString(R.string.audiofocus_check_4), false);
         }
-        return result;
     }
 
     private void toggleHeadset(boolean hasHeadset) {
@@ -820,15 +774,15 @@ public class MainActivity extends AppCompatActivity
                 int state = intent.getIntExtra("state", -1);
                 switch (state) {
                     case 0:
-                        mainScanLogger(getResources().getString(R.string.headset_state_1), false);
+                        entryLogger(getResources().getString(R.string.headset_state_1), false);
                         toggleHeadset(false);
                         break;
                     case 1:
-                        mainScanLogger(getResources().getString(R.string.headset_state_2), false);
+                        entryLogger(getResources().getString(R.string.headset_state_2), false);
                         toggleHeadset(true);
                         break;
                     default:
-                        mainScanLogger(getResources().getString(R.string.headset_state_3), false);
+                        entryLogger(getResources().getString(R.string.headset_state_3), false);
                 }
             }
         }
@@ -838,21 +792,6 @@ public class MainActivity extends AppCompatActivity
 /*
  * 	LOGGERS
  */
-
-    private void mainScanLogger(String entry, boolean caution) {
-        // this prints to MainView.log
-        int start = mainScanText.getText().length();
-        mainScanText.append("\n" + entry);
-        int end = mainScanText.getText().length();
-        Spannable spannableText = (Spannable) mainScanText.getText();
-        if (caution) {
-            spannableText.setSpan(new ForegroundColorSpan(Color.YELLOW), start, end, 0);
-        }
-        else {
-            spannableText.setSpan(new ForegroundColorSpan(Color.GREEN), start, end, 0);
-        }
-    }
-
     public static void entryLogger(String entry, boolean caution) {
         // this prints ExpertView.log (detailed)
         int start = debugText.getText().length();
@@ -867,10 +806,12 @@ public class MainActivity extends AppCompatActivity
         }
     }
 
+    /*
     public static void logger(String message) {
         if (DEBUG) {
-            debugText.append("\n" + TAG + ": " + message);
             Log.d(TAG, message);
         }
     }
+    */
+
 }

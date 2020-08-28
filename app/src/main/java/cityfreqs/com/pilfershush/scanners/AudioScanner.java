@@ -50,7 +50,7 @@ public class AudioScanner {
             }
 
             public void onFailure(String paramString) {
-                MainActivity.logger(context.getString(R.string.audio_scan_2) + paramString);
+                MainActivity.entryLogger(context.getString(R.string.audio_scan_2) + paramString, false);
             }
         });
     }
@@ -65,7 +65,7 @@ public class AudioScanner {
             freqDetector.cleanup();
         }
         catch (Exception ex) {
-            MainActivity.logger(context.getString(R.string.audio_scan_3));
+            MainActivity.entryLogger(context.getString(R.string.audio_scan_3), false);
         }
     }
 

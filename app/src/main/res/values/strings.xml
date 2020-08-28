@@ -35,12 +35,8 @@
     <string name="dialog_delete_all_files">Delete all audio files</string>
     <string name="dialog_free_storage_size">Free storage space</string>
 
-    <string name="focus_text">Debug View (scrollable): </string>
+    <string name="focus_text">Logging (scrollable): </string>
     <string name="debug_text">loading PilferShush.</string>
-
-    <string name="debug_view_button_text">DEBUG</string>
-    <string name="main_view_button_text">MAIN</string>
-    <string name="main_scan_text">PilferShush scanner initialising.</string>
     <string name="timer_text">timer - 00:00</string>
 
     <string name="action_sensitivity_settings">Sensitivity</string>
@@ -124,7 +120,6 @@
     <string name="init_state_1">PilferShush Scanner version\u0020</string>
     <string name="init_state_2">Using\u0020</string>
     <string name="init_state_3">Settings can be changed via the Options menu.</string>
-    <string name="init_state_4">The Debug View has logging and more information from scans.</string>
     <string name="init_state_6">Save scanner audio to file:\u0020</string>
     <string name="init_state_7_1">Wav audio:\u0020</string>
     <string name="init_state_7_2">, little-endian.</string>

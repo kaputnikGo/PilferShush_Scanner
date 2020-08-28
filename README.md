@@ -4,7 +4,10 @@ Android near-ultra high frequency (NUHF) scanner
 Test application for researching methods of discovering use of NUHF audio beacons.
 - compile API 29 (Q, 10.0), Android Studio 4.0.1 stable, AndroidX libs
 
-   vers. 4.0.0
+** Notes**
+- getExternalStorageDirectory method is deprecated in API 29 use getExternalFilesDir(String type)
+
+   vers. 4.0.1
    - min API 18 (4.3)
    - target API 29 (10.x)
    - compiled API 29 (10.x)
@@ -19,25 +22,37 @@ Test application for researching methods of discovering use of NUHF audio beacon
     - SLO : Mts 5045D (tainted) 6.0.1 (23) (CyanogenMod 13.0, GApps)
     - DEV : s5 G900I (tainted) 10.0 (29)(LineageOS 17.1, GApps)
     - PROD: s5 G900P 7.1.2 (25) (LineageOS 14.1, F-Droid)
- 
- **Changes:**
- - upgrade to scanner only
- - remove jammer components, refer to PilferShush Jammer app
- - name changed to PilferShush_Scanner (not root module)
- 
+    
  **TODO**
+ - fix permissions check functions
  - update images
  - simplify activity.java and scanner.java
- - fix WriteProcessor (ext/emulated storage etc)
  - check AudioSettings and deps for use with AudioBundle
  - check AudioBundle fields, rem jammer types
  - make for FDroid
  - scanner as a foreground service
  - analysis view for spectrogram wav file?
  - rebuild scanner to allow different methods of scanning (more than goertzel)
+ 
+ **Changes:**
+ - fix write to storage for API 29
+ - combine MAIN and DEBUG views
+
+
 
 # 2020 Kaputnik Go
 
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+   http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
 
 Screenshots
 

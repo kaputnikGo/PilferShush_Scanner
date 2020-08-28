@@ -206,8 +206,7 @@ public class AudioChecker {
     }
 
     // testing android/media/audiofx/Equalizer
-    // idea is to make the whitenoise less annoying
-    // vers 4.0.6 - rem'ing the EQ changes, is now merely a report function
+    // rem'ing the EQ changes, is now merely a report function
     private boolean testOnboardEQ(int audioSessionId) {
         try {
             Equalizer equalizer = new Equalizer(0, audioSessionId);
@@ -252,7 +251,7 @@ public class AudioChecker {
                     audioBundle.getInt(AudioSettings.AUDIO_BUNDLE_KEYS[2]),
                     audioBundle.getInt(AudioSettings.AUDIO_BUNDLE_KEYS[3]),
                     audioBundle.getInt(AudioSettings.AUDIO_BUNDLE_KEYS[4]));
-            MainActivity.logger(context.getString(R.string.audio_check_4));
+            MainActivity.entryLogger(context.getString(R.string.audio_check_4), false);
             // need to start reading buffer to trigger an exception
             audioRecord.startRecording();
             short[] buffer = new short[audioBundle.getInt(AudioSettings.AUDIO_BUNDLE_KEYS[4])];
@@ -261,9 +260,9 @@ public class AudioChecker {
             // check for error on pre 6.x and 6.x API
             if(audioStatus == AudioRecord.ERROR_INVALID_OPERATION
                     || audioStatus == AudioRecord.STATE_UNINITIALIZED) {
-                MainActivity.logger(context.getString(R.string.audio_check_6) + audioStatus);
+                MainActivity.entryLogger(context.getString(R.string.audio_check_6) + audioStatus, false);
                 // audioStatus == 0(uninitialized) is an error, does not throw exception
-                MainActivity.logger(context.getString(R.string.audio_check_5));
+                MainActivity.entryLogger(context.getString(R.string.audio_check_5), false);
                 audioRecord.stop();
                 audioRecord.release();
                 return false;
@@ -272,12 +271,12 @@ public class AudioChecker {
             audioRecord.release();
         }
         catch(Exception e) {
-            MainActivity.logger(context.getString(R.string.audio_check_7));
-            MainActivity.logger(context.getString(R.string.audio_check_9));
+            MainActivity.entryLogger(context.getString(R.string.audio_check_7), false);
+            MainActivity.entryLogger(context.getString(R.string.audio_check_9), false);
             return false;
         }
         // no errors
-        MainActivity.logger(context.getString(R.string.audio_check_8));
+        MainActivity.entryLogger(context.getString(R.string.audio_check_8), false);
         return true;
     }
 

@@ -138,7 +138,7 @@ public class AudioVisualiserView extends View {
             mForePaint.setColor(Color.argb(brightness,128, 166, 206));
             float lastX = -1;
             float lastY = -1;
-            float centerY = getHeight() / 2;
+            float centerY = (float)getHeight() / 2;
 
             // only draw lines that align with pixel boundaries.
             for (int x = 0; x < getWidth(); x++) {

@@ -36,7 +36,7 @@ public class WriteProcessor {
     public static BufferedOutputStream AUDIO_OUTPUT_STREAM;
     private static DataOutputStream AUDIO_RAW_STREAM;
 
-    private static final String APP_DIRECTORY_NAME = "PilferShush";
+    //private static final String APP_DIRECTORY_NAME = "PilferShush";
     private static final String DEFAULT_SESSION_NAME = "capture";
     private static final String AUDIO_FILE_EXTENSION_RAW = ".pcm";
     private static final String AUDIO_FILE_EXTENSION_WAV = ".wav";
@@ -55,7 +55,9 @@ public class WriteProcessor {
         this.audioBundle = audioBundle;
 
         log(context.getString(R.string.writer_state_1));
-        // checks for read/write state
+        // TODO change for int/ext directory. checks for read/write state
+
+
         if (Environment.MEDIA_MOUNTED.equals(Environment.getExternalStorageState())) {
             createDirectory();
             log(context.getString(R.string.writer_state_2) + "\n" + extDirectory.toString() + "\n");
@@ -90,8 +92,7 @@ public class WriteProcessor {
 
     public boolean prepareWriteAudioFile() {
         // need to build the filename AND path
-        File location = extDirectory;
-        if (location == null) {
+        if (extDirectory == null) {
             log(context.getString(R.string.writer_state_4));
             return false;
         }
@@ -104,14 +105,14 @@ public class WriteProcessor {
         try {
             // has extDirectory : /storage/emulated/0/Download/PilferShush
             // then says no storage folder found
-            AUDIO_OUTPUT_FILE = new File(location, audioFilename);
+            AUDIO_OUTPUT_FILE = new File(extDirectory, audioFilename);
             if (!AUDIO_OUTPUT_FILE.exists()) {
                 if (!AUDIO_OUTPUT_FILE.createNewFile()) {
                     log("error creating audio out file.");
                 }
             }
 
-            WAV_OUTPUT_FILE = new File(location, waveFilename);
+            WAV_OUTPUT_FILE = new File(extDirectory, waveFilename);
             if (!WAV_OUTPUT_FILE.exists()) {
                 if (!WAV_OUTPUT_FILE.createNewFile()) {
                     log("error creating output wav file.");
@@ -298,30 +299,30 @@ public class WriteProcessor {
 
     private void createDirectory() {
         // may not be writable if no permissions granted
+        extDirectory = context.getExternalFilesDir(null);
+        /*
         extDirectory = new File(Environment.getExternalStoragePublicDirectory(
                 Environment.DIRECTORY_DOWNLOADS), APP_DIRECTORY_NAME);
-        if (!extDirectory.exists()) {
-            if (extDirectory.mkdirs()) {
-                log(context.getString(R.string.writer_state_23));
-            }
-            else {
-                log("error creating extDirectory.");
-            }
+        */
+        assert extDirectory != null;
+        if (extDirectory.exists()) {
+            log(context.getString(R.string.writer_state_23));
         }
         else {
-            // already exists
-            log("extDirectory already exists.");
+            log("error creating extDirectory.");
         }
     }
 
     private void deleteAllStorageFiles() {
         // assume MainActivity has cautioned first.
+        assert extDirectory != null;
         if (!extDirectory.exists()) {
             log(context.getString(R.string.writer_state_16_1));
             return;
         }
         log(context.getString(R.string.writer_state_18));
         boolean deleteSuccess = false;
+
         if (extDirectory.listFiles() != null) {
             for (File file : extDirectory.listFiles()) {
                 deleteSuccess = file.delete();
@@ -337,6 +338,7 @@ public class WriteProcessor {
 
     private long calculateStorageSize() {
         // returns long size in bytes
+        assert extDirectory != null;
         if (!extDirectory.exists()) {
             log(context.getString(R.string.writer_state_16_2));
             return 0;
@@ -369,8 +371,8 @@ public class WriteProcessor {
         return TIMESTAMP_FORMAT.format(new Date());
     }
 
-    private static void log(String message) {
-        MainActivity.logger(message);
+    private void log(String message) {
+        MainActivity.entryLogger(message, false);
     }
 }
 
