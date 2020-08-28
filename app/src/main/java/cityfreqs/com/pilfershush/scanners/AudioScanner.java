@@ -44,7 +44,7 @@ public class AudioScanner {
     }
 
     public void setMagnitude(double magnitude) {
-        audioBundle.putDouble(AudioSettings.AUDIO_BUNDLE_KEYS[17], magnitude);
+        audioBundle.putDouble(AudioSettings.AUDIO_BUNDLE_KEYS[12], magnitude);
     }
 
     public void runAudioScanner() {

@@ -57,27 +57,29 @@ public class AudioSettings {
     };
 
     public static final int DEFAULT_WINDOW_TYPE = 2;
-
     //public static final int MICRO_DELAY = 1; // for modulated code
     //public static final int MAXIMUM_NUHF_FREQUENCY = 24000;
 
-    public static final int CARRIER_TEST_FREQUENCY = 440;
-
-    public static final int DEFAULT_RANGE_DRIFT_LIMIT = 1000;
-    //public static final int DEFAULT_DRIFT_SPEED = 1000;
-    public static final int MINIMUM_DRIFT_LIMIT = 10;
-    public static final int JAMMER_TYPE_TEST = 0; // only test tone drift
-
     // Bundle keys string names
     public static final String[] AUDIO_BUNDLE_KEYS = new String[] {
-            "audioSource", "sampleRate", "channelInConfig", "encoding", //3
-            "bufferInSize", "channelOutConfig", "bufferOutSize", "activeType", //7
-            "jammerType", "userCarrier", "userLimit", "userSpeed", "hasEQ", //12
-            "maxFreq", "scanMinFreq", "scanMaxFreq", "scanFreqStep",  //16
-            "ScanMagnitude", "scanWindow", "writeFiles", "bitDepth", //20
-            "debug" //21
+            "audioSource", // 0
+            "sampleRate", // 1
+            "channelInConfig", // 2
+            "encoding", // 3
+            "bufferInSize", // 4
+            "channelOutConfig", // 5
+            "bufferOutSize", // 6
+            "hasEQ", // 7
+            "maxFreq", // 8
+            "scanMinFreq", // 9
+            "scanMaxFreq", // 10
+            "scanFreqStep",  // 11
+            "ScanMagnitude", // 12
+            "scanWindow", // 13
+            "writeFiles", // 14
+            "bitDepth", // 15
+            "debug" // 16
     };
-
 /*
  * Utilities, that may be useful...
  *

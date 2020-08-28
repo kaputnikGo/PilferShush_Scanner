@@ -163,7 +163,7 @@ public class WriteProcessor {
     }
 
     public void audioFileConvert() {
-        if (!audioBundle.getBoolean(AudioSettings.AUDIO_BUNDLE_KEYS[19])) {
+        if (!audioBundle.getBoolean(AudioSettings.AUDIO_BUNDLE_KEYS[14])) {
            // write disabled
             return;
         }
@@ -246,7 +246,7 @@ public class WriteProcessor {
             writeInt(fileChannel, audioBundle.getInt(AudioSettings.AUDIO_BUNDLE_KEYS[1])); // sample rate
             writeInt(fileChannel, audioBundle.getInt(AudioSettings.AUDIO_BUNDLE_KEYS[1]) * 2); // byte rate
             writeShort(fileChannel, (short) 2); // block align
-            writeShort(fileChannel, (short) audioBundle.getInt(AudioSettings.AUDIO_BUNDLE_KEYS[20])); // bits per sample
+            writeShort(fileChannel, (short) audioBundle.getInt(AudioSettings.AUDIO_BUNDLE_KEYS[15])); // bits per sample
             writeString(fileChannel, "data"); // subchunk 2 id
             writeInt(fileChannel, rawData.length); // subchunk 2 size
 

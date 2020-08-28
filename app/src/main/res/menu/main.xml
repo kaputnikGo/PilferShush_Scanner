@@ -23,7 +23,7 @@
 
         <item
             android:id="@+id/action_fft_window_settings"
-            android:orderInCategory="40"
+            android:orderInCategory="35"
             app:showAsAction="never"
             android:title="@string/action_window_settings"/>
     </group>
@@ -31,15 +31,23 @@
     <group android:id="@+id/files_group">
         <item
             android:id="@+id/action_write_file"
-            android:orderInCategory="70"
+            android:orderInCategory="40"
             app:showAsAction="never"
             android:title="@string/action_write_file"/>
 
         <item
             android:id="@+id/action_storage_admin"
-            android:orderInCategory="70"
+            android:orderInCategory="45"
             app:showAsAction="never"
             android:title="@string/action_storage_admin"/>
+    </group>
+
+    <group android:id="@+id/debug_group">
+    <item
+        android:id="@+id/action_print_audio_bundle"
+        android:orderInCategory="50"
+        app:showAsAction="never"
+        android:title="@string/action_bundle_print"/>
     </group>
 
 </menu>

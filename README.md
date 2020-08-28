@@ -31,7 +31,7 @@ bufferOutSize=7688, encoding=2, bufferInSize=4096, activeType=false
     - PROD: s5 G900P 7.1.2 (25) (LineageOS 14.1, F-Droid)
     
  **TODO**
- - check AudioBundle fields, rem jammer types etc
+ - check AudioBundle fields, rem jammer types etc, make it a class
  - fix permissions check functions
  - check AudioSettings and deps for use with AudioBundle
  - make for FDroid

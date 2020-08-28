@@ -17,7 +17,6 @@ import android.widget.TextView;
 import cityfreqs.com.pilfershush.R;
 
 public class AudioChecker {
-    private static final String TAG = "PilferShush_AUDIO";
     private Context context;
     private Bundle audioBundle;
     private int channelInCount;
@@ -26,7 +25,7 @@ public class AudioChecker {
     public AudioChecker(Context context, Bundle audioBundle) {
         this.context = context;
         this.audioBundle = audioBundle;
-        DEBUG = audioBundle.getBoolean(AudioSettings.AUDIO_BUNDLE_KEYS[21], false);
+        DEBUG = audioBundle.getBoolean(AudioSettings.AUDIO_BUNDLE_KEYS[16], false);
     }
 
     public Bundle getAudioBundle() {
@@ -169,20 +168,20 @@ public class AudioChecker {
                             // buffOutSize may not be same as buffInSize conformed to powersOfTwo
                             audioBundle.putInt(AudioSettings.AUDIO_BUNDLE_KEYS[5], channelOutConfig);
                             audioBundle.putInt(AudioSettings.AUDIO_BUNDLE_KEYS[6], buffSize);
-                            audioBundle.putInt(AudioSettings.AUDIO_BUNDLE_KEYS[13], (int)(rate * 0.5f));
+                            audioBundle.putInt(AudioSettings.AUDIO_BUNDLE_KEYS[8], (int)(rate * 0.5f));
 
                             // test onboardEQ
                             if (testOnboardEQ(audioTrack.getAudioSessionId())) {
                                 if (DEBUG) {
                                     entryLogger(context.getString(R.string.eq_check_2) + "\n", false);
                                 }
-                                audioBundle.putBoolean(AudioSettings.AUDIO_BUNDLE_KEYS[12], true);
+                                audioBundle.putBoolean(AudioSettings.AUDIO_BUNDLE_KEYS[7], true);
                             }
                             else {
                                 if (DEBUG) {
                                     entryLogger(context.getString(R.string.eq_check_3) + "\n", true);
                                 }
-                                audioBundle.putBoolean(AudioSettings.AUDIO_BUNDLE_KEYS[12], false);
+                                audioBundle.putBoolean(AudioSettings.AUDIO_BUNDLE_KEYS[7], false);
                             }
                             audioTrack.pause();
                             audioTrack.flush();
@@ -219,6 +218,7 @@ public class AudioChecker {
             final short minEQ = equalizer.getBandLevelRange()[0]; // returns milliBel
             final short maxEQ = equalizer.getBandLevelRange()[1];
 
+            // this only triggers if AUDIO_BUNDLE_KEYS[16] == true
             if (DEBUG) {
                 entryLogger("\n" + context.getString(R.string.eq_check_1), false);
                 entryLogger(context.getString(R.string.eq_check_4) + bands, false);
@@ -286,7 +286,7 @@ public class AudioChecker {
     /*********************/
     public String saveFormatToString() {
         return (audioBundle.getInt(AudioSettings.AUDIO_BUNDLE_KEYS[1]) + " Hz, "
-                + audioBundle.getInt(AudioSettings.AUDIO_BUNDLE_KEYS[20]) + " bits, "
+                + audioBundle.getInt(AudioSettings.AUDIO_BUNDLE_KEYS[15]) + " bits, "
                 + channelInCount + " channel");
     }
 

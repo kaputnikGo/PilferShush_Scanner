@@ -242,6 +242,9 @@ public class MainActivity extends AppCompatActivity
             case R.id.action_storage_admin:
                 performStorageAdmin();
                 return true;
+            case R.id.action_print_audio_bundle:
+                printAudioSettings();
+                return true;
             default:
                 // do not consume the action
                 return super.onOptionsItemSelected(item);
@@ -318,19 +321,14 @@ public class MainActivity extends AppCompatActivity
                 timerHandler.postDelayed(this, 500);
             }
         };
-
-        // apply audio checker settings to bundle for services
-        audioBundle = new Bundle();
-        audioBundle.putBoolean(AudioSettings.AUDIO_BUNDLE_KEYS[7], false);
-        audioBundle.putInt(AudioSettings.AUDIO_BUNDLE_KEYS[8], AudioSettings.JAMMER_TYPE_TEST);
-        audioBundle.putInt(AudioSettings.AUDIO_BUNDLE_KEYS[9], AudioSettings.CARRIER_TEST_FREQUENCY);
-        audioBundle.putInt(AudioSettings.AUDIO_BUNDLE_KEYS[10], AudioSettings.DEFAULT_RANGE_DRIFT_LIMIT);
-        audioBundle.putInt(AudioSettings.AUDIO_BUNDLE_KEYS[11], AudioSettings.MINIMUM_DRIFT_LIMIT);
         // set defaults
-        audioBundle.putInt(AudioSettings.AUDIO_BUNDLE_KEYS[18], AudioSettings.DEFAULT_WINDOW_TYPE);
-        audioBundle.putBoolean(AudioSettings.AUDIO_BUNDLE_KEYS[19], true); //write audio files for scanner
-        audioBundle.putInt(AudioSettings.AUDIO_BUNDLE_KEYS[16], AudioSettings.DEFAULT_FREQ_STEP);
-        audioBundle.putInt(AudioSettings.AUDIO_BUNDLE_KEYS[17], AudioSettings.DEFAULT_MAGNITUDE);
+        audioBundle = new Bundle();
+        audioBundle.putInt(AudioSettings.AUDIO_BUNDLE_KEYS[11], AudioSettings.DEFAULT_FREQ_STEP);
+        audioBundle.putInt(AudioSettings.AUDIO_BUNDLE_KEYS[12], AudioSettings.DEFAULT_MAGNITUDE);
+        audioBundle.putInt(AudioSettings.AUDIO_BUNDLE_KEYS[13], AudioSettings.DEFAULT_WINDOW_TYPE);
+        audioBundle.putBoolean(AudioSettings.AUDIO_BUNDLE_KEYS[14], true); //write audio files for scanner
+        audioBundle.putBoolean(AudioSettings.AUDIO_BUNDLE_KEYS[16], DEBUG); //set DEBUG
+
         setFreqMinMax(1); // NUHF freq range
 
         AudioChecker audioChecker = new AudioChecker(this, audioBundle);
@@ -358,9 +356,9 @@ public class MainActivity extends AppCompatActivity
         debugText.setText(startText);
         entryLogger("\n" + getResources().getString(R.string.init_state_2) + getAudioCheckerReport(), false);
         entryLogger("\n" + getResources().getString(R.string.init_state_3), true);
-        entryLogger("\n" + getResources().getString(R.string.init_state_6) + audioBundle.getBoolean(AudioSettings.AUDIO_BUNDLE_KEYS[19]), false);
+        entryLogger("\n" + getResources().getString(R.string.init_state_6) + audioBundle.getBoolean(AudioSettings.AUDIO_BUNDLE_KEYS[14]), false);
 
-        if (audioBundle.getBoolean(AudioSettings.AUDIO_BUNDLE_KEYS[19])) {
+        if (audioBundle.getBoolean(AudioSettings.AUDIO_BUNDLE_KEYS[14])) {
             entryLogger(getResources().getString(R.string.init_state_7_1) +
                     audioChecker.saveFormatToString() +
                     getResources().getString(R.string.init_state_7_2), false);
@@ -394,6 +392,10 @@ public class MainActivity extends AppCompatActivity
         entryLogger(getResources().getString(R.string.init_state_11) + "\n", true);
 
         if (DEBUG) Log.d(TAG, "audioBundle: " + bundlePrint(audioBundle));
+    }
+
+    private void printAudioSettings() {
+        entryLogger(bundlePrint(audioBundle), false);
     }
 
     private String bundlePrint(Bundle b) {
@@ -489,13 +491,13 @@ public class MainActivity extends AppCompatActivity
         dialogBuilder.setMessage(R.string.dialog_write_message);
         dialogBuilder.setPositiveButton(R.string.dialog_write_file_yes, new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int id) {
-                audioBundle.putBoolean(AudioSettings.AUDIO_BUNDLE_KEYS[19], true);
+                audioBundle.putBoolean(AudioSettings.AUDIO_BUNDLE_KEYS[14], true);
                 entryLogger(getResources().getString(R.string.option_dialog_6), false);
             }
         });
         dialogBuilder.setNegativeButton(R.string.dialog_write_file_no, new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int id) {
-                audioBundle.putBoolean(AudioSettings.AUDIO_BUNDLE_KEYS[19], false);
+                audioBundle.putBoolean(AudioSettings.AUDIO_BUNDLE_KEYS[14], false);
                 entryLogger(getResources().getString(R.string.option_dialog_7), false);
             }
         });
@@ -508,7 +510,7 @@ public class MainActivity extends AppCompatActivity
         dialogBuilder = new AlertDialog.Builder(this);
         dialogBuilder.setItems(freqSteps, new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialogInterface, int which) {
-                audioBundle.putInt(AudioSettings.AUDIO_BUNDLE_KEYS[16], AudioSettings.FREQ_STEPS[which]);
+                audioBundle.putInt(AudioSettings.AUDIO_BUNDLE_KEYS[111], AudioSettings.FREQ_STEPS[which]);
                 entryLogger(getResources().getString(R.string.option_dialog_9) + AudioSettings.FREQ_STEPS[which], false);
             }
         });
@@ -557,7 +559,7 @@ public class MainActivity extends AppCompatActivity
         dialogBuilder.setItems(windowTypes, new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialogInterface, int which) {
                 // numerical values from 1-5
-                audioBundle.putInt(AudioSettings.AUDIO_BUNDLE_KEYS[18], which + 1);
+                audioBundle.putInt(AudioSettings.AUDIO_BUNDLE_KEYS[13], which + 1);
                 entryLogger(getResources().getString(R.string.option_dialog_13) + AudioSettings.FFT_WINDOWS[which], false);
             }
         });
@@ -595,12 +597,12 @@ public class MainActivity extends AppCompatActivity
         // at the moment stick to ranges of 3kHz as DEFAULT or SECOND pair
         // use int as may get more ranges than the 2 presently used
         if (pair == 1) {
-            audioBundle.putInt(AudioSettings.AUDIO_BUNDLE_KEYS[14], AudioSettings.DEFAULT_FREQUENCY_MIN);
-            audioBundle.putInt(AudioSettings.AUDIO_BUNDLE_KEYS[15], AudioSettings.DEFAULT_FREQUENCY_MAX);
+            audioBundle.putInt(AudioSettings.AUDIO_BUNDLE_KEYS[9], AudioSettings.DEFAULT_FREQUENCY_MIN);
+            audioBundle.putInt(AudioSettings.AUDIO_BUNDLE_KEYS[10], AudioSettings.DEFAULT_FREQUENCY_MAX);
         }
         else if (pair == 2) {
-            audioBundle.putInt(AudioSettings.AUDIO_BUNDLE_KEYS[14], AudioSettings.SECOND_FREQUENCY_MIN);
-            audioBundle.putInt(AudioSettings.AUDIO_BUNDLE_KEYS[15], AudioSettings.SECOND_FREQUENCY_MAX);
+            audioBundle.putInt(AudioSettings.AUDIO_BUNDLE_KEYS[9], AudioSettings.SECOND_FREQUENCY_MIN);
+            audioBundle.putInt(AudioSettings.AUDIO_BUNDLE_KEYS[10], AudioSettings.SECOND_FREQUENCY_MAX);
         }
     }
 
@@ -641,7 +643,7 @@ public class MainActivity extends AppCompatActivity
     private void runAudioScanner() {
         entryLogger(getString(R.string.main_scanner_18), false);
         scanBufferSize = 0;
-        if (audioBundle.getBoolean(AudioSettings.AUDIO_BUNDLE_KEYS[19])) {
+        if (audioBundle.getBoolean(AudioSettings.AUDIO_BUNDLE_KEYS[14])) {
             if (!writeProcessor.prepareWriteAudioFile()) {
                 entryLogger(getString(R.string.init_state_15), true);
             }
@@ -823,7 +825,8 @@ public class MainActivity extends AppCompatActivity
     }
 
     private class HeadsetIntentReceiver extends BroadcastReceiver {
-        @Override public void onReceive(Context context, Intent intent) {
+        @Override
+        public void onReceive(Context context, Intent intent) {
             if (intent.getAction() == null) {
                 return;
             }

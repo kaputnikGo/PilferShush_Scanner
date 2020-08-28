@@ -108,7 +108,7 @@ public class RecordTask extends AsyncTask<Void, Integer, String> {
                         }
 
                         public void onPeriodicNotification(AudioRecord audioRecord) {
-                            magnitudeRecordScan(audioBundle.getInt(AudioSettings.AUDIO_BUNDLE_KEYS[18]));
+                            magnitudeRecordScan(audioBundle.getInt(AudioSettings.AUDIO_BUNDLE_KEYS[13]));
 
                             MainActivity.visualiserView.updateVisualiser(bufferArray); //byteBuffer
                         }
@@ -116,7 +116,7 @@ public class RecordTask extends AsyncTask<Void, Integer, String> {
 
                     do {
                         bufferRead = audioRecord.read(bufferArray, 0, audioBundle.getInt(AudioSettings.AUDIO_BUNDLE_KEYS[4]));
-                        if (audioBundle.getBoolean(AudioSettings.AUDIO_BUNDLE_KEYS[19])) {
+                        if (audioBundle.getBoolean(AudioSettings.AUDIO_BUNDLE_KEYS[14])) {
                             WriteProcessor.writeAudioFile(bufferArray, bufferRead);
                         }
                     } while (!isCancelled());
@@ -183,11 +183,11 @@ public class RecordTask extends AsyncTask<Void, Integer, String> {
 
             // default value set to 2
             recordScan = windowArray(windowType, recordScan);
-            candidateFreq = audioBundle.getInt(AudioSettings.AUDIO_BUNDLE_KEYS[14]);
+            candidateFreq = audioBundle.getInt(AudioSettings.AUDIO_BUNDLE_KEYS[9]);
             Goertzel goertzel;
             double candidateMag;
 
-            while (candidateFreq <= audioBundle.getInt(AudioSettings.AUDIO_BUNDLE_KEYS[15])) {
+            while (candidateFreq <= audioBundle.getInt(AudioSettings.AUDIO_BUNDLE_KEYS[10])) {
                 // look for any of our freqs here, increment by freqStepper
                 // this will result in a found candidate for anything in our ranges...
                 goertzel = new Goertzel((float)audioBundle.getInt(AudioSettings.AUDIO_BUNDLE_KEYS[1]), (float)candidateFreq, recordScan);
@@ -195,14 +195,14 @@ public class RecordTask extends AsyncTask<Void, Integer, String> {
                 // get its magnitude
                 candidateMag = goertzel.getOptimisedMagnitude();
                 // check if above threshold
-                if (candidateMag >= audioBundle.getInt(AudioSettings.AUDIO_BUNDLE_KEYS[17])) {
+                if (candidateMag >= audioBundle.getInt(AudioSettings.AUDIO_BUNDLE_KEYS[12])) {
                     // saved here for later analysis
                     bufferStorage.add(tempBuffer);
                     // draw on view
                     publishProgress(candidateFreq, (int)candidateMag);
                 }
                 // next freq for loop
-                candidateFreq += audioBundle.getInt(AudioSettings.AUDIO_BUNDLE_KEYS[16]);
+                candidateFreq += audioBundle.getInt(AudioSettings.AUDIO_BUNDLE_KEYS[11]);
             }
         }
         else {

@@ -4,8 +4,6 @@
     <string name="action_session_name">Set session name</string>
     <string name="dialog_session_name">Enter suffix for save files</string>
     <string name="session_default_name" translatable="false">capture</string>
-    <string name="passive_service_name">PiferShush Passive</string>
-    <string name="active_service_name">PiferShush Active</string>
 
     <string name="dialog_storage_warn_title">Caution</string>
     <string name="dialog_storage_warn_text">limited storage space for recording.</string>
@@ -34,6 +32,8 @@
     <string name="dialog_delete_empty_logs">Delete empty logs</string>
     <string name="dialog_delete_all_files">Delete all audio files</string>
     <string name="dialog_free_storage_size">Free storage space</string>
+
+    <string name="action_bundle_print">Print audio settings</string>
 
     <string name="focus_text">Logging (scrollable): </string>
     <string name="debug_text">loading PilferShush.</string>
