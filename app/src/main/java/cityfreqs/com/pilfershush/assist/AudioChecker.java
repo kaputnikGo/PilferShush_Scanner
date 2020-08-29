@@ -161,10 +161,9 @@ public class AudioChecker {
                             audioTrack.release();
 
                             if (buffSize > AudioSettings.POWERS_TWO_HIGH[4]) {
-                                // stop Active Jammer from ever running if this?
                                 // caution for potential laggy or breaking audiotrack buffer size of 8192
                                 if (DEBUG)
-                                    entryLogger("Output buffer on this device may break active jammer.", true);
+                                    entryLogger("Output buffer greater than 8192ms may cause jitter or latency.\n", true);
                             }
 
                             return true;

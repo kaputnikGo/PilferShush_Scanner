@@ -117,7 +117,7 @@
     <string name="option_dialog_12">Loudness level (dB):\u0020</string>
     <string name="option_dialog_13">FFT Window set to:\u0020</string>
 
-    <string name="init_state_1">PilferShush Scanner version\u0020</string>
+    <string name="init_state_1">PilferShush Scanner\u0020</string>
     <string name="init_state_2">Using\u0020</string>
     <string name="init_state_3">Settings can be changed via the Options menu.</string>
     <string name="init_state_6">Save scanner audio to file:\u0020</string>

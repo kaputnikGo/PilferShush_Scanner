@@ -57,7 +57,7 @@ public class MainActivity extends AppCompatActivity
 
     public static final String VERSION = "4.0.1";
 
-    // TODO fix the the entryLogger 
+    // TODO fix the the entryLogger
     private static TextView debugText;
     private TextView timerText;
     private long startTime;
@@ -358,6 +358,7 @@ public class MainActivity extends AppCompatActivity
     }
 
     private void reportInitialState() {
+        entryLogger("\n[:>----------------------------------<:]", true);
         entryLogger("\n" + getResources().getString(R.string.init_state_1) + VERSION, true);
         entryLogger("\n" + getResources().getString(R.string.init_state_2) + getAudioCheckerReport(), false);
         entryLogger("\n" + getResources().getString(R.string.init_state_3), true);
@@ -376,7 +377,7 @@ public class MainActivity extends AppCompatActivity
         }
 
         // run at init for awareness
-        entryLogger(getResources().getString(R.string.init_state_9) + printFreeSize(), true);
+        entryLogger("\n" + getResources().getString(R.string.init_state_9) + printFreeSize(), true);
 
         int storageSize = writeProcessor.cautionFreeSpace();
         if (storageSize <= MINIMUM_STORAGE_SIZE_BYTES) {
@@ -400,13 +401,13 @@ public class MainActivity extends AppCompatActivity
     }
 
     private void printAudioSettings() {
-        entryLogger(bundlePrint(audioBundle), false);
+        entryLogger("\nAudio" + bundlePrint(audioBundle) + "\n", false);
     }
 
     private String bundlePrint(Bundle b) {
         // debug printout to check vars in audioBundle
         if (b == null) {
-            return "";
+            return "audioBundle not found.";
         }
         Bundle bundle = new Bundle();
         bundle.putAll(b);
@@ -515,7 +516,7 @@ public class MainActivity extends AppCompatActivity
         dialogBuilder = new AlertDialog.Builder(this);
         dialogBuilder.setItems(freqSteps, new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialogInterface, int which) {
-                audioBundle.putInt(AUDIO_BUNDLE_KEYS[111], AudioSettings.FREQ_STEPS[which]);
+                audioBundle.putInt(AUDIO_BUNDLE_KEYS[11], AudioSettings.FREQ_STEPS[which]);
                 entryLogger(getResources().getString(R.string.option_dialog_9) + AudioSettings.FREQ_STEPS[which], false);
             }
         });
