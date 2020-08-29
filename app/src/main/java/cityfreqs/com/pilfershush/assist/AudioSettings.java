@@ -85,6 +85,37 @@ public class AudioSettings {
     };
 
     //TODO add AUDIO_IN and AUDIO_OUT for channelInConfig and channelOutConfig
+    public static final String[] AUDIO_CHANNEL_IN = new String[] {
+            "CHANNEL_INVALID",
+            "CHANNEL_IN_DEFAULT", // 1
+            "CHANNEL_CONFIGURATION_MONO", //deprecated, use CHANNEL_IN_MONO
+            "CHANNEL_CONFIGURATION_STEREO", // deprecated, use CHANNEL_IN_STEREO
+            "CHANNEL_IN_LEFT",
+            "NULL", // no entries in AudioFormat
+            "NULL",
+            "NULL",
+            "CHANNEL_IN_RIGHT", // 8
+            "NULL",
+            "CHANNEL_IN_MONO", // int 16 (0x10)
+            "NULL",
+            "CHANNEL_IN_STEREO" //int 12 (0x0c)
+    };
+
+    public static final String[] AUDIO_CHANNEL_OUT = new String[] {
+            "NULL", // no INVALID in AudioFormat
+            "CHANNEL_OUT_DEFAULT",
+            "NULL", // no entries in AudioFormat
+            "NULL",
+            "CHANNEL_OUT_MONO", // 4, also CHANNEL_OUT_FRONT_LEFT
+            "NULL", // no entries in AudioFormat
+            "NULL",
+            "NULL",
+            "CHANNEL_OUT_FRONT_RIGHT", // 8
+            "NULL", // no entries in AudioFormat
+            "NULL",
+            "NULL",
+            "CHANNEL_OUT_STEREO" // 12
+    };
 
     // Bundle keys string names
     public static final String[] AUDIO_BUNDLE_KEYS = new String[] {

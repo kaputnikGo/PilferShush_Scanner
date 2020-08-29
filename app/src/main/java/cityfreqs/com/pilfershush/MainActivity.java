@@ -42,6 +42,7 @@ import cityfreqs.com.pilfershush.assist.WriteProcessor;
 import cityfreqs.com.pilfershush.scanners.AudioScanner;
 
 import static cityfreqs.com.pilfershush.assist.AudioSettings.AUDIO_BUNDLE_KEYS;
+import static cityfreqs.com.pilfershush.assist.AudioSettings.AUDIO_CHANNEL_IN;
 import static cityfreqs.com.pilfershush.assist.AudioSettings.AUDIO_ENCODING;
 import static cityfreqs.com.pilfershush.assist.AudioSettings.AUDIO_SOURCE;
 import static cityfreqs.com.pilfershush.assist.WriteProcessor.MINIMUM_STORAGE_SIZE_BYTES;
@@ -101,8 +102,6 @@ public class MainActivity extends AppCompatActivity
         powerManager = (PowerManager) this.getSystemService(Context.POWER_SERVICE);
 
         SCANNING = false;
-
-        //MAIN VIEW
         runScansButton = findViewById(R.id.run_scans_button);
         runScansButton.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
@@ -310,20 +309,6 @@ public class MainActivity extends AppCompatActivity
     private void initPilferShush() {
         audioManager = (AudioManager)getSystemService(Context.AUDIO_SERVICE);
 
-        timerText = findViewById(R.id.timer_text);
-        // on screen timer
-        timerHandler = new Handler();
-        timerRunnable = new Runnable() {
-            @Override
-            public void run() {
-                long millis = System.currentTimeMillis() - startTime;
-                int seconds = (int)(millis / 1000);
-                int minutes = seconds / 60;
-                seconds = seconds % 60;
-                timerText.setText(String.format(Locale.getDefault(), "timer - %02d:%02d", minutes, seconds));
-                timerHandler.postDelayed(this, 500);
-            }
-        };
         // set defaults
         audioBundle = new Bundle();
         audioBundle.putInt(AUDIO_BUNDLE_KEYS[11], AudioSettings.DEFAULT_FREQ_STEP);
@@ -340,8 +325,12 @@ public class MainActivity extends AppCompatActivity
             // get latest bundle updates bundle <- needed?
             audioBundle = audioChecker.getAudioBundle();
 
-            //TODO run a boolean here?
-            audioChecker.checkAudioRecord();
+            if (audioChecker.checkAudioRecord()) {
+                entryLogger("audioChecker AudioRecord passed.", false);
+            }
+            else {
+                entryLogger("audioChecker AudioRecord failed.", true);
+            }
 
             toggleHeadset(false); // default state at init
             audioFocusCheck();
@@ -352,11 +341,26 @@ public class MainActivity extends AppCompatActivity
         else {
             entryLogger(getResources().getString(R.string.init_state_12), true);
         }
+
+        // delay this init in case
+        timerText = findViewById(R.id.timer_text);
+        // on screen timer
+        timerHandler = new Handler();
+        timerRunnable = new Runnable() {
+            @Override
+            public void run() {
+                long millis = System.currentTimeMillis() - startTime;
+                int seconds = (int)(millis / 1000);
+                int minutes = seconds / 60;
+                seconds = seconds % 60;
+                timerText.setText(String.format(Locale.getDefault(), "timer - %02d:%02d", minutes, seconds));
+                timerHandler.postDelayed(this, 500);
+            }
+        };
     }
 
     private void reportInitialState() {
-        String startText = getResources().getString(R.string.init_state_1) + VERSION;
-        debugText.setText(startText);
+        entryLogger("\n" + getResources().getString(R.string.init_state_1) + VERSION, true);
         entryLogger("\n" + getResources().getString(R.string.init_state_2) + getAudioCheckerReport(), false);
         entryLogger("\n" + getResources().getString(R.string.init_state_3), true);
         entryLogger("\n" + getResources().getString(R.string.init_state_6) + audioBundle.getBoolean(AUDIO_BUNDLE_KEYS[14]), false);
@@ -639,7 +643,7 @@ public class MainActivity extends AppCompatActivity
                 + audioBundle.getInt(AUDIO_BUNDLE_KEYS[1]) +
                 " Hz, " + audioBundle.getInt(AUDIO_BUNDLE_KEYS[4]) +
                 " ms, " + AUDIO_ENCODING[audioBundle.getInt(AUDIO_BUNDLE_KEYS[3])] +
-                ", " + audioBundle.getInt(AUDIO_BUNDLE_KEYS[2]) +
+                ", " + AUDIO_CHANNEL_IN[audioBundle.getInt(AUDIO_BUNDLE_KEYS[2])] +
                 ", " + AUDIO_SOURCE[audioBundle.getInt(AUDIO_BUNDLE_KEYS[0])]);
     }
 
@@ -854,10 +858,9 @@ public class MainActivity extends AppCompatActivity
 
     /********************************************************************/
 /*
- * 	LOGGERS
+ * 	LOGGER
  */
     public static void entryLogger(String entry, boolean caution) {
-        // this prints ExpertView.log (detailed)
         int start = debugText.getText().length();
         debugText.append("\n" + entry);
         int end = debugText.getText().length();

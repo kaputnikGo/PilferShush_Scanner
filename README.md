@@ -7,11 +7,10 @@ Test application for researching methods of discovering use of NUHF audio beacon
 ** Notes**
 - getExternalStorageDirectory method is deprecated in API 29 use getExternalFilesDir(String type)
 
-- audioBundle debug print::
-channelOutConfig=4, ScanMagnitude=50000, scanMaxFreq=21000, scanWindow=2, jammerType=0, 
-scanMinFreq=18000, writeFiles=true, channelInConfig=1, scanFreqStep=25, hasEQ=false, 
-sampleRate=48000, userCarrier=440, userLimit=1000, userSpeed=10, audioSource=0, maxFreq=24000, 
-bufferOutSize=7688, encoding=2, bufferInSize=4096, activeType=false
+- audioBundle debug print (has that weird non-ordering array thing)::
+[{channelOutConfig=4, ScanMagnitude=50000, scanMaxFreq=21000, scanWindow=2, scanMinFreq=18000, 
+writeFiles=true, channelInConfig=1, scanFreqStep=25, debug=true, hasEQ=true, sampleRate=48000, 
+audioSource=0, maxFreq=24000, bufferOutSize=7688, encoding=2, bufferInSize=4096}]
 
 
    vers. 4.0.1

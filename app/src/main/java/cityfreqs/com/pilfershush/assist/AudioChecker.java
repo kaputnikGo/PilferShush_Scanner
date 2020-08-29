@@ -13,18 +13,19 @@ import cityfreqs.com.pilfershush.MainActivity;
 import cityfreqs.com.pilfershush.R;
 
 import static cityfreqs.com.pilfershush.assist.AudioSettings.AUDIO_BUNDLE_KEYS;
+import static cityfreqs.com.pilfershush.assist.AudioSettings.AUDIO_CHANNEL_OUT;
 import static cityfreqs.com.pilfershush.assist.AudioSettings.AUDIO_ENCODING;
 
 public class AudioChecker {
     private Context context;
     private Bundle audioBundle;
-    private int channelInCount;
+    //private int channelInCount;
     private boolean DEBUG;
 
     public AudioChecker(Context context, Bundle audioBundle) {
         this.context = context;
         this.audioBundle = audioBundle;
-        DEBUG = audioBundle.getBoolean(AUDIO_BUNDLE_KEYS[16], false);
+        DEBUG = audioBundle.getBoolean(AUDIO_BUNDLE_KEYS[16], true);
     }
 
     public Bundle getAudioBundle() {
@@ -105,7 +106,7 @@ public class AudioChecker {
                                     entryLogger("AudioRecord found: " + rate + ", buffer: " + buffSize + ", channel count: " + recorder.getChannelCount(), true);
                                 }
                                 // set found values
-                                channelInCount = recorder.getChannelCount();
+                                //channelInCount = recorder.getChannelCount();
                                 audioBundle.putInt(AUDIO_BUNDLE_KEYS[0], audioSource);
                                 audioBundle.putInt(AUDIO_BUNDLE_KEYS[1], rate);
                                 audioBundle.putInt(AUDIO_BUNDLE_KEYS[2], channelInConfig);
@@ -286,7 +287,7 @@ public class AudioChecker {
     public String saveFormatToString() {
         return (audioBundle.getInt(AUDIO_BUNDLE_KEYS[1]) + " Hz, "
                 + AUDIO_ENCODING[audioBundle.getInt(AUDIO_BUNDLE_KEYS[3])] + ", "
-                + channelInCount + " channel");
+                + AUDIO_CHANNEL_OUT[audioBundle.getInt(AUDIO_BUNDLE_KEYS[5])]);
     }
 
     private void entryLogger(String entry, boolean caution) {
