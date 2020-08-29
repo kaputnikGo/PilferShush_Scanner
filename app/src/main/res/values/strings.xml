@@ -141,7 +141,7 @@
     <string name="usb_state_6">\u0020permission denied for USB device.</string>
 
     <string name="perms_state_1">Record Audio</string>
-    <string name="perms_state_2">Save audio and text files</string>
+    <string name="perms_state_2">Save wav audio files</string>
     <string name="perms_state_3">Permissions request:\u0020</string>
     <string name="perms_state_4">Some permissions denied</string>
 

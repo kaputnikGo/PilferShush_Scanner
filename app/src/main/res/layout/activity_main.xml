@@ -58,13 +58,14 @@
                 android:id="@+id/debug_text"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_below="@+id/focus_text"
                 android:layout_marginTop="@dimen/activity_horizontal_margin"
+                android:layout_below="@+id/focus_text"
                 android:padding="@dimen/activity_horizontal_margin"
                 android:background="#000000"
                 android:gravity="bottom"
                 android:scrollbars="vertical"
                 android:text="@string/debug_text" />
+
         </RelativeLayout>
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

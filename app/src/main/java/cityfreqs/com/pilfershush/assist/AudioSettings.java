@@ -60,6 +60,13 @@ public class AudioSettings {
     //public static final int MICRO_DELAY = 1; // for modulated code
     //public static final int MAXIMUM_NUHF_FREQUENCY = 24000;
 
+    // media/libstagefright/AudioSource.cpp
+        /*
+        AudioRecord.cpp (samsung fork?)::
+        if (inputSource == AUDIO_SOURCE_DEFAULT) {
+            inputSource = AUDIO_SOURCE_MIC;
+        }
+        */
     public static final String[] AUDIO_SOURCE = new String[] {
             "AUDIO_SOURCE_DEFAULT",
             "AUDIO_SOURCE_MIC",
@@ -70,6 +77,8 @@ public class AudioSettings {
             "AUDIO_SOURCE_VOICE_RECOGNITION",  // tuned for voice recognition
             "AUDIO_SOURCE_VOICE_COMMUNICATION"  // 7  tuned for VoIP with echo cancel, auto gain ctrl if available
     };
+    // some pre-processing like echo cancellation, noise suppression is applied on the audio captured using VOICE_COMMUNICATION
+    // assumption is that # 6,7 add DSP to the DEFAULT/MIC input
 
     public static final String[] AUDIO_ENCODING = new String[] {
             "ENCODING_INVALID",

@@ -19,7 +19,6 @@ import static cityfreqs.com.pilfershush.assist.AudioSettings.AUDIO_ENCODING;
 public class AudioChecker {
     private Context context;
     private Bundle audioBundle;
-    //private int channelInCount;
     private boolean DEBUG;
 
     public AudioChecker(Context context, Bundle audioBundle) {
@@ -46,34 +45,9 @@ public class AudioChecker {
 
     public boolean determineRecordAudioType() {
         // guaranteed default for Android is 44.1kHz, PCM_16BIT, CHANNEL_IN_DEFAULT
-        /*
-        AudioRecord.cpp (samsung fork?)::
-        if (inputSource == AUDIO_SOURCE_DEFAULT) {
-            inputSource = AUDIO_SOURCE_MIC;
-        }
-        */
         // test change to audio source:: AUDIO_SOURCE_VOICE_COMMUNICATION (7)
         // FOR PRIORITY BUMP IN ANDROID 10 (API29)
         int audioSource = MediaRecorder.AudioSource.DEFAULT; //VOICE_COMMUNICATION;// 7 //.DEFAULT; // 0
-
-        // note::
-        /*
-        media/libstagefright/AudioSource.cpp
-        typedef enum {
-                    AUDIO_SOURCE_DEFAULT             = 0,
-                    AUDIO_SOURCE_MIC                 = 1,
-                    AUDIO_SOURCE_VOICE_UPLINK        = 2,  // system only, requires Manifest.permission#CAPTURE_AUDIO_OUTPUT
-                    AUDIO_SOURCE_VOICE_DOWNLINK      = 3,  // system only, requires Manifest.permission#CAPTURE_AUDIO_OUTPUT
-                    AUDIO_SOURCE_VOICE_CALL          = 4,  // system only, requires Manifest.permission#CAPTURE_AUDIO_OUTPUT
-                    AUDIO_SOURCE_CAMCORDER           = 5,  // for video recording, same orientation as camera
-                    AUDIO_SOURCE_VOICE_RECOGNITION   = 6,  // tuned for voice recognition
-                    AUDIO_SOURCE_VOICE_COMMUNICATION = 7,  // tuned for VoIP with echo cancel, auto gain ctrl if available
-                    AUDIO_SOURCE_CNT,
-                    AUDIO_SOURCE_MAX                 = AUDIO_SOURCE_CNT - 1,
-        } audio_source_t;
-        */
-        // some pre-processing like echo cancellation, noise suppression is applied on the audio captured using VOICE_COMMUNICATION
-        // assumption is that # 6,7 add DSP to the DEFAULT/MIC input
 
         for (int rate : AudioSettings.SAMPLE_RATES) {
             for (short audioFormat : new short[] {
@@ -106,7 +80,6 @@ public class AudioChecker {
                                     entryLogger("AudioRecord found: " + rate + ", buffer: " + buffSize + ", channel count: " + recorder.getChannelCount(), true);
                                 }
                                 // set found values
-                                //channelInCount = recorder.getChannelCount();
                                 audioBundle.putInt(AUDIO_BUNDLE_KEYS[0], audioSource);
                                 audioBundle.putInt(AUDIO_BUNDLE_KEYS[1], rate);
                                 audioBundle.putInt(AUDIO_BUNDLE_KEYS[2], channelInConfig);

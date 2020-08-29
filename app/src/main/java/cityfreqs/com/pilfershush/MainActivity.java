@@ -57,7 +57,7 @@ public class MainActivity extends AppCompatActivity
 
     public static final String VERSION = "4.0.1";
 
-    // TODO fix the STATE nightmare of the scanner and the audioBundle
+    // TODO fix the the entryLogger 
     private static TextView debugText;
     private TextView timerText;
     private long startTime;
@@ -86,7 +86,6 @@ public class MainActivity extends AppCompatActivity
     private AudioManager audioManager;
     private AudioManager.OnAudioFocusChangeListener audioFocusListener;
     public static AudioVisualiserView visualiserView;
-
     private AlertDialog.Builder dialogBuilder;
     private AlertDialog alertDialog;
 
@@ -123,6 +122,7 @@ public class MainActivity extends AppCompatActivity
                 debugText.setSoundEffectsEnabled(false); // no further click sounds
             }
         });
+
         focusText = findViewById(R.id.focus_text);
         focusText.setTextColor(Color.parseColor("#ffff00")); // yellow
 
@@ -136,9 +136,9 @@ public class MainActivity extends AppCompatActivity
             List<String> permissionsNeeded = new ArrayList<>();
             final List<String> permissionsList = new ArrayList<>();
 
-            if (!addPermission(permissionsList, Manifest.permission.RECORD_AUDIO))
+            if (addPermission(permissionsList, Manifest.permission.RECORD_AUDIO))
                 permissionsNeeded.add(getResources().getString(R.string.perms_state_1));
-            if (!addPermission(permissionsList, Manifest.permission.WRITE_EXTERNAL_STORAGE))
+            if (addPermission(permissionsList, Manifest.permission.WRITE_EXTERNAL_STORAGE))
                 permissionsNeeded.add(getResources().getString(R.string.perms_state_2));
 
             if (permissionsList.size() > 0) {
@@ -268,41 +268,39 @@ public class MainActivity extends AppCompatActivity
                 .show();
     }
 
-    private boolean addPermission(List<String> permissionsList, String permission) {
+    protected boolean addPermission(List<String> permissionsList, String permission) {
         if (ActivityCompat.checkSelfPermission(this, permission) != PackageManager.PERMISSION_GRANTED) {
             permissionsList.add(permission);
-            return (ActivityCompat.shouldShowRequestPermissionRationale(this, permission));
+            return !(ActivityCompat.shouldShowRequestPermissionRationale(this, permission));
         }
-        return true;
+        return false;
     }
 
     @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String permissions[], @NonNull int[] grantResults) {
-        switch (requestCode) {
-            case REQUEST_MULTIPLE_PERMISSIONS: {
-                Map<String, Integer> perms = new HashMap<String, Integer>();
-                // Initial
-                perms.put(Manifest.permission.RECORD_AUDIO, PackageManager.PERMISSION_GRANTED);
-                perms.put(Manifest.permission.WRITE_EXTERNAL_STORAGE, PackageManager.PERMISSION_GRANTED);
-                // Fill with results
-                for (int i = 0; i < permissions.length; i++) {
-                    perms.put(permissions[i], grantResults[i]);
-                }
-                // Check for RECORD_AUDIO
-                if (perms.get(Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED
-                        && perms.get(Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED) {
-                    // All Permissions Granted
-                    initPilferShush();
-                } else
-                    {
-                    // Permission Denied
-                    Toast.makeText(MainActivity.this, getResources().getString(R.string.perms_state_4), Toast.LENGTH_SHORT)
-                            .show();
-                }
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        if (requestCode == REQUEST_MULTIPLE_PERMISSIONS) {
+            Map<String, Integer> perms = new HashMap<>();
+            // Initial
+            perms.put(Manifest.permission.RECORD_AUDIO, PackageManager.PERMISSION_GRANTED);
+            perms.put(Manifest.permission.WRITE_EXTERNAL_STORAGE, PackageManager.PERMISSION_GRANTED);
+            // Fill with results
+            for (int i = 0; i < permissions.length; i++) {
+                perms.put(permissions[i], grantResults[i]);
             }
-            break;
-            default:
-                super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+            // Check for RECORD_AUDIO
+            if (perms.get(Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED
+                    && perms.get(Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED) {
+                // All Permissions Granted
+                initPilferShush();
+            }
+            else {
+                // Permission Denied
+                Toast.makeText(MainActivity.this, getResources().getString(R.string.perms_state_4), Toast.LENGTH_SHORT)
+                        .show();
+            }
+        }
+        else {
+            super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         }
     }
 

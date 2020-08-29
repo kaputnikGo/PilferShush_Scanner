@@ -1,4 +1,5 @@
 ### 4.0.1 (unreleased)
+* cleanup audioBundle
 * fix external storage write for API 29
 * combine MAIN and DEBUG views
 * move scanner.java to mainactivity in prep for proper

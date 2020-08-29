@@ -30,15 +30,14 @@ audioSource=0, maxFreq=24000, bufferOutSize=7688, encoding=2, bufferInSize=4096}
     - PROD: s5 G900P 7.1.2 (25) (LineageOS 14.1, F-Droid)
     
  **TODO**
- - check AudioBundle fields, rem jammer types etc, make it a class
  - fix permissions check functions
- - check AudioSettings and deps for use with AudioBundle
  - make for FDroid
  - scanner as a foreground service
  - analysis view for spectrogram wav file?
  - rebuild scanner to allow different methods of scanning (more than goertzel)
  
  **Changes:**
+ - cleanup audioBundle
  - fix write to storage for API 29
  - combine MAIN and DEBUG views
  - move scanner.java to mainactivity, prep for proper

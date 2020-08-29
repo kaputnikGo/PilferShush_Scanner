@@ -25,8 +25,6 @@ public class AudioScanner {
         this.context = context;
         this.audioBundle = audioBundle;
 
-
-
         freqDetector = new FreqDetector(this.audioBundle);
         freqDetector.init();
         processAudio = new ProcessAudio(context);
