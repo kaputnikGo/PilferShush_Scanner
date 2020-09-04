@@ -416,12 +416,13 @@ public class MainActivity extends AppCompatActivity
 
 
     private void populateMenuItems() {
-        freqSteps = new String[5];
+        freqSteps = new String[6];
         freqSteps[0] = getResources().getString(R.string.freq_step_10_text);
         freqSteps[1] = getResources().getString(R.string.freq_step_25_text);
         freqSteps[2] = getResources().getString(R.string.freq_step_50_text);
         freqSteps[3] = getResources().getString(R.string.freq_step_75_text);
         freqSteps[4] = getResources().getString(R.string.freq_step_100_text);
+        freqSteps[5] = getResources().getString(R.string.freq_step_250_text);
 
         freqRanges = new String[2];
         freqRanges[0] = getResources().getString(R.string.freq_range_one);

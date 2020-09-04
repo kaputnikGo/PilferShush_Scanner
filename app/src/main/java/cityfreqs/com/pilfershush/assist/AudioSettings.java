@@ -44,7 +44,7 @@ public class AudioSettings {
 
     // steps in the frequencies to consider as a coded signal and not noise
     public static final int[] FREQ_STEPS = new int[] {
-            10, 25, 50, 75, 100
+            10, 25, 50, 75, 100, 250
     };
     public static final int DEFAULT_FREQ_STEP = 25;
 
@@ -91,6 +91,11 @@ public class AudioSettings {
             "ENCODING_DTS",
             "ENCODING_DTS_HD",
             "ENCODING_MP3"
+    };
+
+    // reflect numbering in AUDIO_ENCODING
+    public static final int[] BIT_DEPTH = new int[] {
+            0, 0, 16, 8, 32
     };
 
     //TODO add AUDIO_IN and AUDIO_OUT for channelInConfig and channelOutConfig

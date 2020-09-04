@@ -1,9 +1,11 @@
 ### 4.0.1 (unreleased)
+* malformed wav header, bit depth required
 * cleanup audioBundle
 * fix external storage write for API 29
 * combine MAIN and DEBUG views
 * move scanner.java to mainactivity in prep for proper
 * update app images
+* add settings for testing
 
 ### 4.0.0 (27 Aug 2020)
 * Reconfigure app to be Scanner only, no jammer components.

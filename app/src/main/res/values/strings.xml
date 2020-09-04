@@ -15,6 +15,7 @@
     <string name="freq_step_50_text" translatable="false">50 Hz</string>
     <string name="freq_step_75_text" translatable="false">75 Hz</string>
     <string name="freq_step_100_text" translatable="false">100 Hz</string>
+    <string name="freq_step_250_text" translatable="false">250 Hz</string>
 
     <string name="action_audio_scan_ranges">NUHF Scan range</string>
     <string name="dialog_freq_range">Frequency range</string>

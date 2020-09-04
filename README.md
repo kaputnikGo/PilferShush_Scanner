@@ -6,11 +6,9 @@ Test application for researching methods of discovering use of NUHF audio beacon
 
 ** Notes**
 - getExternalStorageDirectory method is deprecated in API 29 use getExternalFilesDir(String type)
-
-- audioBundle debug print (has that weird non-ordering array thing)::
-[{channelOutConfig=4, ScanMagnitude=50000, scanMaxFreq=21000, scanWindow=2, scanMinFreq=18000, 
-writeFiles=true, channelInConfig=1, scanFreqStep=25, debug=true, hasEQ=true, sampleRate=48000, 
-audioSource=0, maxFreq=24000, bufferOutSize=7688, encoding=2, bufferInSize=4096}]
+- adding settings for use with testing HTML5 NUHF synth transmitter emulator
+- problem of detecting freqs close to actual transmitted freq ( ie 18500 -> 18550 )
+- raw to wav is malformed
 
 
    vers. 4.0.1
@@ -37,11 +35,13 @@ audioSource=0, maxFreq=24000, bufferOutSize=7688, encoding=2, bufferInSize=4096}
  - rebuild scanner to allow different methods of scanning (more than goertzel)
  
  **Changes:**
+ - malformed wav header, bit depth required
  - cleanup audioBundle
  - fix write to storage for API 29
  - combine MAIN and DEBUG views
  - move scanner.java to mainactivity, prep for proper
  - update app images
+ - add settings for testing
 
 
 

@@ -15,6 +15,7 @@ import cityfreqs.com.pilfershush.R;
 import static cityfreqs.com.pilfershush.assist.AudioSettings.AUDIO_BUNDLE_KEYS;
 import static cityfreqs.com.pilfershush.assist.AudioSettings.AUDIO_CHANNEL_OUT;
 import static cityfreqs.com.pilfershush.assist.AudioSettings.AUDIO_ENCODING;
+import static cityfreqs.com.pilfershush.assist.AudioSettings.BIT_DEPTH;
 
 public class AudioChecker {
     private Context context;
@@ -85,6 +86,7 @@ public class AudioChecker {
                                 audioBundle.putInt(AUDIO_BUNDLE_KEYS[2], channelInConfig);
                                 audioBundle.putInt(AUDIO_BUNDLE_KEYS[3], audioFormat);
                                 audioBundle.putInt(AUDIO_BUNDLE_KEYS[4], buffSize);
+                                audioBundle.putInt(AUDIO_BUNDLE_KEYS[15], BIT_DEPTH[audioBundle.getInt(AUDIO_BUNDLE_KEYS[3])]);
 
                                 recorder.release();
                                 return true;
