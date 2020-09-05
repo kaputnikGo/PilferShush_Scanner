@@ -27,7 +27,7 @@ public class AudioSettings {
     public static final double[] MAGNITUDES = new double[] {
             500, 1200, 3000, 10000, 30000, 50000, 80000
     };
-    public static final int DEFAULT_MAGNITUDE = 50000; // was 80000
+    public static final double DEFAULT_MAGNITUDE = 50000; // was 80000
     // using dB SPL (sound pressure level) without distance
     // db = 20 log10(goertzel_magnitude).
     // 500   ~= 53.9794 dB

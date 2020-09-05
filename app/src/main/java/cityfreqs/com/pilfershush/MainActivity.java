@@ -310,7 +310,7 @@ public class MainActivity extends AppCompatActivity
         // set defaults
         audioBundle = new Bundle();
         audioBundle.putInt(AUDIO_BUNDLE_KEYS[11], AudioSettings.DEFAULT_FREQ_STEP);
-        audioBundle.putInt(AUDIO_BUNDLE_KEYS[12], AudioSettings.DEFAULT_MAGNITUDE);
+        audioBundle.putDouble(AUDIO_BUNDLE_KEYS[12], AudioSettings.DEFAULT_MAGNITUDE);
         audioBundle.putInt(AUDIO_BUNDLE_KEYS[13], AudioSettings.DEFAULT_WINDOW_TYPE);
         audioBundle.putBoolean(AUDIO_BUNDLE_KEYS[14], true); //write audio files for scanner
         audioBundle.putBoolean(AUDIO_BUNDLE_KEYS[16], DEBUG); //set DEBUG

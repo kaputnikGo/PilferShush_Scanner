@@ -195,7 +195,7 @@ public class RecordTask extends AsyncTask<Void, Integer, String> {
                 // get its magnitude
                 candidateMag = goertzel.getOptimisedMagnitude();
                 // check if above threshold
-                if (candidateMag >= audioBundle.getInt(AudioSettings.AUDIO_BUNDLE_KEYS[12])) {
+                if (candidateMag >= audioBundle.getDouble(AudioSettings.AUDIO_BUNDLE_KEYS[12])) {
                     // saved here for later analysis
                     bufferStorage.add(tempBuffer);
                     // draw on view

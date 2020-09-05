@@ -6,6 +6,7 @@
 * move scanner.java to mainactivity in prep for proper
 * update app images
 * add settings for testing
+* magnitude scan value as double
 
 ### 4.0.0 (27 Aug 2020)
 * Reconfigure app to be Scanner only, no jammer components.

@@ -8,8 +8,6 @@ Test application for researching methods of discovering use of NUHF audio beacon
 - getExternalStorageDirectory method is deprecated in API 29 use getExternalFilesDir(String type)
 - adding settings for use with testing HTML5 NUHF synth transmitter emulator
 - problem of detecting freqs close to actual transmitted freq ( ie 18500 -> 18550 )
-- raw to wav is malformed
-
 
    vers. 4.0.1
    - min API 18 (4.3)
@@ -42,6 +40,7 @@ Test application for researching methods of discovering use of NUHF audio beacon
  - move scanner.java to mainactivity, prep for proper
  - update app images
  - add settings for testing
+ - magnitude scan value as double
 
 
 
