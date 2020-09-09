@@ -4,7 +4,7 @@ Android near-ultra high frequency (NUHF) scanner
 Test application for researching methods of discovering use of NUHF audio beacons.
 - compile API 29 (Q, 10.0), Android Studio 4.0.1 stable, AndroidX libs
 
-** Notes**
+**Notes**
 - getExternalStorageDirectory method is deprecated in API 29 use getExternalFilesDir(String type)
 - adding settings for use with testing HTML5 NUHF synth transmitter emulator
 - problem of detecting freqs close to actual transmitted freq ( ie 18500 -> 18550 )
